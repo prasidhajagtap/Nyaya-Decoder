@@ -10,7 +10,7 @@ const simpleExplanation = document.getElementById('simple-explanation');
 const SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
 
 docSelector.addEventListener('change', async (e) => {
-    // FIX: Verify files array actually has an item before proceeding
+    // Verify files array actually has an item before running pipeline
     if (!e.target.files || e.target.files.length === 0) {
         return;
     }
@@ -36,18 +36,19 @@ docSelector.addEventListener('change', async (e) => {
                 const pageText = await runOcrOnCanvas(canvas);
                 compiledText += " " + pageText;
 
+                // Force browser to wipe canvas memory instantly
                 canvas.width = 0;
                 canvas.height = 0;
             }
         } else {
             updateProgress("Creating image memory link...", 20);
-            // FIX: Create direct object URL string instead of using unstable FileReader
+            // Bulletproof memory object reference pointer
             const imageBlobUrl = URL.createObjectURL(file);
             
             updateProgress("Scanning text via OCR engine...", 50);
             compiledText = await runOcrOnCanvas(imageBlobUrl);
             
-            // Free memory after OCR completes
+            // Wipe object link to prevent browser engine RAM leak
             URL.revokeObjectURL(imageBlobUrl);
         }
 
@@ -62,7 +63,7 @@ docSelector.addEventListener('change', async (e) => {
         alert("Pipeline Processing Error: " + err.message);
     } finally {
         progContainer.classList.add('hidden');
-        // Reset file input so same image can be uploaded twice if needed
+        // Clear input slot so user can try same document file again
         docSelector.value = "";
     }
 });
@@ -86,140 +87,7 @@ async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
 }
 
 async function runOcrOnCanvas(source) {
-    const result = await Tesseract.recognize(source, 'eng+hin+mar');
-    return result.data.text;
-}
-
-async function callSecureLegalAI(extractedText) {
-    const response = await fetch(SUPABASE_FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: extractedText })
-    });
-
-    if (!response.ok) {
-        throw new Error("Secure AI node returned a processing failure.");
-    }
-    return await response.json();
-}
-
-function renderGlassmorphicUI(data) {
-    dangerBadge.className = "badge badge-" + data.dangerLevel.toLowerCase();
-    dangerBadge.innerText = "Urgency Rating: " + data.dangerLevel;
-
-    simpleExplanation.innerHTML = `
-        <div class="explanation-item" style="border-left-color: #ec4899;">
-            <h3>⚖️ Identified Laws & Acts</h3>
-            <p>${data.sectionsIdentified}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📱 Quick Summary (English)</h3>
-            <p>${data.englishExplanation}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📢 मुख्य जानकारी (Hindi)</h3>
-            <p>${data.hindiExplanation}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📌 कोर्ट नोटीस स्पष्टीकरण (Marathi)</h3>
-            <p>${data.marathiExplanation}</p>
-        </div>
-    `;
-    resultBox.classList.remove('hidden');
-}
-
-// Helper function to safely read uploaded files as usable image strings
-function readFileAsDataURL(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
-    });
-}
-
-function updateProgress(message, percentage) {
-    progStatus.innerText = message;
-    progBar.style.width = percentage + "%";
-}
-
-async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
-    const page = await pdfDoc.getPage(pageNumber);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    const viewport = page.getViewport({ scale: 1.2 });
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-
-    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-    return canvas;
-}
-
-async function runOcrOnCanvas(source) {
-    const result = await Tesseract.recognize(source, 'eng+hin+mar');
-    return result.data.text;
-}
-
-async function callSecureLegalAI(extractedText) {
-    const response = await fetch(SUPABASE_FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: extractedText })
-    });
-
-    if (!response.ok) {
-        throw new Error("Secure AI node returned a processing failure.");
-    }
-    return await response.json();
-}
-
-function renderGlassmorphicUI(data) {
-    dangerBadge.className = "badge badge-" + data.dangerLevel.toLowerCase();
-    dangerBadge.innerText = "Urgency Rating: " + data.dangerLevel;
-
-    simpleExplanation.innerHTML = `
-        <div class="explanation-item" style="border-left-color: #ec4899;">
-            <h3>⚖️ Identified Laws & Acts</h3>
-            <p>${data.sectionsIdentified}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📱 Quick Summary (English)</h3>
-            <p>${data.englishExplanation}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📢 मुख्य जानकारी (Hindi)</h3>
-            <p>${data.hindiExplanation}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📌 कोर्ट नोटीस स्पष्टीकरण (Marathi)</h3>
-            <p>${data.marathiExplanation}</p>
-        </div>
-    `;
-    resultBox.classList.remove('hidden');
-}
-
-function updateProgress(message, percentage) {
-    progStatus.innerText = message;
-    progBar.style.width = percentage + "%";
-}
-
-async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
-    const page = await pdfDoc.getPage(pageNumber);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Scale 1.2 protects mobile memory while maintaining OCR readable details
-    const viewport = page.getViewport({ scale: 1.2 });
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-
-    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-    return canvas;
-}
-
-async function runOcrOnCanvas(source) {
-    // Initializing simultaneous English, Hindi, and Marathi analysis datasets
+    // Combined language block handles mixed English, Hindi, and Marathi characters
     const result = await Tesseract.recognize(source, 'eng+hin+mar');
     return result.data.text;
 }
