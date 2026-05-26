@@ -7,7 +7,7 @@ const dangerBadge = document.getElementById('danger-badge');
 const simpleExplanation = document.getElementById('simple-explanation');
 
 // CRITICAL: Put your deployed Supabase URL path here
-const SUPABASE_FUNCTION_URL = "https://svhbqvcabbzrxvndxtjm.supabase.co";
+const SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
 
 docSelector.addEventListener('change', async (e) => {
     const file = e.target.files;
