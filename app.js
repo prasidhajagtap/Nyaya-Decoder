@@ -8,7 +8,6 @@ const simpleExplanation = document.getElementById('simple-explanation');
 
 // CRITICAL: Put your deployed Supabase URL path here
 const SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
-
 docSelector.addEventListener('change', async (e) => {
     const file = e.target.files;
     if (!file) return;
@@ -25,7 +24,6 @@ docSelector.addEventListener('change', async (e) => {
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             const totalPages = pdf.numPages;
 
-            // Sequential Execution Loop to protect Mobile Web RAM limits
             for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
                 updateProgress(`Rendering page ${pageNum}/${totalPages}...`, Math.floor((pageNum / totalPages) * 35));
                 const canvas = await renderPdfPageToCanvas(pdf, pageNum);
@@ -34,13 +32,16 @@ docSelector.addEventListener('change', async (e) => {
                 const pageText = await runOcrOnCanvas(canvas);
                 compiledText += " " + pageText;
 
-                // WIPE CANVAS TO FORCE MEMORY RECOVERY
                 canvas.width = 0;
                 canvas.height = 0;
             }
         } else {
-            updateProgress("Scanning image metadata...", 40);
-            compiledText = await runOcrOnCanvas(file);
+            updateProgress("Converting image data stream...", 20);
+            // Safe converter converts raw data to a fully readable Base64 String 
+            const imageDataUrl = await readFileAsDataURL(file);
+            
+            updateProgress("Scanning text via OCR engine...", 50);
+            compiledText = await runOcrOnCanvas(imageDataUrl);
         }
 
         updateProgress("Passing data to secure AI Legal Layer...", 85);
@@ -56,6 +57,77 @@ docSelector.addEventListener('change', async (e) => {
         progContainer.classList.add('hidden');
     }
 });
+
+// Helper function to safely read uploaded files as usable image strings
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+function updateProgress(message, percentage) {
+    progStatus.innerText = message;
+    progBar.style.width = percentage + "%";
+}
+
+async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
+    const page = await pdfDoc.getPage(pageNumber);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const viewport = page.getViewport({ scale: 1.2 });
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+    return canvas;
+}
+
+async function runOcrOnCanvas(source) {
+    const result = await Tesseract.recognize(source, 'eng+hin+mar');
+    return result.data.text;
+}
+
+async function callSecureLegalAI(extractedText) {
+    const response = await fetch(SUPABASE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: extractedText })
+    });
+
+    if (!response.ok) {
+        throw new Error("Secure AI node returned a processing failure.");
+    }
+    return await response.json();
+}
+
+function renderGlassmorphicUI(data) {
+    dangerBadge.className = "badge badge-" + data.dangerLevel.toLowerCase();
+    dangerBadge.innerText = "Urgency Rating: " + data.dangerLevel;
+
+    simpleExplanation.innerHTML = `
+        <div class="explanation-item" style="border-left-color: #ec4899;">
+            <h3>⚖️ Identified Laws & Acts</h3>
+            <p>${data.sectionsIdentified}</p>
+        </div>
+        <div class="explanation-item">
+            <h3>📱 Quick Summary (English)</h3>
+            <p>${data.englishExplanation}</p>
+        </div>
+        <div class="explanation-item">
+            <h3>📢 मुख्य जानकारी (Hindi)</h3>
+            <p>${data.hindiExplanation}</p>
+        </div>
+        <div class="explanation-item">
+            <h3>📌 कोर्ट नोटीस स्पष्टीकरण (Marathi)</h3>
+            <p>${data.marathiExplanation}</p>
+        </div>
+    `;
+    resultBox.classList.remove('hidden');
+}
 
 function updateProgress(message, percentage) {
     progStatus.innerText = message;
