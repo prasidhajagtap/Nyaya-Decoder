@@ -6,99 +6,150 @@ const resultBox = document.getElementById('result-box');
 const dangerBadge = document.getElementById('danger-badge');
 const simpleExplanation = document.getElementById('simple-explanation');
 
-// CRITICAL: Put your deployed Supabase URL path here
 const SUPABASE_FUNCTION_URL = "https://kgbcygfemcdorqryvxdp.supabase.co/functions/v1/decode-notice";
 
 if (docSelector) {
     docSelector.addEventListener('change', async (e) => {
-        if (!e.target || !e.target.files || e.target.files.length === 0) {
-            return;
-        }
+        if (!e.target || !e.target.files || e.target.files.length === 0) return;
         
-        const selectedFile = e.target.files;
-        if (!selectedFile) {
-            return;
-        }
+        const file = e.target.files;
+        if (!file) return;
 
         progContainer.classList.remove('hidden');
         resultBox.classList.add('hidden');
-        updateProgress("Initializing processing engine...", 5);
+        updateProgress("Waking up processing engine...", 5);
 
         let compiledText = "";
-        let objectUrlString = null;
+        const fileName = (file.name || "").toLowerCase();
 
         try {
-            // Check type string cleanly
-            const isPdf = selectedFile.type === "application/pdf" || (selectedFile.name && selectedFile.name.toLowerCase().endsWith('.pdf'));
-
-            if (isPdf) {
-                const arrayBuffer = await selectedFile.arrayBuffer();
+            // STEP 1: ROUTE BY EXTENSION FOR MAXIMUM COMPATIBILITY
+            if (fileName.endsWith('.pdf') || file.type === "application/pdf") {
+                // PDF processing track
+                updateProgress("Reading PDF binary stream...", 15);
+                const arrayBuffer = await readFileAsArrayBufferAsynchronous(file);
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 const totalPages = pdf.numPages;
 
                 for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-                    updateProgress(`Rendering page ${pageNum}/${totalPages}...`, Math.floor((pageNum / totalPages) * 35));
+                    updateProgress(`Rendering page ${pageNum}/${totalPages}...`, Math.floor((pageNum / totalPages) * 30));
                     const canvas = await renderPdfPageToCanvas(pdf, pageNum);
                     
-                    updateProgress(`Extracting text from page ${pageNum}/${totalPages}...`, 35 + Math.floor((pageNum / totalPages) * 45));
+                    updateProgress(`OCR scanning page ${pageNum}/${totalPages}...`, 30 + Math.floor((pageNum / totalPages) * 50));
                     const pageText = await runOcrOnSource(canvas);
                     compiledText += " " + pageText;
-
-                    canvas.width = 0;
-                    canvas.height = 0;
+                    
+                    canvas.width = 0; canvas.height = 0; // memory save
                 }
-            } else {
-                updateProgress("Parsing image configuration...", 20);
+            } 
+            else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
+                // WORD DOCUMENT track
+                updateProgress("Parsing document text strings...", 30);
+                compiledText = await tryExtractTextFromDocFile(file);
+            } 
+            else {
+                // IMAGE track (PNG, JPG, WEBP, HEIC, GIF, BMP)
+                updateProgress("Processing image data streams...", 20);
+                const imageSourceContainer = await getFallbackImageSource(file);
                 
-                // NO FILEREADER. Create standard object URL route. 
-                // Works even if object is a File handle variant.
-                objectUrlString = URL.createObjectURL(selectedFile);
-                
-                // Force browser to load it into a clean image element matrix
-                const loadedImgElement = await loadImageElementAsync(objectUrlString);
-
-                updateProgress("Extracting multi-language text matrix...", 50);
-                compiledText = await runOcrOnSource(loadedImgElement);
+                updateProgress("Running multi-language OCR layer...", 50);
+                compiledText = await runOcrOnSource(imageSourceContainer);
             }
 
+            // STEP 2: VALIDATE THE TEXT EXTRACTED
             compiledText = compiledText.trim();
             if (!compiledText || compiledText.length < 3) {
-                throw new Error("OCR system found no text characters. Ensure document layout is crisp.");
+                throw new Error("Could not extract clean text characters from this file format layout.");
             }
 
-            updateProgress("Passing data to secure AI Legal Layer...", 85);
+            updateProgress("Forwarding content to secure AI Legal Layer...", 85);
             const aiAnalysisResult = await callSecureLegalAI(compiledText);
             
-            updateProgress("Decompressing payload...", 98);
+            updateProgress("Rendering results matrix...", 98);
             renderGlassmorphicUI(aiAnalysisResult);
 
         } catch (err) {
-            console.error("Pipeline crashed:", err);
-            alert("Pipeline Processing Error: " + err.message);
+            console.error("Pipeline breakdown:", err);
+            alert("Processing Error: " + err.message);
         } finally {
-            // Clean up memory string allocation immediately
-            if (objectUrlString) {
-                URL.revokeObjectURL(objectUrlString);
-            }
             progContainer.classList.add('hidden');
             docSelector.value = ""; 
         }
     });
 }
 
-function updateProgress(message, percentage) {
-    if (progStatus) progStatus.innerText = message;
-    if (progBar) progBar.style.width = percentage + "%";
-}
-
-// Safely loads image element without crashing on file types
-function loadImageElementAsync(url) {
-    return new Promise((resolve, reject) => {
+// ==========================================
+// UNBREAKABLE FALLBACK STORAGE FOR IMAGES
+// ==========================================
+async function getFallbackImageSource(fileObject) {
+    // Brute attempt 1: Try Object URL string path
+    try {
+        const url = URL.createObjectURL(fileObject);
         const img = new Image();
         img.crossOrigin = "anonymous";
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error("Browser failed to decode image format layout."));
-        img.src = url;
+        await new Promise((res, rej) => {
+            img.onload = res;
+            img.onerror = rej;
+            img.src = url;
+        });
+        return img;
+    } catch (e) {
+        console.warn("Object URL route blocked, trying Base64 fallback...");
+    }
+
+    // Brute attempt 2: Try standard FileReader DataURL payload
+    try {
+        const base64 = await new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result);
+            r.onerror = rej;
+            r.readAsDataURL(fileObject);
+        });
+        return base64;
+    } catch (e) {
+        console.warn("FileReader blocked, trying direct array buffer injection...");
+    }
+
+    // Brute attempt 3: Throw data array directly to worker
+    return fileObject;
+}
+
+// ==========================================
+// DOC/DOCX BACKWARD COMPATIBLE PARSER FLUIDITY
+// ==========================================
+async function tryExtractTextFromDocFile(fileObject) {
+    try {
+        const arrayBuffer = await readFileAsArrayBufferAsynchronous(fileObject);
+        
+        // If mammoth Mammoth developer loaded mammoth mammoth mammoth docx reader library scripts:
+        if (typeof mammoth !== 'undefined') {
+            const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+            return result.value;
+        }
+        
+        // Brute fallback: Strip readable ASCII characters from text stream natively if script missing
+        const decoder = new TextDecoder('utf-8');
+        const view = new Uint8Array(arrayBuffer);
+        let rawTextString = decoder.decode(view);
+        // Clean up out-of-bounds non-printable binary garbage characters
+        return rawTextString.replace(/[^\x20-\x7E\t\r\n\u0900-\u097F]/g, ' '); 
+    } catch (err) {
+        throw new Error("Word file ingestion structure failed: " + err.message);
+    }
+}
+
+// ==========================================
+// CORE PROCESSING AND BACKING SYSTEM TOOLS
+// ==========================================
+function readFileAsArrayBufferAsynchronous(fileObject) {
+    if (typeof fileObject.arrayBuffer === 'function') {
+        return fileObject.arrayBuffer();
+    }
+    return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsArrayBuffer(fileObject);
     });
 }
 
@@ -128,23 +179,21 @@ async function callSecureLegalAI(extractedText) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: extractedText })
     });
-
-    if (!response.ok) {
-        throw new Error(`Edge Function responded with status code ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Edge Function error status: ${response.status}`);
     return await response.json();
 }
 
-function renderGlassmorphicUI(data) {
-    if (!data || !data.dangerLevel) {
-        throw new Error("AI response format is missing metadata properties.");
-    }
+function updateProgress(message, percentage) {
+    if (progStatus) progStatus.innerText = message;
+    if (progBar) progBar.style.width = percentage + "%";
+}
 
+function renderGlassmorphicUI(data) {
+    if (!data || !data.dangerLevel) throw new Error("AI response format is corrupt.");
     if (dangerBadge) {
         dangerBadge.className = "badge badge-" + data.dangerLevel.toLowerCase();
         dangerBadge.innerText = "Urgency Rating: " + data.dangerLevel;
     }
-
     if (simpleExplanation) {
         simpleExplanation.innerHTML = `
             <div class="explanation-item" style="border-left-color: #ec4899;">
