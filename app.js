@@ -6,16 +6,21 @@ const resultBox = document.getElementById('result-box');
 const dangerBadge = document.getElementById('danger-badge');
 const simpleExplanation = document.getElementById('simple-explanation');
 
-// Keep URL on one line. Put your real project ref string inside quotes.
+// CRITICAL: Put your deployed Supabase URL path here
 const SUPABASE_FUNCTION_URL = "https://kgbcygfemcdorqryvxdp.supabase.co/functions/v1/decode-notice";
 
 docSelector.addEventListener('change', async (e) => {
-    if (!e.target || !e.target.files || e.target.files.length === 0) {
+    // RULE 1: Immediate ejection if event structure or file list is null
+    if (!e || !e.target || !e.target.files || e.target.files.length === 0) {
         return;
     }
     
-    const file = e.target.files;
-    if (!file) {
+    // RULE 2: Bind file object to immutable block scope instantly
+    const selectedFile = e.target.files;
+    
+    // RULE 3: Strict physical instance check against Blob type prototype
+    if (!selectedFile || !(selectedFile instanceof Blob)) {
+        console.error("Pipeline abort: Extracted object is not a valid Blob instance.");
         return;
     }
 
@@ -26,8 +31,8 @@ docSelector.addEventListener('change', async (e) => {
     let compiledText = "";
 
     try {
-        if (file.type === "application/pdf") {
-            const arrayBuffer = await file.arrayBuffer();
+        if (selectedFile.type === "application/pdf") {
+            const arrayBuffer = await selectedFile.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             const totalPages = pdf.numPages;
 
@@ -44,7 +49,9 @@ docSelector.addEventListener('change', async (e) => {
             }
         } else {
             updateProgress("Converting image data streams...", 20);
-            const base64Data = await readAsDataURLAsync(file);
+            
+            // Pass immutable block-scoped file straight into isolated reader
+            const base64Data = await readAsDataURLAsync(selectedFile);
             
             updateProgress("Extracting multi-language text matrix...", 50);
             compiledText = await runOcrOnSource(base64Data);
@@ -66,7 +73,10 @@ docSelector.addEventListener('change', async (e) => {
         alert("Pipeline Processing Error: " + err.message);
     } finally {
         progContainer.classList.add('hidden');
-        docSelector.value = ""; 
+        // Clear value cleanly without re-triggering file processing errors
+        if (docSelector) {
+            docSelector.value = "";
+        }
     }
 });
 
@@ -75,12 +85,17 @@ function updateProgress(message, percentage) {
     if (progBar) progBar.style.width = percentage + "%";
 }
 
-function readAsDataURLAsync(fileObject) {
+// Clean isolated Promise block executor
+function readAsDataURLAsync(targetBlob) {
     return new Promise((resolve, reject) => {
+        // Redundant assertion inside promise microtask
+        if (!targetBlob || !(targetBlob instanceof Blob)) {
+            return reject(new TypeError("FileReader argument is verified non-Blob type."));
+        }
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => reject(new Error("Browser dropped file reader access link."));
-        reader.readAsDataURL(fileObject);
+        reader.readAsDataURL(targetBlob);
     });
 }
 
