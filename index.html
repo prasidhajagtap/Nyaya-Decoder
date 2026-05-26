@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
     <script src="https://unpkg.com/tesseract.js@v5.0.5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -19,6 +20,7 @@
         <main>
             <div class="upload-section">
                 <input type="file" id="document-selector" accept="image/*,application/pdf" class="hidden-input">
+                <input type="file" id="document-selector" accept="image/*,application/pdf">
                 <label for="document-selector" class="upload-btn">📷 Scan Photo or Upload PDF</label>
                 <div class="subtext">Supports multi-language notices (Eng + हिंदी + मराठी)</div>
             </div>
