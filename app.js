@@ -6,8 +6,8 @@ const resultBox = document.getElementById('result-box');
 const dangerBadge = document.getElementById('danger-badge');
 const simpleExplanation = document.getElementById('simple-explanation');
 
-// CRITICAL: Put your deployed Supabase URL path here
-cconst SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
+// Keep URL on one line. Put your real project ref string inside quotes.
+const SUPABASE_FUNCTION_URL = "https://kgbcygfemcdorqryvxdp.supabase.co/functions/v1/decode-notice";
 
 docSelector.addEventListener('change', async (e) => {
     if (!e.target || !e.target.files || e.target.files.length === 0) {
@@ -44,7 +44,6 @@ docSelector.addEventListener('change', async (e) => {
             }
         } else {
             updateProgress("Converting image data streams...", 20);
-            // Safe conversion to Base64 DataURL data stream
             const base64Data = await readAsDataURLAsync(file);
             
             updateProgress("Extracting multi-language text matrix...", 50);
@@ -76,7 +75,6 @@ function updateProgress(message, percentage) {
     if (progBar) progBar.style.width = percentage + "%";
 }
 
-// Fixed Promise tracker wrapper for clean file data capture
 function readAsDataURLAsync(fileObject) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -100,7 +98,6 @@ async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
 }
 
 async function runOcrOnSource(imageSource) {
-    // Explicit multi-language initialization routine prevents parameter errors
     const worker = await Tesseract.createWorker('eng+hin+mar');
     const response = await worker.recognize(imageSource);
     await worker.terminate();
