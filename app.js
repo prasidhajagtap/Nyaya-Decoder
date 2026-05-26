@@ -11,13 +11,11 @@ const SUPABASE_FUNCTION_URL = "https://kgbcygfemcdorqryvxdp.supabase.co/function
 
 if (docSelector) {
     docSelector.addEventListener('change', async (e) => {
-        // Fix here: if browser fire event with no files, stop immediately. No error, no popup.
         if (!e.target || !e.target.files || e.target.files.length === 0) {
             return;
         }
         
         const selectedFile = e.target.files;
-        // If file object is missing or blank, stop immediately.
         if (!selectedFile) {
             return;
         }
@@ -27,9 +25,13 @@ if (docSelector) {
         updateProgress("Initializing processing engine...", 5);
 
         let compiledText = "";
+        let objectUrlString = null;
 
         try {
-            if (selectedFile.type === "application/pdf") {
+            // Check type string cleanly
+            const isPdf = selectedFile.type === "application/pdf" || (selectedFile.name && selectedFile.name.toLowerCase().endsWith('.pdf'));
+
+            if (isPdf) {
                 const arrayBuffer = await selectedFile.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 const totalPages = pdf.numPages;
@@ -46,11 +48,17 @@ if (docSelector) {
                     canvas.height = 0;
                 }
             } else {
-                updateProgress("Converting image data streams...", 20);
-                const base64Data = await readAsDataURLAsync(selectedFile);
+                updateProgress("Parsing image configuration...", 20);
                 
+                // NO FILEREADER. Create standard object URL route. 
+                // Works even if object is a File handle variant.
+                objectUrlString = URL.createObjectURL(selectedFile);
+                
+                // Force browser to load it into a clean image element matrix
+                const loadedImgElement = await loadImageElementAsync(objectUrlString);
+
                 updateProgress("Extracting multi-language text matrix...", 50);
-                compiledText = await runOcrOnSource(base64Data);
+                compiledText = await runOcrOnSource(loadedImgElement);
             }
 
             compiledText = compiledText.trim();
@@ -68,8 +76,11 @@ if (docSelector) {
             console.error("Pipeline crashed:", err);
             alert("Pipeline Processing Error: " + err.message);
         } finally {
+            // Clean up memory string allocation immediately
+            if (objectUrlString) {
+                URL.revokeObjectURL(objectUrlString);
+            }
             progContainer.classList.add('hidden');
-            // Reset input slot so same file can be tapped again
             docSelector.value = ""; 
         }
     });
@@ -80,12 +91,14 @@ function updateProgress(message, percentage) {
     if (progBar) progBar.style.width = percentage + "%";
 }
 
-function readAsDataURLAsync(targetBlob) {
+// Safely loads image element without crashing on file types
+function loadImageElementAsync(url) {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error("Browser dropped file reader access link."));
-        reader.readAsDataURL(targetBlob);
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("Browser failed to decode image format layout."));
+        img.src = url;
     });
 }
 
