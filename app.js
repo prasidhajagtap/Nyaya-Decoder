@@ -10,12 +10,16 @@ const simpleExplanation = document.getElementById('simple-explanation');
 const SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
 
 docSelector.addEventListener('change', async (e) => {
-    // Verify files array actually has an item before running pipeline
-    if (!e.target.files || e.target.files.length === 0) {
+    // Bulletproof check: if no files element, stop completely
+    if (!e.target || !e.target.files || e.target.files.length === 0) {
         return;
     }
     
     const file = e.target.files;
+    if (!file) {
+        return;
+    }
+
     progContainer.classList.remove('hidden');
     resultBox.classList.add('hidden');
     updateProgress("Starting document analysis...", 5);
@@ -36,20 +40,21 @@ docSelector.addEventListener('change', async (e) => {
                 const pageText = await runOcrOnCanvas(canvas);
                 compiledText += " " + pageText;
 
-                // Force browser to wipe canvas memory instantly
                 canvas.width = 0;
                 canvas.height = 0;
             }
         } else {
-            updateProgress("Creating image memory link...", 20);
-            // Bulletproof memory object reference pointer
-            const imageBlobUrl = URL.createObjectURL(file);
+            updateProgress("Reading image data...", 20);
             
             updateProgress("Scanning text via OCR engine...", 50);
-            compiledText = await runOcrOnCanvas(imageBlobUrl);
-            
-            // Wipe object link to prevent browser engine RAM leak
-            URL.revokeObjectURL(imageBlobUrl);
+            // Pass the raw file object directly. Tesseract v5 handles it native.
+            compiledText = await runOcrOnCanvas(file);
+        }
+
+        // Clean up text string before sending to AI
+        compiledText = compiledText.trim();
+        if (!compiledText) {
+            throw new Error("OCR could not find any readable text characters in this document.");
         }
 
         updateProgress("Passing data to secure AI Legal Layer...", 85);
@@ -59,18 +64,17 @@ docSelector.addEventListener('change', async (e) => {
         renderGlassmorphicUI(aiAnalysisResult);
 
     } catch (err) {
-        console.error(err);
+        console.error("Pipeline crashed:", err);
         alert("Pipeline Processing Error: " + err.message);
     } finally {
         progContainer.classList.add('hidden');
-        // Clear input slot so user can try same document file again
-        docSelector.value = "";
+        docSelector.value = ""; // Reset
     }
 });
 
 function updateProgress(message, percentage) {
-    progStatus.innerText = message;
-    progBar.style.width = percentage + "%";
+    if (progStatus) progStatus.innerText = message;
+    if (progBar) progBar.style.width = percentage + "%";
 }
 
 async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
@@ -87,7 +91,7 @@ async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
 }
 
 async function runOcrOnCanvas(source) {
-    // Combined language block handles mixed English, Hindi, and Marathi characters
+    // Recognize handles image file, canvas, or blob string native
     const result = await Tesseract.recognize(source, 'eng+hin+mar');
     return result.data.text;
 }
@@ -100,32 +104,40 @@ async function callSecureLegalAI(extractedText) {
     });
 
     if (!response.ok) {
-        throw new Error("Secure AI node returned a processing failure.");
+        throw new Error(`Edge Function responded with status code ${response.status}`);
     }
     return await response.json();
 }
 
 function renderGlassmorphicUI(data) {
-    dangerBadge.className = "badge badge-" + data.dangerLevel.toLowerCase();
-    dangerBadge.innerText = "Urgency Rating: " + data.dangerLevel;
+    if (!data || !data.dangerLevel) {
+        throw new Error("AI response format is malformed or missing data fields.");
+    }
 
-    simpleExplanation.innerHTML = `
-        <div class="explanation-item" style="border-left-color: #ec4899;">
-            <h3>⚖️ Identified Laws & Acts</h3>
-            <p>${data.sectionsIdentified}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📱 Quick Summary (English)</h3>
-            <p>${data.englishExplanation}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📢 मुख्य जानकारी (Hindi)</h3>
-            <p>${data.hindiExplanation}</p>
-        </div>
-        <div class="explanation-item">
-            <h3>📌 कोर्ट नोटीस स्पष्टीकरण (Marathi)</h3>
-            <p>${data.marathiExplanation}</p>
-        </div>
-    `;
-    resultBox.classList.remove('hidden');
+    if (dangerBadge) {
+        dangerBadge.className = "badge badge-" + data.dangerLevel.toLowerCase();
+        dangerBadge.innerText = "Urgency Rating: " + data.dangerLevel;
+    }
+
+    if (simpleExplanation) {
+        simpleExplanation.innerHTML = `
+            <div class="explanation-item" style="border-left-color: #ec4899;">
+                <h3>⚖️ Identified Laws & Acts</h3>
+                <p>${data.sectionsIdentified || 'None detected'}</p>
+            </div>
+            <div class="explanation-item">
+                <h3>📱 Quick Summary (English)</h3>
+                <p>${data.englishExplanation || 'No data'}</p>
+            </div>
+            <div class="explanation-item">
+                <h3>📢 मुख्य जानकारी (Hindi)</h3>
+                <p>${data.hindiExplanation || 'No data'}</p>
+            </div>
+            <div class="explanation-item">
+                <h3>📌 कोर्ट नोटीस स्पष्टीकरण (Marathi)</h3>
+                <p>${data.marathiExplanation || 'No data'}</p>
+            </div>
+        `;
+    }
+    if (resultBox) resultBox.classList.remove('hidden');
 }
