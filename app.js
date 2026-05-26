@@ -8,10 +8,14 @@ const simpleExplanation = document.getElementById('simple-explanation');
 
 // CRITICAL: Put your deployed Supabase URL path here
 const SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
-docSelector.addEventListener('change', async (e) => {
-    const file = e.target.files;
-    if (!file) return;
 
+docSelector.addEventListener('change', async (e) => {
+    // FIX: Verify files array actually has an item before proceeding
+    if (!e.target.files || e.target.files.length === 0) {
+        return;
+    }
+    
+    const file = e.target.files;
     progContainer.classList.remove('hidden');
     resultBox.classList.add('hidden');
     updateProgress("Starting document analysis...", 5);
@@ -36,12 +40,15 @@ docSelector.addEventListener('change', async (e) => {
                 canvas.height = 0;
             }
         } else {
-            updateProgress("Converting image data stream...", 20);
-            // Safe converter converts raw data to a fully readable Base64 String 
-            const imageDataUrl = await readFileAsDataURL(file);
+            updateProgress("Creating image memory link...", 20);
+            // FIX: Create direct object URL string instead of using unstable FileReader
+            const imageBlobUrl = URL.createObjectURL(file);
             
             updateProgress("Scanning text via OCR engine...", 50);
-            compiledText = await runOcrOnCanvas(imageDataUrl);
+            compiledText = await runOcrOnCanvas(imageBlobUrl);
+            
+            // Free memory after OCR completes
+            URL.revokeObjectURL(imageBlobUrl);
         }
 
         updateProgress("Passing data to secure AI Legal Layer...", 85);
@@ -55,8 +62,71 @@ docSelector.addEventListener('change', async (e) => {
         alert("Pipeline Processing Error: " + err.message);
     } finally {
         progContainer.classList.add('hidden');
+        // Reset file input so same image can be uploaded twice if needed
+        docSelector.value = "";
     }
 });
+
+function updateProgress(message, percentage) {
+    progStatus.innerText = message;
+    progBar.style.width = percentage + "%";
+}
+
+async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
+    const page = await pdfDoc.getPage(pageNumber);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const viewport = page.getViewport({ scale: 1.2 });
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+    return canvas;
+}
+
+async function runOcrOnCanvas(source) {
+    const result = await Tesseract.recognize(source, 'eng+hin+mar');
+    return result.data.text;
+}
+
+async function callSecureLegalAI(extractedText) {
+    const response = await fetch(SUPABASE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: extractedText })
+    });
+
+    if (!response.ok) {
+        throw new Error("Secure AI node returned a processing failure.");
+    }
+    return await response.json();
+}
+
+function renderGlassmorphicUI(data) {
+    dangerBadge.className = "badge badge-" + data.dangerLevel.toLowerCase();
+    dangerBadge.innerText = "Urgency Rating: " + data.dangerLevel;
+
+    simpleExplanation.innerHTML = `
+        <div class="explanation-item" style="border-left-color: #ec4899;">
+            <h3>⚖️ Identified Laws & Acts</h3>
+            <p>${data.sectionsIdentified}</p>
+        </div>
+        <div class="explanation-item">
+            <h3>📱 Quick Summary (English)</h3>
+            <p>${data.englishExplanation}</p>
+        </div>
+        <div class="explanation-item">
+            <h3>📢 मुख्य जानकारी (Hindi)</h3>
+            <p>${data.hindiExplanation}</p>
+        </div>
+        <div class="explanation-item">
+            <h3>📌 कोर्ट नोटीस स्पष्टीकरण (Marathi)</h3>
+            <p>${data.marathiExplanation}</p>
+        </div>
+    `;
+    resultBox.classList.remove('hidden');
+}
 
 // Helper function to safely read uploaded files as usable image strings
 function readFileAsDataURL(file) {
