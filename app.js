@@ -9,89 +9,79 @@ const simpleExplanation = document.getElementById('simple-explanation');
 // CRITICAL: Put your deployed Supabase URL path here
 const SUPABASE_FUNCTION_URL = "https://kgbcygfemcdorqryvxdp.supabase.co/functions/v1/decode-notice";
 
-docSelector.addEventListener('change', async (e) => {
-    // RULE 1: Immediate ejection if event structure or file list is null
-    if (!e || !e.target || !e.target.files || e.target.files.length === 0) {
-        return;
-    }
-    
-    // RULE 2: Bind file object to immutable block scope instantly
-    const selectedFile = e.target.files;
-    
-    // RULE 3: Strict physical instance check against Blob type prototype
-    if (!selectedFile || !(selectedFile instanceof Blob)) {
-        console.error("Pipeline abort: Extracted object is not a valid Blob instance.");
-        return;
-    }
-
-    progContainer.classList.remove('hidden');
-    resultBox.classList.add('hidden');
-    updateProgress("Initializing processing engine...", 5);
-
-    let compiledText = "";
-
-    try {
-        if (selectedFile.type === "application/pdf") {
-            const arrayBuffer = await selectedFile.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            const totalPages = pdf.numPages;
-
-            for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-                updateProgress(`Rendering page ${pageNum}/${totalPages}...`, Math.floor((pageNum / totalPages) * 35));
-                const canvas = await renderPdfPageToCanvas(pdf, pageNum);
-                
-                updateProgress(`Extracting text from page ${pageNum}/${totalPages}...`, 35 + Math.floor((pageNum / totalPages) * 45));
-                const pageText = await runOcrOnSource(canvas);
-                compiledText += " " + pageText;
-
-                canvas.width = 0;
-                canvas.height = 0;
-            }
-        } else {
-            updateProgress("Converting image data streams...", 20);
-            
-            // Pass immutable block-scoped file straight into isolated reader
-            const base64Data = await readAsDataURLAsync(selectedFile);
-            
-            updateProgress("Extracting multi-language text matrix...", 50);
-            compiledText = await runOcrOnSource(base64Data);
+if (docSelector) {
+    docSelector.addEventListener('change', async (e) => {
+        // Fix here: if browser fire event with no files, stop immediately. No error, no popup.
+        if (!e.target || !e.target.files || e.target.files.length === 0) {
+            return;
         }
-
-        compiledText = compiledText.trim();
-        if (!compiledText || compiledText.length < 3) {
-            throw new Error("OCR system found no text characters. Ensure document layout is crisp.");
-        }
-
-        updateProgress("Passing data to secure AI Legal Layer...", 85);
-        const aiAnalysisResult = await callSecureLegalAI(compiledText);
         
-        updateProgress("Decompressing payload...", 98);
-        renderGlassmorphicUI(aiAnalysisResult);
-
-    } catch (err) {
-        console.error("Pipeline crashed:", err);
-        alert("Pipeline Processing Error: " + err.message);
-    } finally {
-        progContainer.classList.add('hidden');
-        // Clear value cleanly without re-triggering file processing errors
-        if (docSelector) {
-            docSelector.value = "";
+        const selectedFile = e.target.files;
+        // If file object is missing or blank, stop immediately.
+        if (!selectedFile) {
+            return;
         }
-    }
-});
+
+        progContainer.classList.remove('hidden');
+        resultBox.classList.add('hidden');
+        updateProgress("Initializing processing engine...", 5);
+
+        let compiledText = "";
+
+        try {
+            if (selectedFile.type === "application/pdf") {
+                const arrayBuffer = await selectedFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const totalPages = pdf.numPages;
+
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    updateProgress(`Rendering page ${pageNum}/${totalPages}...`, Math.floor((pageNum / totalPages) * 35));
+                    const canvas = await renderPdfPageToCanvas(pdf, pageNum);
+                    
+                    updateProgress(`Extracting text from page ${pageNum}/${totalPages}...`, 35 + Math.floor((pageNum / totalPages) * 45));
+                    const pageText = await runOcrOnSource(canvas);
+                    compiledText += " " + pageText;
+
+                    canvas.width = 0;
+                    canvas.height = 0;
+                }
+            } else {
+                updateProgress("Converting image data streams...", 20);
+                const base64Data = await readAsDataURLAsync(selectedFile);
+                
+                updateProgress("Extracting multi-language text matrix...", 50);
+                compiledText = await runOcrOnSource(base64Data);
+            }
+
+            compiledText = compiledText.trim();
+            if (!compiledText || compiledText.length < 3) {
+                throw new Error("OCR system found no text characters. Ensure document layout is crisp.");
+            }
+
+            updateProgress("Passing data to secure AI Legal Layer...", 85);
+            const aiAnalysisResult = await callSecureLegalAI(compiledText);
+            
+            updateProgress("Decompressing payload...", 98);
+            renderGlassmorphicUI(aiAnalysisResult);
+
+        } catch (err) {
+            console.error("Pipeline crashed:", err);
+            alert("Pipeline Processing Error: " + err.message);
+        } finally {
+            progContainer.classList.add('hidden');
+            // Reset input slot so same file can be tapped again
+            docSelector.value = ""; 
+        }
+    });
+}
 
 function updateProgress(message, percentage) {
     if (progStatus) progStatus.innerText = message;
     if (progBar) progBar.style.width = percentage + "%";
 }
 
-// Clean isolated Promise block executor
 function readAsDataURLAsync(targetBlob) {
     return new Promise((resolve, reject) => {
-        // Redundant assertion inside promise microtask
-        if (!targetBlob || !(targetBlob instanceof Blob)) {
-            return reject(new TypeError("FileReader argument is verified non-Blob type."));
-        }
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => reject(new Error("Browser dropped file reader access link."));
