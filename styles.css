@@ -1,145 +1,254 @@
-:root {
-    --bg-gradient: linear-gradient(135deg, #090d16 0%, #111026 100%);
-    --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(255, 255, 255, 0.07);
-    --glass-glow: rgba(99, 102, 241, 0.15);
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --accent-glow: #6366f1;
+/* Base Reset and Adaptive Mobile Layout Configurations */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
-body {
-    margin: 0;
-    padding: 16px;
-    background: var(--bg-gradient);
-    min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: var(--text-primary);
-    display: flex;
-    justify-content: center;
+body, html {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #090d16;
+    color: #f1f5f9;
+    min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Base Glassmorphic Backdrop Framework */
+.app-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090d16 70%);
+    z-index: -1;
 }
 
 .app-container {
     width: 100%;
-    max-width: 480px;
+    max-width: 480px; /* Locked to clean compact mobile aspect container width */
+    margin: 0 auto;
+    padding: 20px 16px;
+    display: block;
 }
 
-header h1 {
-    font-size: 1.75rem;
-    background: linear-gradient(to right, #6366f1, #ec4899);
+.app-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-top: 8px;
+}
+
+.brand-title {
+    font-size: 24pt;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #f472b6 0%, #c084fc 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-align: center;
-    margin-bottom: 4px;
-    font-weight: 800;
+    margin-bottom: 6px;
 }
 
-header p {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin-top: 0;
-    margin-bottom: 24px;
+.brand-subtitle {
+    font-size: 10pt;
+    color: #94a3b8;
+    font-weight: 400;
 }
 
-.upload-section, #progress-container, #result-box {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 24px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 var(--glass-border);
-    margin-bottom: 20px;
-    text-align: center;
+/* Glass Element Specifications */
+.glass-card {
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
-.hidden-input {
+.upload-card {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.input-wrapper {
+    margin-bottom: 14px;
+}
+
+/* Native input hidden to style beautiful uncompressed tap targets */
+#document-selector {
     display: none;
 }
 
-.upload-btn {
-    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
-    border: none;
-    color: white;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    display: inline-block;
-    box-shadow: 0 4px 20px var(--glass-glow);
-    transition: transform 0.15s ease;
-}
-
-.upload-btn:active {
-    transform: scale(0.97);
-}
-
-.subtext {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 12px;
-}
-
-#progress-status {
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    text-align: left;
-}
-
-.progress-bar-bg {
+.custom-file-upload {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
     background: rgba(255, 255, 255, 0.05);
-    height: 8px;
-    border-radius: 4px;
-    overflow: hidden;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 11pt;
+    font-weight: 600;
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
 }
 
-#progress-bar {
-    background: linear-gradient(90deg, #3b82f6, #ec4899);
-    width: 0%;
-    height: 100%;
-    transition: width 0.2s linear;
+.custom-file-upload:active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #c084fc;
 }
 
-.badge {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    letter-spacing: 0.5px;
+.upload-icon {
+    margin-right: 6px;
+    font-size: 14pt;
 }
 
-.badge-high { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-.badge-medium { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-.badge-low { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-
-.explanation-item {
-    border-left: 3px solid #6366f1;
-    padding-left: 14px;
-    margin-bottom: 24px;
-    text-align: left;
+.file-support-hint {
+    font-size: 9pt;
+    color: #64748b;
+    line-height: 1.4;
 }
 
-.explanation-item h3 {
-    margin: 0 0 8px 0;
-    font-size: 1rem;
-    color: var(--text-primary);
+/* Bulletproof Mobile Touch Submit Control Block */
+.submit-btn {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px 20px;
+    font-size: 11pt;
     font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+    transition: transform 0.1s ease;
 }
 
-.explanation-item p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    white-space: pre-line;
+.submit-btn:active {
+    transform: scale(0.98);
 }
 
 .hidden {
     display: none !important;
+}
+
+/* Loader Layout Metrics */
+.progress-card {
+    text-align: center;
+    padding: 24px;
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #c084fc;
+    border-radius: 50%;
+    margin: 0 auto 12px auto;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.progress-message {
+    font-size: 10.5pt;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ec4899, #c084fc);
+    border-radius: 99px;
+    transition: width 0.2s ease;
+}
+
+/* UI Data Rendering Presentation Specifications */
+.result-header {
+    display: block;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.result-header h2 {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 6px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+.badge-high, .badge-critical, .badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-medium, .badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-low, .badge-safe {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.explanation-container {
+    display: block;
+}
+
+.explanation-item {
+    display: block;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid #c084fc;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.explanation-item:last-child {
+    margin-bottom: 0;
+}
+
+.explanation-item h3 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
+.explanation-item p {
+    font-size: 10pt;
+    color: #e2e8f0;
+    line-height: 1.5;
+    white-space: pre-line;
 }
