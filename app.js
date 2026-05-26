@@ -7,10 +7,9 @@ const dangerBadge = document.getElementById('danger-badge');
 const simpleExplanation = document.getElementById('simple-explanation');
 
 // CRITICAL: Put your deployed Supabase URL path here
-const SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
+cconst SUPABASE_FUNCTION_URL = "https://supabase.com/dashboard/project/kgbcygfemcdorqryvxdp/functions/decode-notice/details";
 
 docSelector.addEventListener('change', async (e) => {
-    // Bulletproof check: if no files element, stop completely
     if (!e.target || !e.target.files || e.target.files.length === 0) {
         return;
     }
@@ -22,7 +21,7 @@ docSelector.addEventListener('change', async (e) => {
 
     progContainer.classList.remove('hidden');
     resultBox.classList.add('hidden');
-    updateProgress("Starting document analysis...", 5);
+    updateProgress("Initializing processing engine...", 5);
 
     let compiledText = "";
 
@@ -36,25 +35,25 @@ docSelector.addEventListener('change', async (e) => {
                 updateProgress(`Rendering page ${pageNum}/${totalPages}...`, Math.floor((pageNum / totalPages) * 35));
                 const canvas = await renderPdfPageToCanvas(pdf, pageNum);
                 
-                updateProgress(`Extracting multi-language text ${pageNum}/${totalPages}...`, 35 + Math.floor((pageNum / totalPages) * 45));
-                const pageText = await runOcrOnCanvas(canvas);
+                updateProgress(`Extracting text from page ${pageNum}/${totalPages}...`, 35 + Math.floor((pageNum / totalPages) * 45));
+                const pageText = await runOcrOnSource(canvas);
                 compiledText += " " + pageText;
 
                 canvas.width = 0;
                 canvas.height = 0;
             }
         } else {
-            updateProgress("Reading image data...", 20);
+            updateProgress("Converting image data streams...", 20);
+            // Safe conversion to Base64 DataURL data stream
+            const base64Data = await readAsDataURLAsync(file);
             
-            updateProgress("Scanning text via OCR engine...", 50);
-            // Pass the raw file object directly. Tesseract v5 handles it native.
-            compiledText = await runOcrOnCanvas(file);
+            updateProgress("Extracting multi-language text matrix...", 50);
+            compiledText = await runOcrOnSource(base64Data);
         }
 
-        // Clean up text string before sending to AI
         compiledText = compiledText.trim();
-        if (!compiledText) {
-            throw new Error("OCR could not find any readable text characters in this document.");
+        if (!compiledText || compiledText.length < 3) {
+            throw new Error("OCR system found no text characters. Ensure document layout is crisp.");
         }
 
         updateProgress("Passing data to secure AI Legal Layer...", 85);
@@ -68,13 +67,23 @@ docSelector.addEventListener('change', async (e) => {
         alert("Pipeline Processing Error: " + err.message);
     } finally {
         progContainer.classList.add('hidden');
-        docSelector.value = ""; // Reset
+        docSelector.value = ""; 
     }
 });
 
 function updateProgress(message, percentage) {
     if (progStatus) progStatus.innerText = message;
     if (progBar) progBar.style.width = percentage + "%";
+}
+
+// Fixed Promise tracker wrapper for clean file data capture
+function readAsDataURLAsync(fileObject) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Browser dropped file reader access link."));
+        reader.readAsDataURL(fileObject);
+    });
 }
 
 async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
@@ -90,10 +99,12 @@ async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
     return canvas;
 }
 
-async function runOcrOnCanvas(source) {
-    // Recognize handles image file, canvas, or blob string native
-    const result = await Tesseract.recognize(source, 'eng+hin+mar');
-    return result.data.text;
+async function runOcrOnSource(imageSource) {
+    // Explicit multi-language initialization routine prevents parameter errors
+    const worker = await Tesseract.createWorker('eng+hin+mar');
+    const response = await worker.recognize(imageSource);
+    await worker.terminate();
+    return response.data.text;
 }
 
 async function callSecureLegalAI(extractedText) {
@@ -111,7 +122,7 @@ async function callSecureLegalAI(extractedText) {
 
 function renderGlassmorphicUI(data) {
     if (!data || !data.dangerLevel) {
-        throw new Error("AI response format is malformed or missing data fields.");
+        throw new Error("AI response format is missing metadata properties.");
     }
 
     if (dangerBadge) {
