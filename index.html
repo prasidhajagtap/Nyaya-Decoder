@@ -2,42 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nyaya Decoder: Indian Family Law Assistant</title>
-   <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nyaya Decoder</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/tesseract.js@v5.0.5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script>
+        // Bind worker src for PDF.js explicitly to prevent worker engine drops on mobile
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    </script>
 </head>
 <body>
+    <div class="app-background"></div>
+    
     <div class="app-container">
-        <header>
-            <h1>न्याय Decoder</h1>
-            <p>Indian Family Court Notice Analyzer • MH & National</p>
+        <header class="app-header">
+            <h1 class="brand-title">न्याय Decoder</h1>
+            <p class="brand-subtitle">Indian Family Court Notice Analyzer • MH & National</p>
         </header>
 
-        <main>
-            <div class="upload-section">
-                <input type="file" id="document-selector" accept="image/*,application/pdf" class="hidden-input">
-                <input type="file" id="document-selector" accept="image/*,application/pdf">
-                <label for="document-selector" class="upload-btn">📷 Scan Photo or Upload PDF</label>
-                <div class="subtext">Supports multi-language notices (Eng + हिंदी + मराठी)</div>
+        <main class="app-main">
+            <div class="glass-card upload-card">
+                <div class="input-wrapper">
+                    <label for="document-selector" class="custom-file-upload">
+                        <span class="upload-icon">📁</span> Select Notice File
+                    </label>
+                    <input type="file" id="document-selector" accept="image/*,application/pdf,.doc,.docx">
+                </div>
+                <p class="file-support-hint">Supports multi-language notices (Eng + हिंदी + मराठी)<br>PDF, PNG, JPG, DOCX formats</p>
+                
+                <button id="submit-document-btn" class="submit-btn hidden">Analyze Document</button>
             </div>
 
-            <div id="progress-container" class="hidden">
-                <div id="progress-status">Preparing document pipeline...</div>
+            <div id="progress-container" class="glass-card progress-card hidden">
+                <div class="spinner"></div>
+                <div id="progress-status" class="progress-message">Initializing processing engine...</div>
                 <div class="progress-bar-bg">
-                    <div id="progress-bar"></div>
+                    <div id="progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
                 </div>
             </div>
 
-            <div id="result-box" class="hidden">
-                <div id="danger-badge" class="badge"></div>
-                <div id="simple-explanation"></div>
+            <div id="result-box" class="glass-card result-card hidden">
+                <div class="result-header">
+                    <h2>Analysis Summary</h2>
+                    <span id="danger-badge" class="badge">Urgency Rating</span>
+                </div>
+                <div id="simple-explanation" class="explanation-container">
+                    </div>
             </div>
         </main>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
