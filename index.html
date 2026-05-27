@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nyaya Decoder - Indian Legal Document Scanner</title>
+    <title>Nyaya Decoder v2 - Enhanced OCR</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js'></script>
     <style>
         * {
             margin: 0;
@@ -35,7 +35,7 @@
         }
 
         .app-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
@@ -113,6 +113,54 @@
             display: none;
         }
 
+        .controls-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .language-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+        }
+
+        .lang-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--glass-border);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            font-weight: 500;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lang-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--secondary);
+        }
+
+        .lang-option.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--accent);
+        }
+
         .btn {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
@@ -171,6 +219,22 @@
             font-size: 0.9rem;
             opacity: 0.8;
             text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid var(--accent);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .results-container {
@@ -229,6 +293,7 @@
             display: flex;
             gap: 8px;
             margin-bottom: 12px;
+            flex-wrap: wrap;
         }
 
         .language-tab {
@@ -267,6 +332,7 @@
             max-height: 300px;
             overflow-y: auto;
             line-height: 1.6;
+            word-break: break-word;
         }
 
         .action-buttons {
@@ -285,27 +351,40 @@
             font-size: 0.9rem;
         }
 
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top: 3px solid var(--accent);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .file-preview {
-            margin-top: 16px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
+        .warning-message {
+            background: rgba(247, 148, 75, 0.2);
+            border: 1px solid var(--secondary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
             font-size: 0.9rem;
+        }
+
+        .confidence-badge {
+            background: rgba(186, 214, 68, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .ocr-stats {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 0.85rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            opacity: 0.7;
         }
 
         @media (max-width: 768px) {
@@ -333,6 +412,10 @@
             .result-header {
                 flex-direction: column;
             }
+
+            .language-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -349,7 +432,7 @@
                 id: "hma_5",
                 act: "Hindu Marriage Act, 1955",
                 section: "Section 5",
-                patterns: ["section 5", "sec 5", "s 5", "धारा 5", "कलम 5"],
+                patterns: ["section 5", "sec 5", "s 5", "धारा 5", "कलम 5", "conditions for hindu marriage"],
                 title: {
                     en: "Conditions for Hindu Marriage",
                     hi: "हिंदू विवाह की शर्तें",
@@ -366,7 +449,7 @@
                 id: "hma_7",
                 act: "Hindu Marriage Act, 1955",
                 section: "Section 7",
-                patterns: ["section 7", "sec 7", "s 7", "धारा 7", "कलम 7"],
+                patterns: ["section 7", "sec 7", "s 7", "धारा 7", "कलम 7", "ceremonies"],
                 title: {
                     en: "Ceremonies for Hindu Marriage",
                     hi: "हिंदू विवाह के लिए समारोह",
@@ -400,7 +483,7 @@
                 id: "hma_13",
                 act: "Hindu Marriage Act, 1955",
                 section: "Section 13",
-                patterns: ["section 13", "sec 13", "s 13", "धारा 13", "कलम 13", "divorce"],
+                patterns: ["section 13", "sec 13", "s 13", "धारा 13", "कलम 13", "divorce", "तलाक", "घटस्फोट"],
                 title: {
                     en: "Divorce - Grounds",
                     hi: "तलाक - आधार",
@@ -419,9 +502,9 @@
                 section: "Section 24",
                 patterns: ["section 24", "sec 24", "s 24", "धारा 24", "कलम 24", "maintenance pendente lite"],
                 title: {
-                    en: "Maintenance Pendente Lite and Expenses of Proceedings",
-                    hi: "मुकदमे के दौरान भरण-पोषण और कार्यवाही का खर्च",
-                    mr: "खटला प्रलंबित असताना पोषण आणि कार्यवाहीचा खर्च"
+                    en: "Maintenance Pendente Lite",
+                    hi: "मुकदमे के दौरान भरण-पोषण",
+                    mr: "खटला प्रलंबित असताना पोषण"
                 },
                 explanation: {
                     en: "During matrimonial proceedings, if the wife has no independent income sufficient for her support, the court may order the husband to pay maintenance pendente lite and litigation expenses as it deems reasonable.",
@@ -434,7 +517,7 @@
                 id: "hma_25",
                 act: "Hindu Marriage Act, 1955",
                 section: "Section 25",
-                patterns: ["section 25", "sec 25", "s 25", "धारा 25", "कलम 25", "permanent alimony"],
+                patterns: ["section 25", "sec 25", "s 25", "धारा 25", "कलम 25", "permanent alimony", "स्थायी गुजारा"],
                 title: {
                     en: "Permanent Alimony and Maintenance",
                     hi: "स्थायी गुजारा भत्ता और भरण-पोषण",
@@ -442,13 +525,30 @@
                 },
                 explanation: {
                     en: "Court may order either party to pay permanent alimony and maintenance considering their income, property, financial status, and conduct. Amount may be paid as lump sum or monthly/periodic payments. Order can be modified if circumstances change.",
-                    hi: "न्यायालय किसी भी पक्ष को उनकी आय, संपत्ति, वित्तीय स्थिति और आचरण को ध्यान में रखते हुए स्थायी गुजारा भत्ता और भरण-पोषण का भुगतान करने का आदेश दे सकता है। राशि एकमुश्त या मासिक/आवधिक भुगतान के रूप में दी जा सकती है। परिस्थितियों में बदलाव होने पर आदेश को संशोधित किया जा सकता है।",
-                    mr: "न्यायालय कोणत्याही पक्षाला त्यांचे उत्पन्न, मालमत्ता, आर्थिक स्थिती आणि वर्तन लक्षात घेऊन कायमस्वरूपी निर्वाह भत्ता आणि पोषण देण्याचा आदेश देऊ शकते. रक्कम एकरकमी किंवा मासिक/नियतकालिक देयक म्हणून दिली जाऊ शकते. परिस्थिती बदलल्यास आदेश सुधारला जाऊ शकतो."
+                    hi: "न्यायालय किसी भी पक्ष को उनकी आय, संपत्ति, वित्तीय स्थिति और आचरण को ध्यान में रखते हुए स्थायी गुजारा भत्ता और भरण-पोषण का भुगतान करने का आदेश दे सकता है। राशि एकमुश्त या मासिक/आवधिक भुगतान के रूप में दी जा सकती है।",
+                    mr: "न्यायालय कोणत्याही पक्षाला त्यांचे उत्पन्न, मालमत्ता, आर्थिक स्थिती आणि वर्तन लक्षात घेऊन कायमस्वरूपी निर्वाह भत्ता आणि पोषण देण्याचा आदेश देऊ शकते. रक्कम एकरकमी किंवा मासिक/नियतकालिक देयक म्हणून दिली जाऊ शकते."
+                },
+                category: "Family Law"
+            },
+            {
+                id: "hma_26",
+                act: "Hindu Marriage Act, 1955",
+                section: "Section 26",
+                patterns: ["section 26", "sec 26", "s 26", "धारा 26", "कलम 26", "custody of children", "बच्चों की हिरासत"],
+                title: {
+                    en: "Custody of Children",
+                    hi: "बच्चों की हिरासत",
+                    mr: "मुलांची कोठडी"
+                },
+                explanation: {
+                    en: "In matrimonial proceedings, court may pass interim/final orders regarding custody, maintenance, and education of minor children. Court considers welfare of child as paramount. May allow reasonable access to non-custodial parent.",
+                    hi: "वैवाहिक कार्यवाही में, न्यायालय नाबालिग बच्चों की हिरासत, भरण-पोषण और शिक्षा के संबंध में अंतरिम/अंतिम आदेश पारित कर सकता है। न्यायालय बच्चे के कल्याण को सर्वोपरि मानता है।",
+                    mr: "वैवाहिक कार्यवाहीमध्ये, न्यायालय अल्पवयीन मुलांच्या कोठडी, पोषण आणि शिक्षणाबाबत अंतरिम/अंतिम आदेश पारित करू शकते. न्यायालय मुलाच्या कल्याणाला सर्वोच्च मानते."
                 },
                 category: "Family Law"
             },
 
-            // IPC Legacy Sections (Still Cited)
+            // IPC Legacy Sections
             {
                 id: "ipc_498a",
                 act: "Indian Penal Code, 1860 (Legacy)",
@@ -461,8 +561,8 @@
                 },
                 explanation: {
                     en: "Whoever, being the husband or relative of the husband of a woman, subjects her to cruelty shall be punished with imprisonment up to 3 years and fine. Cruelty includes harassment for dowry demands or conduct causing danger to life/health.",
-                    hi: "जो कोई, किसी महिला का पति या पति का रिश्तेदार होते हुए, उसे क्रूरता के अधीन करता है, उसे 3 वर्ष तक की कैद और जुर्माने से दंडित किया जाएगा। क्रूरता में दहेज की मांग के लिए उत्पीड़न या जीवन/स्वास्थ्य को खतरे में डालने वाला आचरण शामिल है।",
-                    mr: "जो कोणी, एखाद्या स्त्रीचा पती किंवा पतीचा नातेवाईक असून, तिला क्रूरता करतो, त्याला 3 वर्षांपर्यंत कारावास आणि दंड होऊ शकतो. क्रूरतेत हुंडा मागणीसाठी छळवणूक किंवा जीवन/आरोग्याला धोका निर्माण करणारे वर्तन समाविष्ट आहे."
+                    hi: "जो कोई, किसी महिला का पति या पति का रिश्तेदार होते हुए, उसे क्रूरता के अधीन करता है, उसे 3 वर्ष तक की कैद और जुर्माने से दंडित किया जाएगा।",
+                    mr: "जो कोणी, एखाद्या स्त्रीचा पती किंवा पतीचा नातेवाईक असून, तिला क्रूरता करतो, त्याला 3 वर्षांपर्यंत कारावास आणि दंड होऊ शकतो."
                 },
                 category: "Criminal Law"
             },
@@ -495,18 +595,18 @@
                 },
                 explanation: {
                     en: "Whoever commits criminal breach of trust (dishonest misappropriation or conversion of property entrusted) shall be punished with imprisonment up to 3 years or fine or both. Commonly used in matrimonial disputes for retention of jewelry/property.",
-                    hi: "जो कोई आपराधिक विश्वासघात करता है (सौंपी गई संपत्ति का बेईमानी से दुरुपयोग या रूपांतरण) उसे 3 वर्ष तक की कैद या जुर्माना या दोनों से दंडित किया जाएगा। वैवाहिक विवादों में आभूषण/संपत्ति की रोक के लिए आमतौर पर उपयोग किया जाता है।",
-                    mr: "जो कोणी गुन्हेगारी विश्वासघात करतो (सोपवलेल्या मालमत्तेचा अप्रामाणिकपणे गैरवापर किंवा रूपांतरण) त्याला 3 वर्षांपर्यंत कारावास किंवा दंड किंवा दोन्ही होऊ शकतो. वैवाहिक वादांमध्ये दागिने/मालमत्ता रोखण्यासाठी सामान्यतः वापरले जाते."
+                    hi: "जो कोई आपराधिक विश्वासघात करता है (सौंपी गई संपत्ति का बेईमानी से दुरुपयोग या रूपांतरण) उसे 3 वर्ष तक की कैद या जुर्माना या दोनों से दंडित किया जाएगा।",
+                    mr: "जो कोणी गुन्हेगारी विश्वासघात करतो (सोपवलेल्या मालमत्तेचा अप्रामाणिकपणे गैरवापर किंवा रूपांतरण) त्याला 3 वर्षांपर्यंत कारावास किंवा दंड किंवा दोन्ही होऊ शकतो."
                 },
                 category: "Criminal Law"
             },
 
-            // BNS (Bharatiya Nyaya Sanhita) - New Criminal Code
+            // BNS Sections
             {
                 id: "bns_85",
                 act: "Bharatiya Nyaya Sanhita, 2023",
                 section: "Section 85",
-                patterns: ["bns 85", "section 85 bns", "धारा 85 बीएनएस", "कलम 85 बीएनएस"],
+                patterns: ["bns 85", "section 85 bns", "भारतीय न्याय संहिता", "धारा 85 बीएनएस"],
                 title: {
                     en: "Cruelty by Husband or Relatives (BNS)",
                     hi: "पति या रिश्तेदारों द्वारा क्रूरता (बीएनएस)",
@@ -514,8 +614,8 @@
                 },
                 explanation: {
                     en: "Replaces IPC 498A. Whoever being husband or relative subjects woman to cruelty shall be punished with imprisonment up to 3 years and fine. Includes willful conduct causing injury/danger to life or harassment for dowry.",
-                    hi: "आईपीसी 498ए को बदलता है। जो कोई पति या रिश्तेदार होते हुए महिला को क्रूरता के अधीन करता है, उसे 3 वर्ष तक की कैद और जुर्माने से दंडित किया जाएगा। इसमें जानबूझकर किया गया आचरण शामिल है जो चोट/जीवन को खतरे में डालता है या दहेज के लिए उत्पीड़न करता है।",
-                    mr: "आयपीसी 498अ बदलते. जो कोणी पती किंवा नातेवाईक असून स्त्रीला क्रूरता करतो, त्याला 3 वर्षांपर्यंत कारावास आणि दंड होईल. यात जीवनाला इजा/धोका निर्माण करणारे जाणूनबुजून केलेले वर्तन किंवा हुंडा मागणीसाठी छळवणूक समाविष्ट आहे."
+                    hi: "आईपीसी 498ए को बदलता है। जो कोई पति या रिश्तेदार होते हुए महिला को क्रूरता के अधीन करता है, उसे 3 वर्ष तक की कैद और जुर्माने से दंडित किया जाएगा।",
+                    mr: "आयपीसी 498अ बदलते. जो कोणी पती किंवा नातेवाईक असून स्त्रीला क्रूरता करतो, त्याला 3 वर्षांपर्यंत कारावास आणि दंड होईल."
                 },
                 category: "Criminal Law"
             },
@@ -523,7 +623,7 @@
                 id: "bns_80",
                 act: "Bharatiya Nyaya Sanhita, 2023",
                 section: "Section 80",
-                patterns: ["bns 80", "section 80 bns", "धारा 80 बीएनएस", "कलम 80 बीएनएस", "dowry death bns"],
+                patterns: ["bns 80", "section 80 bns", "धारा 80 बीएनएस"],
                 title: {
                     en: "Dowry Death (BNS)",
                     hi: "दहेज मृत्यु (बीएनएस)",
@@ -531,16 +631,16 @@
                 },
                 explanation: {
                     en: "Replaces IPC 304B. Death of woman within 7 years of marriage under abnormal circumstances where she was subjected to cruelty/harassment for dowry. Punishment: minimum 7 years (up to life imprisonment) and fine.",
-                    hi: "आईपीसी 304बी को बदलता है। विवाह के 7 वर्षों के भीतर असामान्य परिस्थितियों में महिला की मृत्यु जहां उसे दहेज के लिए क्रूरता/उत्पीड़न का सामना करना पड़ा। सजा: न्यूनतम 7 वर्ष (आजीवन कारावास तक) और जुर्माना।",
-                    mr: "आयपीसी 304ब बदलते. लग्नाच्या 7 वर्षांच्या आत असामान्य परिस्थितीत स्त्रीचा मृत्यू जेथे तिला हुंडासाठी क्रूरता/छळवणूक करण्यात आली. शिक्षा: किमान 7 वर्षे (आजीवन कारावास पर्यंत) आणि दंड."
+                    hi: "आईपीसी 304बी को बदलता है। विवाह के 7 वर्षों के भीतर असामान्य परिस्थितियों में महिला की मृत्यु जहां उसे दहेज के लिए क्रूरता/उत्पीड़न का सामना करना पड़ा।",
+                    mr: "आयपीसी 304ब बदलते. लग्नाच्या 7 वर्षांच्या आत असामान्य परिस्थितीत स्त्रीचा मृत्यू जेथे तिला हुंडासाठी क्रूरता/छळवणूक करण्यात आली."
                 },
                 category: "Criminal Law"
             },
 
-            // CrPC (Legacy) / BNSS (New)
+            // CrPC / BNSS Sections
             {
                 id: "crpc_125",
-                act: "Code of Criminal Procedure, 1973 (Legacy)",
+                act: "Code of Criminal Procedure, 1973",
                 section: "Section 125",
                 patterns: ["125", "section 125", "sec 125", "धारा 125", "कलम 125", "maintenance wife"],
                 title: {
@@ -550,8 +650,8 @@
                 },
                 explanation: {
                     en: "Person with sufficient means must maintain wife (unable to maintain herself), legitimate/illegitimate minor children, and parents (unable to maintain themselves). Magistrate may order monthly maintenance. Wife disqualified if living in adultery, refuses to live with husband without sufficient reason, or living separately by mutual consent.",
-                    hi: "पर्याप्त साधनों वाले व्यक्ति को पत्नी (स्वयं का भरण-पोषण करने में असमर्थ), वैध/अवैध नाबालिग बच्चों और माता-पिता (स्वयं का भरण-पोषण करने में असमर्थ) का भरण-पोषण करना होगा। मजिस्ट्रेट मासिक भरण-पोषण का आदेश दे सकता है। पत्नी अयोग्य हो जाती है यदि वह व्यभिचार में रह रही है, पर्याप्त कारण के बिना पति के साथ रहने से इनकार करती है, या आपसी सहमति से अलग रह रही है।",
-                    mr: "पुरेशा साधनांसह व्यक्तीने पत्नी (स्वतःचे पोषण करू शकत नाही), कायदेशीर/बेकायदेशीर अल्पवयीन मुले आणि पालक (स्वतःचे पोषण करू शकत नाहीत) यांचे पोषण केले पाहिजे. दंडाधिकारी मासिक पोषणाचा आदेश देऊ शकतो. पत्नी अपात्र ठरते जर ती व्यभिचारात राहत असेल, पुरेशा कारणाशिवाय पतीबरोबर राहण्यास नकार दिला असेल किंवा परस्पर संमतीने वेगळी राहत असेल."
+                    hi: "पर्याप्त साधनों वाले व्यक्ति को पत्नी (स्वयं का भरण-पोषण करने में असमर्थ), वैध/अवैध नाबालिग बच्चों और माता-पिता (स्वयं का भरण-पोषण करने में असमर्थ) का भरण-पोषण करना होगा।",
+                    mr: "पुरेशा साधनांसह व्यक्तीने पत्नी (स्वतःचे पोषण करू शकत नाही), कायदेशीर/बेकायदेशीर अल्पवयीन मुले आणि पालक (स्वतःचे पोषण करू शकत नाहीत) यांचे पोषण केले पाहिजे."
                 },
                 category: "Procedural Law"
             },
@@ -559,7 +659,7 @@
                 id: "bnss_144",
                 act: "Bharatiya Nagarik Suraksha Sanhita, 2023",
                 section: "Section 144",
-                patterns: ["bnss 144", "section 144 bnss", "धारा 144 बीएनएसएस", "कलम 144 बीएनएसएस"],
+                patterns: ["bnss 144", "section 144 bnss", "धारा 144 बीएनएसएस"],
                 title: {
                     en: "Maintenance of Wife, Children and Parents (BNSS)",
                     hi: "पत्नी, बच्चों और माता-पिता का भरण-पोषण (बीएनएसएस)",
@@ -567,18 +667,18 @@
                 },
                 explanation: {
                     en: "Replaces CrPC 125. Person with sufficient means must maintain wife, children, and parents. Magistrate may order monthly maintenance up to Rs. 10,000 or as deemed appropriate based on income and circumstances.",
-                    hi: "सीआरपीसी 125 को बदलता है। पर्याप्त साधनों वाले व्यक्ति को पत्नी, बच्चों और माता-पिता का भरण-पोषण करना होगा। मजिस्ट्रेट आय और परिस्थितियों के आधार पर रु. 10,000 तक या उचित समझी जाने वाली मासिक भरण-पोषण का आदेश दे सकता है।",
-                    mr: "सीआरपीसी 125 बदलते. पुरेशा साधनांसह व्यक्तीने पत्नी, मुले आणि पालकांचे पोषण केले पाहिजे. दंडाधिकारी उत्पन्न आणि परिस्थिती यावर आधारित रु. 10,000 पर्यंत किंवा योग्य वाटेल तेवढे मासिक पोषणाचा आदेश देऊ शकतो."
+                    hi: "सीआरपीसी 125 को बदलता है। पर्याप्त साधनों वाले व्यक्ति को पत्नी, बच्चों और माता-पिता का भरण-पोषण करना होगा।",
+                    mr: "सीआरपीसी 125 बदलते. पुरेशा साधनांसह व्यक्तीने पत्नी, मुले आणि पालकांचे पोषण केले पाहिजे."
                 },
                 category: "Procedural Law"
             },
 
-            // Domestic Violence Act
+            // DV Act
             {
                 id: "dv_3",
                 act: "Protection of Women from Domestic Violence Act, 2005",
                 section: "Section 3",
-                patterns: ["dv act section 3", "pwdva 3", "section 3 dv", "धारा 3 घरेलू हिंसा", "कलम 3 घरेलू हिंसा", "domestic violence definition"],
+                patterns: ["dv act section 3", "pwdva 3", "section 3 dv", "धारा 3 घरेलू हिंसा"],
                 title: {
                     en: "Definition of Domestic Violence",
                     hi: "घरेलू हिंसा की परिभाषा",
@@ -586,8 +686,8 @@
                 },
                 explanation: {
                     en: "Any act, omission or commission that harms/injures/endangers health/safety/life/limb or mental wellbeing of aggrieved person, or constitutes harassment for dowry/property. Includes physical, sexual, verbal/emotional, and economic abuse.",
-                    hi: "कोई भी कार्य, चूक या आयोग जो पीड़ित व्यक्ति के स्वास्थ्य/सुरक्षा/जीवन/अंग या मानसिक कल्याण को नुकसान/चोट/खतरे में डालता है, या दहेज/संपत्ति के लिए उत्पीड़न का गठन करता है। इसमें शारीरिक, यौन, मौखिक/भावनात्मक और आर्थिक शोषण शामिल है।",
-                    mr: "पीडित व्यक्तीच्या आरोग्य/सुरक्षा/जीवन/अवयव किंवा मानसिक कल्याणाला हानी/इजा/धोका निर्माण करणारी कोणतीही कृती, वगळणे किंवा आयोग, किंवा हुंडा/मालमत्तेसाठी छळवणूक. यात शारीरिक, लैंगिक, मौखिक/भावनिक आणि आर्थिक शोषण समाविष्ट आहे."
+                    hi: "कोई भी कार्य, चूक या आयोग जो पीड़ित व्यक्ति के स्वास्थ्य/सुरक्षा/जीवन/अंग या मानसिक कल्याण को नुकसान/चोट/खतरे में डालता है।",
+                    mr: "पीडित व्यक्तीच्या आरोग्य/सुरक्षा/जीवन/अवयव किंवा मानसिक कल्याणाला हानी/इजा/धोका निर्माण करणारी कोणतीही कृती, वगळणे किंवा आयोग."
                 },
                 category: "Protection Acts"
             },
@@ -595,7 +695,7 @@
                 id: "dv_12",
                 act: "Protection of Women from Domestic Violence Act, 2005",
                 section: "Section 12",
-                patterns: ["dv act section 12", "pwdva 12", "section 12 dv", "धारा 12 घरेलू हिंसा", "कलम 12 घरेलू हिंसा"],
+                patterns: ["dv act section 12", "pwdva 12", "section 12 dv", "धारा 12 घरेलू हिंसा"],
                 title: {
                     en: "Protection Orders",
                     hi: "संरक्षण आदेश",
@@ -603,8 +703,8 @@
                 },
                 explanation: {
                     en: "Magistrate may pass protection order prohibiting respondent from committing acts of domestic violence, entering aggrieved person's residence/workplace, attempting to communicate with her, alienating assets, causing violence to dependents/relatives, or committing any other act specified.",
-                    hi: "मजिस्ट्रेट संरक्षण आदेश पारित कर सकता है जो प्रतिवादी को घरेलू हिंसा के कार्य करने, पीड़ित व्यक्ति के निवास/कार्यस्थल में प्रवेश करने, उससे संपर्क करने का प्रयास करने, संपत्ति को हस्तांतरित करने, आश्रितों/रिश्तेदारों को हिंसा पहुंचाने, या कोई अन्य निर्दिष्ट कार्य करने से प्रतिबंधित करता है।",
-                    mr: "दंडाधिकारी संरक्षण आदेश देऊ शकतो जो प्रतिवादीला घरगुती हिंसाचाराची कृती करणे, पीडित व्यक्तीच्या निवासस्थानी/कार्यस्थळी प्रवेश करणे, तिच्याशी संपर्क साधण्याचा प्रयत्न करणे, मालमत्ता हस्तांतरित करणे, आश्रित/नातेवाईकांना हिंसा करणे किंवा इतर कोणतीही निर्दिष्ट कृती करण्यास प्रतिबंधित करतो."
+                    hi: "मजिस्ट्रेट संरक्षण आदेश पारित कर सकता है जो प्रतिवादी को घरेलू हिंसा के कार्य करने से प्रतिबंधित करता है।",
+                    mr: "दंडाधिकारी संरक्षण आदेश देऊ शकतो जो प्रतिवादीला घरगुती हिंसाचाराची कृती करणे प्रतिबंधित करतो."
                 },
                 category: "Protection Acts"
             },
@@ -612,77 +712,26 @@
                 id: "dv_18",
                 act: "Protection of Women from Domestic Violence Act, 2005",
                 section: "Section 18",
-                patterns: ["dv act section 18", "pwdva 18", "section 18 dv", "धारा 18 घरेलू हिंसा", "कलम 18 घरेलू हिंसा"],
+                patterns: ["dv act section 18", "pwdva 18", "section 18 dv", "धारा 18 घरेलू हिंसा", "monetary relief"],
                 title: {
                     en: "Monetary Relief",
                     hi: "मौद्रिक राहत",
                     mr: "आर्थिक मदत"
                 },
                 explanation: {
-                    en: "Aggrieved person entitled to monetary relief to meet expenses including loss of earnings, medical expenses, loss caused by destruction/removal of property, maintenance for herself and children, and expenses of proceedings. Magistrate determines quantum based on evidence.",
-                    hi: "पीड़ित व्यक्ति को कमाई की हानि, चिकित्सा व्यय, संपत्ति के विनाश/हटाने से होने वाली हानि, स्वयं और बच्चों के लिए भरण-पोषण, और कार्यवाही के खर्च सहित खर्चों को पूरा करने के लिए मौद्रिक राहत का हकदार है। मजिस्ट्रेट साक्ष्य के आधार पर राशि निर्धारित करता है।",
-                    mr: "पीडित व्यक्ती उत्पन्नाची हानी, वैद्यकीय खर्च, मालमत्तेचा नाश/काढून टाकल्यामुळे झालेली हानी, स्वतःसाठी आणि मुलांसाठी पोषण आणि कार्यवाहीचा खर्च यासह खर्च भागविण्यासाठी आर्थिक मदत मिळण्यास पात्र आहे. दंडाधिकारी पुराव्यावर आधारित रक्कम निश्चित करतो."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "dv_19",
-                act: "Protection of Women from Domestic Violence Act, 2005",
-                section: "Section 19",
-                patterns: ["dv act section 19", "pwdva 19", "section 19 dv", "धारा 19 घरेलू हिंसा", "कलम 19 घरेलू हिंसा", "residence order"],
-                title: {
-                    en: "Residence Orders",
-                    hi: "निवास आदेश",
-                    mr: "निवासस्थान आदेश"
-                },
-                explanation: {
-                    en: "Magistrate may pass residence order restraining respondent from dispossessing/disturbing aggrieved person's possession of shared household, directing respondent to remove himself, restrain entry, or direct respondent to secure alternative accommodation or pay rent. Aggrieved person has right to reside in shared household regardless of title/ownership.",
-                    hi: "मजिस्ट्रेट निवास आदेश पारित कर सकता है जो प्रतिवादी को पीड़ित व्यक्ति को साझा घर के कब्जे से बेदखल करने/परेशान करने से रोकता है, प्रतिवादी को स्वयं को हटाने का निर्देश देता है, प्रवेश को प्रतिबंधित करता है, या प्रतिवादी को वैकल्पिक आवास सुरक्षित करने या किराया देने का निर्देश देता है। पीड़ित व्यक्ति को शीर्षक/स्वामित्व की परवाह किए बिना साझा घर में रहने का अधिकार है।",
-                    mr: "दंडाधिकारी निवासस्थान आदेश देऊ शकतो जो प्रतिवादीला पीडित व्यक्तीला सामायिक घराच्या ताब्यातून बेदखल करण्यास/त्रास देण्यास प्रतिबंधित करतो, प्रतिवादीला स्वतःला काढून टाकण्याचे निर्देश देतो, प्रवेश प्रतिबंधित करतो किंवा प्रतिवादीला पर्यायी निवासस्थान सुरक्षित करण्यास किंवा भाडे देण्यास निर्देश देतो. पीडित व्यक्तीला शीर्षक/मालकी विचारात न घेता सामायिक घरात राहण्याचा अधिकार आहे."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "dv_20",
-                act: "Protection of Women from Domestic Violence Act, 2005",
-                section: "Section 20",
-                patterns: ["dv act section 20", "pwdva 20", "section 20 dv", "धारा 20 घरेलू हिंसा", "कलम 20 घरेलू हिंसा", "custody order"],
-                title: {
-                    en: "Custody Orders",
-                    hi: "हिरासत आदेश",
-                    mr: "कोठडी आदेश"
-                },
-                explanation: {
-                    en: "Magistrate may grant temporary custody of children to aggrieved person and specify visitation rights. May also direct respondent to return stridhan or any other property/valuables to aggrieved person.",
-                    hi: "मजिस्ट्रेट पीड़ित व्यक्ति को बच्चों की अस्थायी हिरासत दे सकता है और मुलाकात के अधिकार निर्दिष्ट कर सकता है। प्रतिवादी को स्त्रीधन या कोई अन्य संपत्ति/कीमती सामान पीड़ित व्यक्ति को वापस करने का निर्देश भी दे सकता है।",
-                    mr: "दंडाधिकारी पीडित व्यक्तीला मुलांची तात्पुरती कोठडी देऊ शकतो आणि भेट अधिकार निर्दिष्ट करू शकतो. प्रतिवादीला स्त्रीधन किंवा इतर कोणतीही मालमत्ता/मौल्यवान वस्तू पीडित व्यक्तीला परत करण्याचे निर्देश देखील देऊ शकतो."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "dv_23",
-                act: "Protection of Women from Domestic Violence Act, 2005",
-                section: "Section 23",
-                patterns: ["dv act section 23", "pwdva 23", "section 23 dv", "धारा 23 घरेलू हिंसा", "कलम 23 घरेलू हिंसा"],
-                title: {
-                    en: "Powers of Magistrate",
-                    hi: "मजिस्ट्रेट की शक्तियां",
-                    mr: "दंडाधिकाऱ्याचे अधिकार"
-                },
-                explanation: {
-                    en: "Magistrate may direct respondent to undergo counseling, may direct both parties for counseling, pass interim/ex-parte orders, and exercise all powers under CrPC for investigation and trial. May also direct seizure/attachment of assets to secure payment of monetary relief.",
-                    hi: "मजिस्ट्रेट प्रतिवादी को परामर्श लेने का निर्देश दे सकता है, दोनों पक्षों को परामर्श के लिए निर्देश दे सकता है, अंतरिम/एकपक्षीय आदेश पारित कर सकता है, और जांच और सुनवाई के लिए सीआरपीसी के तहत सभी शक्तियों का प्रयोग कर सकता है। मौद्रिक राहत के भुगतान को सुरक्षित करने के लिए संपत्ति की जब्ती/अटैचमेंट का भी निर्देश दे सकता है।",
-                    mr: "दंडाधिकारी प्रतिवादीला समुपदेशन घेण्याचे निर्देश देऊ शकतो, दोन्ही पक्षांना समुपदेशनासाठी निर्देश देऊ शकतो, अंतरिम/एकपक्षीय आदेश पारित करू शकतो आणि तपास आणि चाचणीसाठी सीआरपीसी अंतर्गत सर्व अधिकारांचा वापर करू शकतो. आर्थिक मदतीचे पैसे भरण्याची खात्री करण्यासाठी मालमत्ता जप्त/संलग्न करण्याचे निर्देश देखील देऊ शकतो."
+                    en: "Aggrieved person entitled to monetary relief to meet expenses including loss of earnings, medical expenses, loss caused by destruction/removal of property, maintenance for herself and children, and expenses of proceedings.",
+                    hi: "पीड़ित व्यक्ति को कमाई की हानि, चिकित्सा व्यय, संपत्ति के विनाश/हटाने से होने वाली हानि, स्वयं और बच्चों के लिए भरण-पोषण, और कार्यवाही के खर्च सहित खर्चों को पूरा करने के लिए मौद्रिक राहत का हकदार है।",
+                    mr: "पीडित व्यक्ती उत्पन्नाची हानी, वैद्यकीय खर्च, मालमत्तेचा नाश/काढून टाकल्यामुळे झालेली हानी, स्वतःसाठी आणि मुलांसाठी पोषण आणि कार्यवाहीचा खर्च यासह खर्च भागविण्यासाठी आर्थिक मदत मिळण्यास पात्र आहे."
                 },
                 category: "Protection Acts"
             },
 
-            // Guardianship and Wards Act
+            // Guardianship Act
             {
                 id: "gwa_7",
                 act: "Guardians and Wards Act, 1890",
                 section: "Section 7",
-                patterns: ["gwa section 7", "section 7 gwa", "guardianship section 7", "धारा 7 संरक्षकता", "कलम 7 पालकत्व"],
+                patterns: ["gwa section 7", "section 7 gwa", "guardianship section 7", "धारा 7 संरक्षकता"],
                 title: {
                     en: "Application for Guardianship",
                     hi: "संरक्षकता के लिए आवेदन",
@@ -690,25 +739,8 @@
                 },
                 explanation: {
                     en: "Person desiring to be guardian may apply to District Court having jurisdiction where minor ordinarily resides. Court may appoint guardian of person (for personal care) or property (for estate management) or both after considering minor's welfare as paramount consideration.",
-                    hi: "संरक्षक बनने की इच्छा रखने वाला व्यक्ति उस जिला न्यायालय में आवेदन कर सकता है जिसके पास अधिकार क्षेत्र है जहां नाबालिग सामान्य रूप से रहता है। न्यायालय नाबालिग के कल्याण को सर्वोपरि विचार मानते हुए व्यक्ति (व्यक्तिगत देखभाल के लिए) या संपत्ति (संपत्ति प्रबंधन के लिए) या दोनों का संरक्षक नियुक्त कर सकता है।",
-                    mr: "पालक होण्याची इच्छा असलेली व्यक्ती जिल्हा न्यायालयात अर्ज करू शकते ज्यांचे अधिकारक्षेत्र आहे जेथे अल्पवयीन व्यक्ती सामान्यतः राहते. न्यायालय अल्पवयीन व्यक्तीच्या कल्याणाला सर्वोच्च विचार मानून व्यक्तीचा (वैयक्तिक काळजीसाठी) किंवा मालमत्तेचा (संपत्ती व्यवस्थापनासाठी) किंवा दोन्हीचा पालक नियुक्त करू शकते."
-                },
-                category: "Family Law"
-            },
-            {
-                id: "gwa_17",
-                act: "Guardians and Wards Act, 1890",
-                section: "Section 17",
-                patterns: ["gwa section 17", "section 17 gwa", "guardianship section 17", "धारा 17 संरक्षकता", "कलम 17 पालकत्व"],
-                title: {
-                    en: "Welfare of Minor - Paramount Consideration",
-                    hi: "नाबालिग का कल्याण - सर्वोपरि विचार",
-                    mr: "अल्पवयीन व्यक्तीचे कल्याण - सर्वोच्च विचार"
-                },
-                explanation: {
-                    en: "In appointing/declaring guardian, court shall be guided by welfare of minor as paramount consideration. Considers minor's age, sex, religion of minor and proposed guardian, character and capacity of proposed guardian, proximity to minor, wishes of deceased parents, and minor's preference (if old enough).",
-                    hi: "संरक्षक की नियुक्ति/घोषणा करते समय, न्यायालय नाबालिग के कल्याण को सर्वोपरि विचार के रूप में निर्देशित किया जाएगा। नाबालिग की उम्र, लिंग, नाबालिग और प्रस्तावित संरक्षक का धर्म, प्रस्तावित संरक्षक का चरित्र और क्षमता, नाबालिग से निकटता, मृत माता-पिता की इच्छाओं, और नाबालिग की प्राथमिकता (यदि पर्याप्त बड़ा है) पर विचार करता है।",
-                    mr: "पालक नियुक्त/घोषित करताना, न्यायालय अल्पवयीन व्यक्तीच्या कल्याणाला सर्वोच्च विचार म्हणून मार्गदर्शन करेल. अल्पवयीन व्यक्तीचे वय, लिंग, अल्पवयीन आणि प्रस्तावित पालकाचा धर्म, प्रस्तावित पालकाचे चारित्र्य आणि क्षमता, अल्पवयीन व्यक्तीशी जवळीक, मृत पालकांच्या इच्छा आणि अल्पवयीन व्यक्तीची प्राथमिकता (जर पुरेसे मोठे असल्यास) विचारात घेते."
+                    hi: "संरक्षक बनने की इच्छा रखने वाला व्यक्ति उस जिला न्यायालय में आवेदन कर सकता है जिसके पास अधिकार क्षेत्र है जहां नाबालिग सामान्य रूप से रहता है।",
+                    mr: "पालक होण्याची इच्छा असलेली व्यक्ती जिल्हा न्यायालयात अर्ज करू शकते ज्यांचे अधिकारक्षेत्र आहे जेथे अल्पवयीन व्यक्ती सामान्यतः राहते."
                 },
                 category: "Family Law"
             },
@@ -718,16 +750,16 @@
                 id: "dp_2",
                 act: "Dowry Prohibition Act, 1961",
                 section: "Section 2",
-                patterns: ["dowry prohibition section 2", "dp act 2", "section 2 dp", "धारा 2 दहेज निषेध", "कलम 2 हुंडा प्रतिबंध"],
+                patterns: ["dowry prohibition section 2", "dp act 2", "section 2 dp", "धारा 2 दहेज निषेध"],
                 title: {
                     en: "Definition of Dowry",
                     hi: "दहेज की परिभाषा",
                     mr: "हुंड्याची व्याख्या"
                 },
                 explanation: {
-                    en: "Dowry means any property or valuable security given/agreed to be given either directly or indirectly by one party to marriage to other party, or by parents/other persons to either party, at/before/after marriage as consideration for marriage. Excludes dower/mahr in Muslim marriages and presents of nominal value.",
-                    hi: "दहेज का अर्थ है कोई भी संपत्ति या मूल्यवान सुरक्षा जो विवाह के एक पक्ष द्वारा दूसरे पक्ष को, या माता-पिता/अन्य व्यक्तियों द्वारा किसी भी पक्ष को, विवाह के समय/पहले/बाद में विवाह के विचार के रूप में प्रत्यक्ष या अप्रत्यक्ष रूप से दी जाती है या देने के लिए सहमत है। मुस्लिम विवाह में दहेज/महर और नाममात्र मूल्य के उपहारों को बाहर रखता है।",
-                    mr: "हुंडा म्हणजे विवाहाच्या एका पक्षाद्वारे दुसऱ्या पक्षाला, किंवा पालक/इतर व्यक्तींद्वारे कोणत्याही पक्षाला, विवाहाच्या वेळी/आधी/नंतर विवाहाचा विचार म्हणून प्रत्यक्ष किंवा अप्रत्यक्षपणे दिलेली किंवा देण्यास सहमत असलेली कोणतीही मालमत्ता किंवा मौल्यवान सुरक्षा. मुस्लिम विवाहातील दहेज/महर आणि नाममात्र मूल्याच्या भेटवस्तू वगळल्या आहेत."
+                    en: "Dowry means any property or valuable security given/agreed to be given either directly or indirectly by one party to marriage to other party, or by parents/other persons to either party, at/before/after marriage as consideration for marriage.",
+                    hi: "दहेज का अर्थ है कोई भी संपत्ति या मूल्यवान सुरक्षा जो विवाह के एक पक्ष द्वारा दूसरे पक्ष को, या माता-पिता/अन्य व्यक्तियों द्वारा किसी भी पक्ष को, विवाह के समय/पहले/बाद में विवाह के विचार के रूप में प्रत्यक्ष या अप्रत्यक्ष रूप से दी जाती है या देने के लिए सहमत है।",
+                    mr: "हुंडा म्हणजे विवाहाच्या एका पक्षाद्वारा दुसऱ्या पक्षाला, किंवा पालक/इतर व्यक्तींद्वारा कोणत्याही पक्षाला, विवाहाच्या वेळी/आधी/नंतर विवाहाचा विचार म्हणून प्रत्यक्ष किंवा अप्रत्यक्षपणे दिलेली किंवा देण्यास सहमत असलेली कोणतीही मालमत्ता किंवा मौल्यवान सुरक्षा."
                 },
                 category: "Protection Acts"
             },
@@ -735,128 +767,58 @@
                 id: "dp_3",
                 act: "Dowry Prohibition Act, 1961",
                 section: "Section 3",
-                patterns: ["dowry prohibition section 3", "dp act 3", "section 3 dp", "धारा 3 दहेज निषेध", "कलम 3 हुंडा प्रतिबंध"],
+                patterns: ["dowry prohibition section 3", "dp act 3", "section 3 dp", "धारा 3 दहेज निषेध"],
                 title: {
                     en: "Penalty for Giving/Taking Dowry",
                     hi: "दहेज देने/लेने के लिए दंड",
                     mr: "हुंडा देणे/घेणे यासाठी शिक्षा"
                 },
                 explanation: {
-                    en: "Giving or taking dowry is punishable with imprisonment minimum 5 years (up to 10 years) and fine minimum Rs. 15,000 or dowry amount, whichever is more. Applies to both giver and taker. Demand for dowry also punishable with imprisonment up to 2 years and fine up to Rs. 10,000.",
-                    hi: "दहेज देना या लेना न्यूनतम 5 वर्ष (10 वर्ष तक) की कैद और न्यूनतम रु. 15,000 या दहेज राशि, जो भी अधिक हो, के जुर्माने से दंडनीय है। देने वाले और लेने वाले दोनों पर लागू होता है। दहेज की मांग भी 2 वर्ष तक की कैद और रु. 10,000 तक के जुर्माने से दंडनीय है।",
-                    mr: "हुंडा देणे किंवा घेणे हे किमान 5 वर्षे (10 वर्षांपर्यंत) कारावास आणि किमान रु. 15,000 किंवा हुंड्याची रक्कम, जे जास्त असेल त्याचा दंड देण्यास पात्र आहे. देणाऱ्या आणि घेणाऱ्या दोघांनाही लागू होते. हुंड्याची मागणी देखील 2 वर्षांपर्यंत कारावास आणि रु. 10,000 पर्यंत दंड देण्यास पात्र आहे."
+                    en: "Giving or taking dowry is punishable with imprisonment minimum 5 years (up to 10 years) and fine minimum Rs. 15,000 or dowry amount, whichever is more. Applies to both giver and taker.",
+                    hi: "दहेज देना या लेना न्यूनतम 5 वर्ष (10 वर्ष तक) की कैद और न्यूनतम रु. 15,000 या दहेज राशि, जो भी अधिक हो, के जुर्माने से दंडनीय है।",
+                    mr: "हुंडा देणे किंवा घेणे हे किमान 5 वर्षे (10 वर्षांपर्यंत) कारावास आणि किमान रु. 15,000 किंवा हुंड्याची रक्कम, जे जास्त असेल त्याचा दंड देण्यास पात्र आहे."
                 },
                 category: "Protection Acts"
             },
 
             // Special Marriage Act
             {
-                id: "sma_4",
-                act: "Special Marriage Act, 1954",
-                section: "Section 4",
-                patterns: ["sma section 4", "special marriage act 4", "section 4 sma", "धारा 4 विशेष विवाह", "कलम 4 विशेष विवाह"],
-                title: {
-                    en: "Conditions for Special Marriage",
-                    hi: "विशेष विवाह की शर्तें",
-                    mr: "विशेष विवाहाच्या अटी"
-                },
-                explanation: {
-                    en: "Neither party has living spouse, both capable of consent (sound mind, not unfit due to mental disorder), bridegroom 21+ and bride 18+, parties not within prohibited degrees unless custom permits, and if parties belong to same religion, not sapindas unless custom permits.",
-                    hi: "किसी भी पक्ष का जीवित पति/पत्नी न हो, दोनों सहमति देने में सक्षम (स्वस्थ मस्तिष्क, मानसिक विकार के कारण अयोग्य नहीं), वर 21+ और वधू 18+, पक्ष निषिद्ध डिग्री के भीतर न हों जब तक कि प्रथा अनुमति न दे, और यदि पक्ष एक ही धर्म के हैं, तो सपिंड न हों जब तक कि प्रथा अनुमति न दे।",
-                    mr: "कोणत्याही पक्षाचा जिवंत जोडीदार नसावा, दोघेही संमतीसाठी सक्षम (सुदृढ मन, मानसिक विकारामुळे अयोग्य नाही), वर 21+ आणि वधू 18+, प्रथा परवानगी देत नाही तोपर्यंत पक्ष निषिद्ध अंशांमध्ये नसावेत आणि जर पक्ष एकाच धर्माचे असतील तर प्रथा परवानगी देत नाही तोपर्यंत सपिंड नसावेत."
-                },
-                category: "Family Law"
-            },
-            {
                 id: "sma_27",
                 act: "Special Marriage Act, 1954",
                 section: "Section 27",
-                patterns: ["sma section 27", "special marriage act 27", "section 27 sma", "धारा 27 विशेष विवाह", "कलम 27 विशेष विवाह"],
+                patterns: ["sma section 27", "special marriage act 27", "section 27 sma", "धारा 27 विशेष विवाह"],
                 title: {
-                    en: "Divorce - Grounds under SMA",
-                    hi: "तलाक - विशेष विवाह अधिनियम के तहत आधार",
-                    mr: "घटस्फोट - विशेष विवाह कायद्यांतर्गत कारणे"
+                    en: "Divorce - Special Marriage Act",
+                    hi: "तलाक - विशेष विवाह अधिनियम",
+                    mr: "घटस्फोट - विशेष विवाह कायदा"
                 },
                 explanation: {
-                    en: "Either party may petition for divorce on grounds: adultery, cruelty, desertion for 2+ years, conversion, mental disorder, leprosy, venereal disease, renunciation, presumption of death. Court may decree divorce if satisfied and no connivance/condonation/unreasonable delay.",
-                    hi: "कोई भी पक्ष निम्न आधारों पर तलाक के लिए याचिका दायर कर सकता है: व्यभिचार, क्रूरता, 2+ वर्षों के लिए परित्याग, धर्मांतरण, मानसिक विकार, कुष्ठ रोग, यौन रोग, त्याग, मृत्यु की धारणा। यदि संतुष्ट हो और कोई मिलीभगत/क्षमा/अनुचित देरी न हो तो न्यायालय तलाक का आदेश दे सकता है।",
-                    mr: "कोणताही पक्ष खालील कारणांवर घटस्फोटासाठी याचिका दाखल करू शकतो: व्यभिचार, क्रूरता, 2+ वर्षे सोडून जाणे, धर्मांतर, मानसिक विकार, कुष्ठरोग, लैंगिक रोग, त्याग, मृत्यूची धारणा. जर समाधानी असेल आणि कोणतीही गुप्तहेतु/माफी/अवास्तव विलंब नसेल तर न्यायालय घटस्फोटाचा आदेश देऊ शकते."
+                    en: "Either party may petition for divorce on grounds: adultery, cruelty, desertion for 2+ years, conversion, mental disorder, leprosy, venereal disease, renunciation, presumption of death. Court may decree divorce if satisfied.",
+                    hi: "कोई भी पक्ष निम्न आधारों पर तलाक के लिए याचिका दायर कर सकता है: व्यभिचार, क्रूरता, 2+ वर्षों के लिए परित्याग, धर्मांतरण, मानसिक विकार, कुष्ठ रोग, यौन रोग, त्याग, मृत्यु की धारणा।",
+                    mr: "कोणताही पक्ष खालील कारणांवर घटस्फोटासाठी याचिका दाखल करू शकतो: व्यभिचार, क्रूरता, 2+ वर्षे सोडून जाणे, धर्मांतर, मानसिक विकार, कुष्ठरोग, लैंगिक रोग, त्याग, मृत्यूची धारणा."
                 },
                 category: "Family Law"
-            },
-
-            // CPC Sections
-            {
-                id: "cpc_26",
-                act: "Code of Civil Procedure, 1908",
-                section: "Order 26",
-                patterns: ["cpc order 26", "order 26 cpc", "आदेश 26 सीपीसी", "आदेश 26 सीपीसी"],
-                title: {
-                    en: "Commission for Examination of Witnesses",
-                    hi: "गवाहों की जांच के लिए आयोग",
-                    mr: "साक्षीदारांच्या तपासणीसाठी आयोग"
-                },
-                explanation: {
-                    en: "Court may issue commission for examination of witnesses who are unable to attend court due to valid reasons (illness, distance, etc.). Commission may be issued to another court or commissioner to record evidence.",
-                    hi: "न्यायालय उन गवाहों की जांच के लिए आयोग जारी कर सकता है जो वैध कारणों (बीमारी, दूरी, आदि) के कारण न्यायालय में उपस्थित होने में असमर्थ हैं। साक्ष्य दर्ज करने के लिए किसी अन्य न्यायालय या आयुक्त को आयोग जारी किया जा सकता है।",
-                    mr: "न्यायालय वैध कारणांमुळे (आजारपण, अंतर इ.) न्यायालयात हजर राहू शकत नाहीत अशा साक्षीदारांच्या तपासणीसाठी आयोग जारी करू शकते. पुरावा नोंदविण्यासाठी दुसऱ्या न्यायालयाला किंवा आयुक्ताला आयोग जारी केला जाऊ शकतो."
-                },
-                category: "Civil Procedure"
-            },
-
-            // Additional Critical Sections
-            {
-                id: "hma_26",
-                act: "Hindu Marriage Act, 1955",
-                section: "Section 26",
-                patterns: ["section 26 hma", "sec 26", "धारा 26", "कलम 26", "custody of children"],
-                title: {
-                    en: "Custody of Children",
-                    hi: "बच्चों की हिरासत",
-                    mr: "मुलांची कोठडी"
-                },
-                explanation: {
-                    en: "In matrimonial proceedings, court may pass interim/final orders regarding custody, maintenance, and education of minor children. Court considers welfare of child as paramount. May allow reasonable access to non-custodial parent.",
-                    hi: "वैवाहिक कार्यवाही में, न्यायालय नाबालिग बच्चों की हिरासत, भरण-पोषण और शिक्षा के संबंध में अंतरिम/अंतिम आदेश पारित कर सकता है। न्यायालय बच्चे के कल्याण को सर्वोपरि मानता है। गैर-हिरासत वाले माता-पिता को उचित पहुंच की अनुमति दे सकता है।",
-                    mr: "वैवाहिक कार्यवाहीमध्ये, न्यायालय अल्पवयीन मुलांच्या कोठडी, पोषण आणि शिक्षणाबाबत अंतरिम/अंतिम आदेश पारित करू शकते. न्यायालय मुलाच्या कल्याणाला सर्वोच्च मानते. गैर-कोठडी पालकांना वाजवी प्रवेशाची परवानगी देऊ शकते."
-                },
-                category: "Family Law"
-            },
-            {
-                id: "crpc_127",
-                act: "Code of Criminal Procedure, 1973 (Legacy)",
-                section: "Section 127",
-                patterns: ["127", "section 127 crpc", "sec 127", "धारा 127", "कलम 127"],
-                title: {
-                    en: "Alteration of Maintenance Order",
-                    hi: "भरण-पोषण आदेश में परिवर्तन",
-                    mr: "पोषण आदेशात बदल"
-                },
-                explanation: {
-                    en: "On proof of change in circumstances of any party, Magistrate may alter maintenance order by canceling, varying, or temporarily suspending it. Application can be made by person receiving/paying maintenance.",
-                    hi: "किसी भी पक्ष की परिस्थितियों में परिवर्तन के प्रमाण पर, मजिस्ट्रेट भरण-पोषण आदेश को रद्द करके, बदलकर या अस्थायी रूप से निलंबित करके बदल सकता है। भरण-पोषण प्राप्त करने/देने वाला व्यक्ति आवेदन कर सकता है।",
-                    mr: "कोणत्याही पक्षाच्या परिस्थितीत बदलाचा पुरावा मिळाल्यास, दंडाधिकारी पोषण आदेश रद्द करून, बदलून किंवा तात्पुरता निलंबित करून बदलू शकतो. पोषण मिळवणारी/देणारी व्यक्ती अर्ज करू शकते."
-                },
-                category: "Procedural Law"
-            },
-            {
-                id: "crpc_482",
-                act: "Code of Criminal Procedure, 1973 (Legacy)",
-                section: "Section 482",
-                patterns: ["482", "section 482 crpc", "sec 482", "धारा 482", "कलम 482", "quash fir"],
-                title: {
-                    en: "Inherent Powers of High Court",
-                    hi: "उच्च न्यायालय की निहित शक्तियां",
-                    mr: "उच्च न्यायालयाचे अंतर्निहित अधिकार"
-                },
-                explanation: {
-                    en: "High Court has inherent power to prevent abuse of court process or secure ends of justice. Commonly used to quash FIR/complaints where allegations don't constitute offense, are frivolous/vexatious, or where compromise reached in compoundable offenses.",
-                    hi: "उच्च न्यायालय के पास न्यायालय प्रक्रिया के दुरुपयोग को रोकने या न्याय के उद्देश्यों को सुरक्षित करने की निहित शक्ति है। आमतौर पर एफआईआर/शिकायतों को खारिज करने के लिए उपयोग किया जाता है जहां आरोप अपराध नहीं बनते, तुच्छ/परेशान करने वाले हैं, या जहां समझौता योग्य अपराधों में समझौता हो गया है।",
-                    mr: "उच्च न्यायालयाला न्यायालयीन प्रक्रियेचा गैरवापर रोखण्यासाठी किंवा न्यायाचे ध्येय सुरक्षित करण्यासाठी अंतर्निहित अधिकार आहेत. सामान्यतः एफआयआर/तक्रारी रद्द करण्यासाठी वापरले जाते जेथे आरोप गुन्हा बनत नाहीत, क्षुल्लक/त्रासदायक आहेत किंवा जेथे जुळवून घेता येण्याजोग्या गुन्ह्यांमध्ये तडजोड झाली आहे."
-                },
-                category: "Procedural Law"
             }
         ];
+
+        // Image preprocessing function
+        const preprocessImage = (canvas) => {
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            // Enhance contrast for B&W documents
+            const contrast = 1.5;
+            const intercept = 128 * (1 - contrast) / 2;
+
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = data[i] * contrast + intercept;
+                data[i + 1] = data[i + 1] * contrast + intercept;
+                data[i + 2] = data[i + 2] * contrast + intercept;
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        };
 
         // Main App Component
         function NyayaDecoder() {
@@ -868,8 +830,11 @@
             const [matchedSections, setMatchedSections] = useState([]);
             const [showExtractedText, setShowExtractedText] = useState(false);
             const [error, setError] = useState("");
+            const [warning, setWarning] = useState("");
             const [dragOver, setDragOver] = useState(false);
             const [selectedLanguage, setSelectedLanguage] = useState("en");
+            const [selectedOCRLanguage, setSelectedOCRLanguage] = useState("eng+hin+mar");
+            const [ocrStats, setOcrStats] = useState(null);
 
             const fileInputRef = useRef(null);
 
@@ -878,6 +843,7 @@
                 setExtractedText("");
                 setMatchedSections([]);
                 setError("");
+                setWarning("");
                 setProgress(0);
             };
 
@@ -905,16 +871,18 @@
                     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                     const numPages = pdf.numPages;
                     let fullText = "";
+                    let totalProcessingTime = 0;
 
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
 
                     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                        setProgressText(`Processing page ${pageNum} of ${numPages}...`);
-                        setProgress((pageNum / numPages) * 50);
+                        setProgressText(`Rendering page ${pageNum} of ${numPages}...`);
+                        setProgress((pageNum / (numPages * 2)) * 100);
 
                         const page = await pdf.getPage(pageNum);
-                        const viewport = page.getViewport({ scale: 2.0 });
+                        // Increased scale from 2.0 to 5.0 for better clarity
+                        const viewport = page.getViewport({ scale: 5.0 });
 
                         canvas.width = viewport.width;
                         canvas.height = viewport.height;
@@ -924,11 +892,17 @@
                             viewport: viewport
                         }).promise;
 
+                        // Apply image preprocessing
+                        preprocessImage(canvas);
+
                         const imageData = canvas.toDataURL('image/png');
 
-                        const { data: { text } } = await Tesseract.recognize(
+                        setProgressText(`Processing page ${pageNum} of ${numPages} with OCR...`);
+
+                        const startTime = performance.now();
+                        const { data: { text, confidence } } = await Tesseract.recognize(
                             imageData,
-                            'eng+hin+mar',
+                            selectedOCRLanguage,
                             {
                                 logger: m => {
                                     if (m.status === 'recognizing text') {
@@ -937,13 +911,20 @@
                                 }
                             }
                         );
+                        const endTime = performance.now();
+                        totalProcessingTime += (endTime - startTime);
 
-                        fullText += text + "\n\n";
+                        fullText += `\n--- Page ${pageNum} ---\n${text}\n`;
 
-                        // Memory cleanup
+                        // Memory cleanup - CRITICAL
                         canvas.width = 0;
                         canvas.height = 0;
                     }
+
+                    setOcrStats({
+                        totalPages: numPages,
+                        processingTime: totalProcessingTime.toFixed(2)
+                    });
 
                     return fullText;
                 } catch (err) {
@@ -953,18 +934,57 @@
 
             const processImage = async (file) => {
                 try {
+                    setProgressText("Loading image...");
+                    setProgress(10);
+
+                    const reader = new FileReader();
+                    const imagePromise = new Promise((resolve, reject) => {
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+
+                                // Apply preprocessing
+                                preprocessImage(canvas);
+
+                                const imageData = canvas.toDataURL('image/png');
+                                resolve(imageData);
+                            };
+                            img.onerror = () => reject(new Error("Image loading failed"));
+                            img.src = e.target.result;
+                        };
+                        reader.onerror = () => reject(new Error("File reading failed"));
+                        reader.readAsDataURL(file);
+                    });
+
+                    const imageData = await imagePromise;
+
                     setProgressText("Extracting text from image...");
-                    const { data: { text } } = await Tesseract.recognize(
-                        file,
-                        'eng+hin+mar',
+                    setProgress(30);
+
+                    const startTime = performance.now();
+                    const { data: { text, confidence } } = await Tesseract.recognize(
+                        imageData,
+                        selectedOCRLanguage,
                         {
                             logger: m => {
                                 if (m.status === 'recognizing text') {
-                                    setProgress(m.progress * 100);
+                                    setProgress(30 + (m.progress * 60));
                                 }
                             }
                         }
                     );
+                    const endTime = performance.now();
+
+                    setOcrStats({
+                        totalPages: 1,
+                        processingTime: (endTime - startTime).toFixed(2)
+                    });
+
                     return text;
                 } catch (err) {
                     throw new Error(`Image processing failed: ${err.message}`);
@@ -993,9 +1013,11 @@
 
                 setIsProcessing(true);
                 setError("");
+                setWarning("");
                 setProgress(0);
                 setExtractedText("");
                 setMatchedSections([]);
+                setOcrStats(null);
 
                 try {
                     let text = "";
@@ -1005,22 +1027,31 @@
                     } else if (file.type.startsWith("image/")) {
                         text = await processImage(file);
                     } else {
-                        throw new Error("Unsupported file type");
+                        throw new Error("Unsupported file type. Please upload PDF or image (JPG/PNG).");
                     }
 
                     setExtractedText(text);
 
+                    if (!text || text.trim().length < 10) {
+                        setWarning("⚠️ OCR extracted very little text. The document quality might be poor or the text might not be recognized. Try adjusting the language settings or document angle.");
+                    }
+
                     setProgressText("Analyzing legal sections...");
-                    setProgress(90);
+                    setProgress(95);
 
                     const matches = matchLegalSections(text);
                     setMatchedSections(matches);
+
+                    if (matches.length === 0) {
+                        setWarning("ℹ️ No legal sections detected. The document may not contain Indian legal references, or try different language settings.");
+                    }
 
                     setProgress(100);
                     setProgressText("Complete!");
 
                 } catch (err) {
                     setError(err.message);
+                    setWarning("Try a higher quality document or switch language preferences.");
                 } finally {
                     setIsProcessing(false);
                 }
@@ -1032,6 +1063,8 @@
                 setMatchedSections([]);
                 setProgress(0);
                 setError("");
+                setWarning("");
+                setOcrStats(null);
                 if (fileInputRef.current) {
                     fileInputRef.current.value = "";
                 }
@@ -1040,8 +1073,8 @@
             return (
                 <div className="app-container">
                     <div className="header">
-                        <h1>⚖️ Nyaya Decoder</h1>
-                        <p>Indian Legal Document Scanner - OCR + Pattern Matching</p>
+                        <h1>⚖️ Nyaya Decoder v2</h1>
+                        <p>Enhanced OCR - Indian Legal Document Scanner</p>
                     </div>
 
                     <div className="glass-card">
@@ -1069,13 +1102,45 @@
                         </div>
 
                         {file && !isProcessing && matchedSections.length === 0 && (
-                            <div className="action-buttons">
-                                <button className="btn" onClick={handleScan}>
-                                    🔍 Scan & Analyze
-                                </button>
-                                <button className="btn btn-secondary" onClick={handleReset}>
-                                    🔄 Reset
-                                </button>
+                            <div className="controls-section">
+                                <div className="control-group">
+                                    <div className="control-label">📝 OCR Language Priority:</div>
+                                    <div className="language-selector">
+                                        <div 
+                                            className={`lang-option ${selectedOCRLanguage === 'eng' ? 'active' : ''}`}
+                                            onClick={() => setSelectedOCRLanguage('eng')}
+                                        >
+                                            English Only
+                                        </div>
+                                        <div 
+                                            className={`lang-option ${selectedOCRLanguage === 'hin' ? 'active' : ''}`}
+                                            onClick={() => setSelectedOCRLanguage('hin')}
+                                        >
+                                            हिंदी Only
+                                        </div>
+                                        <div 
+                                            className={`lang-option ${selectedOCRLanguage === 'mar' ? 'active' : ''}`}
+                                            onClick={() => setSelectedOCRLanguage('mar')}
+                                        >
+                                            मराठी Only
+                                        </div>
+                                        <div 
+                                            className={`lang-option ${selectedOCRLanguage === 'eng+hin+mar' ? 'active' : ''}`}
+                                            onClick={() => setSelectedOCRLanguage('eng+hin+mar')}
+                                        >
+                                            All Three
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="action-buttons">
+                                    <button className="btn" onClick={handleScan}>
+                                        🔍 Scan & Analyze
+                                    </button>
+                                    <button className="btn btn-secondary" onClick={handleReset}>
+                                        🔄 Reset
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -1087,14 +1152,20 @@
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>
-                                <div className="progress-text">{progressText}</div>
+                                <div className="progress-text">{progressText} ({Math.round(progress)}%)</div>
                                 <div className="spinner" />
                             </div>
                         )}
 
                         {error && (
                             <div className="error-message">
-                                ❌ {error}
+                                ❌ Error: {error}
+                            </div>
+                        )}
+
+                        {warning && (
+                            <div className="warning-message">
+                                {warning}
                             </div>
                         )}
                     </div>
@@ -1105,6 +1176,23 @@
                                 <h2 style={{ marginBottom: '16px' }}>
                                     📋 Detected Legal Sections ({matchedSections.length})
                                 </h2>
+
+                                {ocrStats && (
+                                    <div className="ocr-stats">
+                                        <div className="stat-row">
+                                            <span className="stat-label">Pages Scanned:</span>
+                                            <span>{ocrStats.totalPages}</span>
+                                        </div>
+                                        <div className="stat-row">
+                                            <span className="stat-label">Processing Time:</span>
+                                            <span>{ocrStats.processingTime}ms</span>
+                                        </div>
+                                        <div className="stat-row">
+                                            <span className="stat-label">OCR Language:</span>
+                                            <span>{selectedOCRLanguage}</span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="language-tabs">
                                     <div 
@@ -1184,6 +1272,14 @@
                                 ℹ️ No legal sections detected in this document.
                                 <br />
                                 The document may not contain Indian legal references.
+                                <br />
+                                <strong>Troubleshooting:</strong>
+                                <br />
+                                1. Try selecting a different OCR language
+                                <br />
+                                2. Ensure the document is clear and readable
+                                <br />
+                                3. Check that the text is printed (not handwritten)
                             </div>
                             <div className="action-buttons">
                                 <button 
