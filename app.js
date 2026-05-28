@@ -1,6 +1,5 @@
-// -----------------------------------------------
 // PUT YOUR GEMINI API KEY HERE
-const GEMINI_KEY = 'AIzaSyBEHH8dx5uGCGfy3GWRaBnU9_cvN99SWUE';
+const GEMINI_KEY = 'YOUR_GEMINI_API_KEY';
 // -----------------------------------------------
 
 let curExp = '';
@@ -10,7 +9,7 @@ let theme = 'light';
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
-async function callGemini(prompt) {
+async function callGemini(prompt, retries = 2) {
   const res = await fetch(GEMINI_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -19,6 +18,15 @@ async function callGemini(prompt) {
       generationConfig: { temperature: 0.2, maxOutputTokens: 1500 }
     })
   });
+
+  if (res.status === 429) {
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, 4000));
+      return callGemini(prompt, retries - 1);
+    }
+    throw new Error('Too many requests. Wait a few seconds and try again.');
+  }
+
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
   return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -94,7 +102,7 @@ You must know all Indian laws: BNS 2023, BNSS 2023, BSA 2023, IPC 1860, CrPC 197
 
   } catch (e) {
     hide('ld');
-    document.getElementById('erMsg').textContent = 'Search failed. Check your API key or try again.';
+    document.getElementById('erMsg').textContent = e.message || 'Search failed. Check your API key or try again.';
     show('er');
   } finally {
     document.getElementById('sBtn').disabled = false;
