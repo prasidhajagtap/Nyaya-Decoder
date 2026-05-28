@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nyaya Decoder | Law Made Simple for Men</title>
-  <meta name="description" content="Search Indian laws (BNS, BNSS, IPC, CrPC) with plain language explanations and context-aware translations." />
+  <title>Nyaya Decoder | Strategic Legal Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <style>
@@ -18,9 +17,12 @@
       --t3:        #94a3b8;
       --accent:    #1e3a8a;
       --accent2:   #eff6ff;
-      --atxt:      #1e40af;
-      --gbg:       #f0fdf4;
-      --gbd:       #bbf7d0;
+      --jbg:       #fcf8f2;
+      --jborder:   #eede7b;
+      --jtxt:      #855d0a;
+      --sbg:       #fff1f2;
+      --sborder:   #fecdd3;
+      --stxt:      #9f1239;
       --shadow:    0 4px 20px rgba(15, 23, 42, 0.05);
     }
     [data-theme="dark"] {
@@ -33,383 +35,254 @@
       --t3:        #64748b;
       --accent:    #3b82f6;
       --accent2:   #1e3a8a;
-      --atxt:      #93c5fd;
-      --gbg:       #064e3b;
-      --gbd:       #047857;
+      --jbg:       #2a2415;
+      --jborder:   #715c1e;
+      --jtxt:      #fef08a;
+      --sbg:       #4c0519;
+      --sborder:   #9f1239;
+      --stxt:      #fecdd3;
       --shadow:    0 4px 25px rgba(0, 0, 0, 0.3);
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--t1); min-height: 100vh; transition: background .3s, color .3s; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--t1); min-height: 100vh; transition: background .3s, color .3s; padding-bottom: 5rem; }
 
     nav { position: sticky; top: 0; z-index: 50; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 65px; box-shadow: var(--shadow); }
-    .logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--t1); }
-    .logo-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; letter-spacing: -.02em; }
-    .logo-name span { color: var(--accent); }
-    .nav-r { display: flex; align-items: center; gap: 1.2rem; }
-    .nav-hint { font-size: .8rem; color: var(--t3); font-weight: 400; display: none; }
-    @media(min-width: 560px) { .nav-hint { display: block; } }
-    .tog { display: flex; align-items: center; gap: .4rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 50px; padding: .4rem .9rem; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: .8rem; color: var(--t2); font-weight: 500; transition: all .2s; }
-    .tog:hover { border-color: var(--accent); color: var(--accent); }
+    .logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--t1); font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; }
+    .logo span { color: var(--accent); }
+    .tog { background: var(--surface2); border: 1px solid var(--border); border-radius: 50px; padding: .4rem .9rem; cursor: pointer; font-size: .8rem; color: var(--t2); font-weight: 500; }
 
-    .hero { max-width: 800px; margin: 0 auto; padding: 5rem 1.5rem 3rem; text-align: center; }
-    .badge { display: inline-flex; align-items: center; gap: .4rem; background: var(--accent2); color: var(--atxt); font-size: .75rem; font-weight: 600; padding: .35rem 1rem; border-radius: 50px; margin-bottom: 1.5rem; letter-spacing: .03em; text-transform: uppercase; }
-    h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 400; line-height: 1.15; letter-spacing: -.03em; margin-bottom: 1rem; }
+    .hero { max-width: 800px; margin: 0 auto; padding: 4rem 1.5rem 2rem; text-align: center; }
+    h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 400; line-height: 1.2; margin-bottom: 1.5rem; }
     h1 em { font-style: italic; color: var(--accent); font-weight: 600; }
-    .hero p { font-size: 1rem; color: var(--t2); max-width: 540px; margin: 0 auto 2.5rem; font-weight: 300; line-height: 1.7; }
 
     .sw { max-width: 650px; margin: 0 auto; }
-    .sb { display: flex; align-items: center; background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: .4rem .4rem .4rem 1.2rem; box-shadow: var(--shadow); gap: .6rem; transition: all .2s; }
-    .sb:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
-    .sb svg { color: var(--t3); flex-shrink: 0; }
+    .sb { display: flex; align-items: center; background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: .4rem .4rem .4rem 1.2rem; box-shadow: var(--shadow); gap: .6rem; }
     #q { flex: 1; border: none; outline: none; background: transparent; font-family: 'Outfit', sans-serif; font-size: .95rem; color: var(--t1); padding: .7rem 0; }
-    #q::placeholder { color: var(--t3); }
-    .sbtn { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .7rem 1.6rem; font-family: 'Outfit', sans-serif; font-size: .9rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all .15s; flex-shrink: 0; }
-    .sbtn:hover { opacity: .95; transform: translateY(-1px); }
-    .sbtn:active { transform: translateY(1px); }
+    .sbtn { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .7rem 1.6rem; font-size: .9rem; font-weight: 500; cursor: pointer; }
     
-    .chips { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1.2rem; }
-    .chip { background: var(--surface); border: 1px solid var(--border); color: var(--t2); font-size: .78rem; padding: .35rem .85rem; border-radius: 50px; cursor: pointer; transition: all .2s; font-weight: 400; }
-    .chip:hover { background: var(--accent2); color: var(--atxt); border-color: var(--accent); }
+    .cat-bar { display: flex; justify-content: center; gap: .5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cat-btn { background: var(--surface); border: 1px solid var(--border); color: var(--t2); padding: .5rem 1rem; border-radius: 8px; font-size: .85rem; cursor: pointer; font-weight: 500; }
+    .cat-btn.active, .cat-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
     .st { max-width: 700px; margin: 2rem auto; padding: 0 1.5rem; text-align: center; display: none; }
     .st.on { display: block; }
     .errtxt { color: #ef4444; font-size: .95rem; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); }
 
-    .res { max-width: 760px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; display: none; }
-    .res.on { display: block; animation: up .4s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
+    .res-list { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
     .ch { padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 1.2rem; background: linear-gradient(to bottom, var(--surface), var(--bg)); }
-    .ctitle { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 600; line-height: 1.3; color: var(--t1); }
-    .cbadge { background: var(--accent); color: #fff; font-size: .75rem; font-weight: 600; padding: .35rem .85rem; border-radius: 8px; white-space: nowrap; flex-shrink: 0; letter-spacing: 0.02em; }
-    .cb { padding: 1.8rem; display: flex; flex-direction: column; gap: 1.5rem; }
-
-    .lblock { background: var(--surface2); border-left: 4px solid var(--t2); border-radius: 0 10px 10px 0; padding: 1.2rem 1.5rem; }
-    .blabel { font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t3); margin-bottom: .6rem; }
-    .ltext { font-family: 'Playfair Display', serif; font-size: 1.05rem; line-height: 1.8; color: var(--t2); font-style: italic; }
-
-    .eblock { background: var(--accent2); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0; padding: 1.2rem 1.5rem; }
+    .ctitle { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 600; color: var(--t1); }
+    .cbadge { background: var(--accent); color: #fff; font-size: .75rem; font-weight: 600; padding: .35rem .85rem; border-radius: 8px; text-transform: uppercase; }
+    
+    .cb { padding: 1.8rem; display: flex; flex-direction: column; gap: 1.8rem; }
+    .lblock { background: var(--surface2); border-left: 4px solid var(--t2); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; }
+    .eblock { background: var(--accent2); border-left: 4px solid var(--accent); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; }
+    .blabel { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t3); margin-bottom: .5rem; }
     .eblock .blabel { color: var(--accent); }
-    .etext { font-size: 1rem; line-height: 1.75; color: var(--t1); font-weight: 400; }
-    .ctx { font-size: .85rem; color: var(--t3); padding: 0 .2rem; font-style: italic; display: flex; align-items: center; gap: .4rem; }
+    .ltext { font-family: 'Playfair Display', serif; font-size: 1rem; line-height: 1.7; color: var(--t2); font-style: italic; }
+    .etext { font-size: .95rem; line-height: 1.7; color: var(--t1); }
+    
+    /* Precedents Section Setup */
+    .jblock { background: var(--jbg); border: 1px dashed var(--jborder); padding: 1.2rem; border-radius: 12px; }
+    .jblock .blabel { color: var(--jtxt); opacity: 0.9; }
+    .j-item { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.06); }
+    .j-item:first-child { margin-top: .5rem; padding-top: 0; border-top: none; }
+    .j-cite { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; color: var(--t1); margin-bottom: .25rem; }
+    .j-rule { font-size: .9rem; line-height: 1.6; color: var(--t2); }
 
-    .tbar { border-top: 1px solid var(--border); padding: 1.2rem 1.8rem; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; background: var(--surface); }
-    .tlbl { font-size: .85rem; color: var(--t2); font-weight: 500; }
-    .tbtn { background: var(--surface2); border: 1px solid var(--border); color: var(--t2); font-family: 'Outfit', sans-serif; font-size: .85rem; font-weight: 500; padding: .45rem 1.1rem; border-radius: 8px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: .3rem; }
-    .tbtn:hover { background: var(--accent2); color: var(--atxt); border-color: var(--accent); }
+    /* Next Steps Protocols */
+    .sblock { background: var(--sbg); border: 1px dashed var(--sborder); padding: 1.2rem; border-radius: 12px; }
+    .sblock .blabel { color: var(--stxt); opacity: 0.9; }
+    .s-list { margin-top: .6rem; padding-left: 1.2rem; display: flex; flex-direction: column; gap: .6rem; }
+    .s-item { font-size: .92rem; line-height: 1.6; color: var(--t1); }
+    .s-item strong { color: var(--stxt); font-weight: 500; }
+
+    .tbar { border-top: 1px solid var(--border); padding: 1rem 1.8rem; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; background: var(--surface); }
+    .tlbl { font-size: .8rem; color: var(--t2); }
+    .tbtn { background: var(--surface2); border: 1px solid var(--border); color: var(--t2); font-size: .8rem; font-weight: 500; padding: .4rem .9rem; border-radius: 6px; cursor: pointer; }
     .tbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
     .tlwrap { padding: 0 1.8rem 1.8rem; display: none; }
-    .tlwrap.on { display: block; animation: up .3s ease; }
-    .tlcard { background: var(--gbg); border: 1px solid var(--gbd); border-radius: 12px; padding: 1.2rem 1.5rem; }
-    .tlcard .blabel { color: var(--gbd); filter: brightness(0.7); }
-    .tltext { font-size: 1rem; line-height: 1.8; color: var(--t1); }
-
-    .disc { margin-top: 1.2rem; display: flex; gap: .6rem; align-items: flex-start; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.2rem; font-size: .8rem; color: var(--t2); line-height: 1.5; }
-    .disc span:first-child { font-size: 1.1rem; }
-
-    .mission { border-top: 1px solid var(--border); padding: 5rem 1.5rem; text-align: center; background: var(--surface); }
-    .mi { max-width: 620px; margin: 0 auto; }
-    .mi h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 500; margin-bottom: 1rem; color: var(--t1); }
-    .mi p { font-size: .95rem; color: var(--t2); line-height: 1.85; font-weight: 300; }
-    .mi p+p { margin-top: 1rem; }
-
-    footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: .8rem; color: var(--t3); background: var(--bg); }
-
-    @media(max-width: 540px) { nav { padding: 0 1rem; } .hero { padding: 3.5rem 1rem 2rem; } .ch { flex-direction: column; align-items: flex-start; gap: .6rem; } .res, .st { padding-left: 1rem; padding-right: 1rem; } }
+    .tlwrap.on { display: block; }
+    .tlcard { background: var(--surface2); border-left: 4px solid #10b981; border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; }
+    .tltext { font-size: .95rem; line-height: 1.7; color: var(--t1); }
+    
+    .loading { text-align: center; color: var(--t3); padding: 2rem; font-size: 1rem; display: none; }
+    .loading.on { display: block; }
   </style>
 </head>
 <body>
 
 <nav>
-  <a class="logo" href="#">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 3v19M5 10l7-7 7 7"/><path d="M3 17h4l2 3h6l2-3h4"/>
-    </svg>
-    <span class="logo-name">Nyaya<span>Decoder</span></span>
-  </a>
-  <div class="nav-r">
-    <span class="nav-hint">Empowering Innocent Men with Absolute Clarity</span>
-    <button class="tog" onclick="toggleTheme()" aria-label="Toggle theme">
-      <span id="tIco">🌙</span><span id="tLbl">Dark</span>
-    </button>
-  </div>
+  <a class="logo" href="#">Nyaya<span>Decoder</span></a>
+  <button class="tog" onclick="toggleTheme()">🌙 Dark Mode</button>
 </nav>
 
 <section class="hero">
-  <div class="badge">⚖️ Statutory Protection & Legal Awareness</div>
-  <h1>Know Your Rights.<br><em>Counter</em> False Allegations.</h1>
-  <p>Instantly clear up complex legal terminology. Search any critical section across the old codes and the newly enforced Bharatiya Nyaya Sanhita.</p>
-
+  <h1>Statute Analyzer & <em>Defense Precedents</em> Portal</h1>
   <div class="sw">
     <div class="sb">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input type="text" id="q" placeholder="e.g., Section 498A IPC, BNS Section 85, False complaint protection..." onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off" spellcheck="false" />
-      <button class="sbtn" onclick="doSearch()">Search</button>
+      <input type="text" id="q" placeholder="Type sections (e.g., '498A', 'BNS 85', 'Maintenance')..." onkeyup="handleSearch()" autocomplete="off" />
+      <button class="sbtn" onclick="handleSearch()">Search</button>
     </div>
-    <div class="chips">
-      <span class="chip" onclick="fill('Section 498A IPC')">498A IPC (Cruelty)</span>
-      <span class="chip" onclick="fill('BNS Section 85')">BNS Section 85</span>
-      <span class="chip" onclick="fill('POCSO Act Section 22')">POCSO Sec 22 (False Cases)</span>
-      <span class="chip" onclick="fill('Dowry Prohibition Act Section 3')">Dowry Act Sec 3</span>
-      <span class="chip" onclick="fill('Domestic Violence Act Protection')">DV Act Safeguards</span>
-      <span class="chip" onclick="fill('Section 125 CrPC')">Sec 125 CrPC (Maintenance)</span>
+    <div class="cat-bar">
+      <button class="cat-btn active" id="cat-all" onclick="filterCategory('all')">All Statutes</button>
+      <button class="cat-btn" id="cat-family" onclick="filterCategory('family-court')">Family & Matrimonial</button>
     </div>
   </div>
 </section>
+
+<div class="loading" id="loader">Syncing legal defense nodes...</div>
 
 <div class="st" id="er">
-  <p class="errtxt" id="erMsg"></p>
+  <p class="errtxt" id="erMsg">No regulations match your framework query.</p>
 </div>
 
-<section class="res" id="res">
-  <div class="card">
-    <div class="ch">
-      <div class="ctitle" id="rTitle"></div>
-      <div class="cbadge" id="rBadge"></div>
-    </div>
-    <div class="cb">
-      <div class="lblock">
-        <div class="blabel">Actual Bare Act Text</div>
-        <div class="ltext" id="rLaw"></div>
-      </div>
-      <div class="eblock">
-        <div class="blabel">Plain English Meaning</div>
-        <div class="etext" id="rExp"></div>
-      </div>
-      <div class="ctx" id="rCtx"></div>
-    </div>
-    <div class="tbar">
-      <span class="tlbl">Translate explanation with contextual accuracy:</span>
-      <button class="tbtn" id="btnHi" onclick="showTranslation('hi')">🇮🇳 &nbsp;Hindi (हिंदी)</button>
-      <button class="tbtn" id="btnMr" onclick="showTranslation('mr')">🟠 &nbsp;Marathi (मराठी)</button>
-    </div>
-    <div class="tlwrap" id="tlWrap">
-      <div class="tlcard">
-        <div class="blabel" id="tlLbl"></div>
-        <div class="tltext" id="tlText"></div>
-      </div>
-    </div>
-  </div>
-  <div class="disc">
-    <span>⚠️</span>
-    <span><strong>Legal Disclaimer:</strong> This portal offers public information compiled directly from the Indian Penal Code, Criminal Procedure Code, and Bharatiya Nyaya Sanhita. It does not constitute formal legal counsel. If you are confronting malicious legal disputes or false litigation, immediately engage a qualified defense advocate.</span>
-  </div>
-</section>
-
-<section class="mission">
-  <div class="mi">
-    <h2>Why This Framework Exists</h2>
-    <p>Navigating structural gender imbalances in standard procedural laws leaves many innocent men highly vulnerable. Complex legal jargon can act as a barrier to understanding basic statutory shields.</p>
-    <p>This localized database resolves this asymmetry by presenting raw statutory provisions right alongside actionable plain-language analysis, ensuring a balanced, precise understanding of your rights.</p>
-  </div>
-</section>
-
-<footer>
-  &copy; 2026 Nyaya Decoder &nbsp;&middot;&nbsp; Designed to demystify Indian law for citizens under stress.
-</footer>
+<section class="res-list" id="resultsContainer"></section>
 
 <script>
-  // Robust Client-Side Legal Database with true Contextual Translations
-  const LEGAL_DATABASE = [
-    {
-      id: "498a",
-      keywords: ["498a", "ipc 498a", "cruelty", "husband", "relative", "harassment"],
-      lawTitle: "Section 498A of the Indian Penal Code (IPC)",
-      section: "Section 498A IPC",
-      actualText: "Husband or relative of husband of a woman subjecting her to cruelty.—Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine.",
-      simpleExplanation: "This provision penalizes a husband or his family members if they subject the wife to physical or psychological cruelty. It is a non-bailable offense. Note: In malicious or staged cases, Supreme Court guidelines (such as Arnesh Kumar v. State of Bihar) mandate that police cannot arbitrarily arrest you or your family without primary verification and issuing a Section 41A notice first.",
-      context: "Supreme Court mandates a strict check on automatic arrests under this section to avoid misuse.",
-      translations: {
-        hi: {
-          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
-          text: "यह धारा पति या उसके रिश्तेदारों द्वारा पत्नी के प्रति क्रूरता (शारीरिक या मानसिक उत्पीड़न) को दंडित करती है। यह गैर-जमानती है। लेकिन ध्यान दें: झूठे मामलों से सुरक्षा के लिए, सुप्रीम कोर्ट (अर्णेश कुमार बनाम बिहार राज्य) के सख्त निर्देश हैं कि पुलिस बिना प्राथमिक जांच या धारा 41A के नोटिस के आपको या आपके परिवार को सीधे गिरफ्तार नहीं कर सकती।"
-        },
-        mr: {
-          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
-          text: "या कलमांतर्गत पती किंवा त्याच्या नातेवाईकांनी पत्नीचा शारीरिक किंवा मानसिक छळ केल्यास शिक्षेची तरतूद आहे. हा गुन्हा अजामीनपात्र आहे. परंतु महत्त्वाची बाब म्हणजे: खोट्या प्रकरणांमध्ये संरक्षण मिळवण्यासाठी, सर्वोच्च न्यायालयाने (अर्णेश कुमार वि. बिहार राज्य) आदेश दिला आहे की, प्राथमिक चौकशी केल्याशिवाय आणि कलम 41A ची नोटीस दिल्याशिवाय पोलीस थेट अटक करू शकत नाहीत."
-        }
-      }
-    },
-    {
-      id: "bns85",
-      keywords: ["bns 85", "section 85", "bns", "cruelty bns", "new law"],
-      lawTitle: "Section 85 of the Bharatiya Nyaya Sanhita (BNS), 2023",
-      section: "Section 85 BNS",
-      actualText: "Husband or relative of husband of a woman subjecting her to cruelty.—Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine.",
-      simpleExplanation: "This is the newly enacted equivalent of the classic Section 498A IPC under the revised criminal codes. The fundamental components of the offense remain identical to 498A IPC, and standard protective procedural guidelines set by high courts against arbitrary arrests continue to apply to this new section.",
-      context: "Replaces Section 498A IPC starting July 2024. All supreme court safeguards against misuse apply here completely.",
-      translations: {
-        hi: {
-          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
-          text: "यह नए कानूनों (BNS) के तहत पुरानी धारा 498A IPC का नया रूप है। इसके तहत परिभाषा और सजा वही है। इसके दुरुपयोग को रोकने के लिए सुप्रीम कोर्ट द्वारा बनाए गए सभी सुरक्षा नियम (जैसे कि बिना जांच मनमानी गिरफ्तारी पर रोक) इस नई धारा पर भी पूरी तरह लागू होते हैं।"
-        },
-        mr: {
-          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
-          text: "नवीन फौजदारी कायद्यानुसार (BNS) हे जुन्या कलम 498A IPC चे नवे रूप आहे. गुन्ह्याचे स्वरूप आणि शिक्षा पूर्वीसारखीच आहे. या कायद्याचा गैरवापर रोखण्यासाठी सर्वोच्च न्यायालयाने दिलेले सर्व मार्गदर्शक तत्वे (उदा. चौकशीशिवाय थेट अटकेला बंदी) या नवीन कलमालाही लागू आहेत."
-        }
-      }
-    },
-    {
-      id: "pocso22",
-      keywords: ["pocso", "pocso 22", "false accusation", "false complaint", "pocso false"],
-      lawTitle: "Section 22 of the POCSO Act, 2012",
-      section: "Section 22 POCSO",
-      actualText: "Punishment for false complaint or false information.—Where a person makes a false complaint or provides false information against any person solely with the intention to humiliate, extort, threaten or defame him... such person shall be punished with imprisonment which may extend to six months or with fine or with both.",
-      simpleExplanation: "If an individual maliciously files a totally fabricated case under the POCSO Act against a man solely to blackmail, defame, or extort money, that accuser can be criminally prosecuted under this section and sentenced to prison.",
-      context: "A direct statutory defense shield against extortion or manufactured cases involving minors.",
-      translations: {
-        hi: {
-          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
-          text: "यदि कोई व्यक्ति किसी निर्दोष पुरुष को केवल अपमानित करने, पैसे वसूलने (ब्लैकमेल), या बदनाम करने के इरादे से पॉक्सो (POCSO) एक्ट के तहत झूठी शिकायत दर्ज कराता है, तो इस धारा के तहत उस झूठी शिकायत करने वाली महिला या व्यक्ति को 6 महीने तक की जेल या जुर्माना हो सकता है।"
-        },
-        mr: {
-          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
-          text: "जर एखाद्या व्यक्तीने केवळ पैसे उकळण्याच्या (ब्लॅकमेल), अपमान करण्याच्या किंवा बदनाम करण्याच्या हेतूने पॉक्सो (POCSO) कायद्यांतर्गत खोटा गुन्हा दाखल केला, तर या कलमानुसार खोटा गुन्हा दाखल करणाऱ्या व्यक्तीला ६ महिन्यांपर्यंतची जेल किंवा दंडाची शिक्षा होऊ शकते."
-        }
-      }
-    },
-    {
-      id: "dowry3",
-      keywords: ["dowry", "dowry 3", "dowry prohibition", "giving dowry"],
-      lawTitle: "Section 3 of the Dowry Prohibition Act, 1961",
-      section: "Section 3 Dowry Act",
-      actualText: "Penalty for giving or taking dowry.—If any person, after the commencement of this Act, gives or takes or abets the giving or taking of dowry, he shall be punishable with imprisonment for a term which shall not be less than five years, and with fine...",
-      simpleExplanation: "This law penalizes both giving and taking dowry. In cases where a wife's family files a false case alleging dowry extraction, if they record in court that they 'gave' dowry willingly, this section theoretically exposes the accuser's family to legal penalties as well, serving as an effective cross-check against exaggerations.",
-      context: "The law treats the giver and taker of dowry with equal strictness, which acts as a deterrent against falsified financial statements.",
-      translations: {
-        hi: {
-          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
-          text: "यह कानून दहेज देने और लेने दोनों को अपराध मानता है। यदि कोई पक्ष कोर्ट में झूठा केस दर्ज कराता है और यह दावा करता है कि उसने शादी में भारी दहेज 'दिया' था, तो कानूनी तौर पर दहेज देने के जुर्म में शिकायतकर्ता का परिवार भी इस धारा के तहत कार्रवाई के दायरे में आ सकता है।"
-        },
-        mr: {
-          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
-          text: "हा कायदा हुंडा देणे आणि घेणे या दोन्ही गोष्टींना गुन्हा मानतो. जर सासरच्या छळाचा खोटा गुन्हा दाखल करताना वधू पक्षाने कोर्टात कबूल केले की त्यांनी हुंडा 'दिला' होता, तर या कलमाचा वापर करून हुंडा देणाऱ्यांवरही कायदेशीर कारवाईची मागणी करता येऊ शकते."
-        }
-      }
-    },
-    {
-      id: "dvact",
-      keywords: ["dv act", "domestic violence", "bail", "protection", "false dv"],
-      lawTitle: "The Protection of Women from Domestic Violence Act, 2005 (Safeguards)",
-      section: "DV Act Overview",
-      actualText: "Provisions for monetary reliefs, residence orders, and protection orders to aggrieved persons under Sections 18, 19, and 20.",
-      simpleExplanation: "The DV Act is a civil remedy, meaning standard complaints under it do not lead to instant criminal arrest. Husbands cannot be thrown out of their ancestral homes without extensive evidence. Courts heavily scrutinize complaints where a wife files for maintenance simultaneously across multiple forums (DV, 125 CrPC, and HMA).",
-      context: "Purely civil in nature initially. No immediate arrest can take place under a basic DV application.",
-      translations: {
-        hi: {
-          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
-          text: "घरेलू हिंसा अधिनियम (DV Act) एक दीवानी (Civil) कानून है, आपराधिक नहीं। इसलिए इसमें शिकायत दर्ज होते ही कोई तुरंत गिरफ्तारी नहीं होती। कोर्ट अब इस बात पर सख्त हैं कि पत्नियां एक ही समय में कई अलग-अलग कोर्ट में (जैसे DV Act, 125 CrPC और तलाक केस में) अलग-अलग गुजारा भत्ते की मांग नहीं कर सकतीं।"
-        },
-        mr: {
-          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
-          text: "कौटुंबिक हिंसाचार कायदा (DV Act) हा मूळतः दिवाणी (Civil) स्वरूपाचा आहे, फौजदारी नाही. त्यामुळे तक्रार होताच लगेच अटक होत नाही. एकाच वेळी अनेक न्यायालयांमध्ये (DV Act, कलम १२५ आणि घटस्फोट खटला) वेगवेगळ्या देखभालीच्या (पोटगी) मागण्या करण्याच्या प्रवृत्तीला कोर्ट आता चाप लावत आहे."
-        }
-      }
-    },
-    {
-      id: "crpc125",
-      keywords: ["125", "crpc 125", "maintenance", "poti", "wife earning", "bnss 144"],
-      lawTitle: "Section 125 of the Criminal Procedure Code (CrPC) / Sec 144 BNSS",
-      section: "Section 125 CrPC",
-      actualText: "Order for maintenance of wives, children and parents.—If any person having sufficient means neglects or refuses to maintain his wife, unable to maintain herself... a Magistrate may order monthly maintenance.",
-      simpleExplanation: "While this law secures support for a dependent wife, if she is highly qualified, voluntarily resigns from work to sit idle, or is living in adultery, the husband cannot be legally forced to pay maintenance. The husband must present proof of her income, qualifications, or desertion to successfully defend his position.",
-      context: "Earning or highly qualified wives are legally ineligible for financial maintenance if they willfully exit jobs.",
-      translations: {
-        hi: {
-          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
-          text: "यह धारा पत्नी को गुजारा भत्ता (खर्चा) देने का प्रावधान करती है। लेकिन, यदि पत्नी अत्यधिक शिक्षित है, अपनी मर्जी से नौकरी छोड़कर बैठी है, या बिना किसी ठोस कारण के अलग रह रही है, तो पति उसे गुजारा भत्ता देने से इनकार कर सकता है। इसके लिए पति को कोर्ट में उसकी डिग्री या कमाई के सबूत पेश करने होंगे।"
-        },
-        mr: {
-          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
-          text: "हे कलम पत्नीला पोटगी देण्याबाबत आहे. तथापि, जर पत्नी उच्चशिक्षित असेल, स्वतःहून नोकरी सोडली असेल, किंवा कोणत्याही ठोस कारणाशिवाय पतीपासून वेगळी राहत असेल, तर पती पोटगी देण्यास नकार देऊ शकतो. पतीला न्यायालयात तिच्या शिक्षणाचे किंवा उत्पन्नाचे पुरावे सादर करावे लागतील."
-        }
-      }
-    }
-  ];
-
-  let activeLaw = null;
+  let DB = [];
+  let currentCategory = 'all';
   let theme = 'light';
 
-  function toggleTheme() {
-    theme = theme === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    document.getElementById('tIco').textContent = theme === 'light' ? '🌙' : '☀️';
-    document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark' : 'Light';
-  }
-
-  function fill(text) {
-    document.getElementById('q').value = text;
-    doSearch();
-  }
-
-  function resetUI() {
-    document.getElementById('er').classList.remove('on');
-    document.getElementById('res').classList.remove('on');
-    document.getElementById('tlWrap').classList.remove('on');
-    document.getElementById('btnHi').classList.remove('active');
-    document.getElementById('btnMr').classList.remove('active');
-  }
-
-  function doSearch() {
-    const rawQuery = document.getElementById('q').value.trim().toLowerCase();
-    if (!rawQuery) return;
-
-    resetUI();
-
-    // Smart Client Side Fuzzy Finder
-    const match = LEGAL_DATABASE.find(item => {
-      return item.keywords.some(keyword => rawQuery.includes(keyword)) || 
-             item.section.toLowerCase().includes(rawQuery) || 
-             item.lawTitle.toLowerCase().includes(rawQuery);
-    });
-
-    if (match) {
-      activeLaw = match;
-      document.getElementById('rTitle').textContent = match.lawTitle;
-      document.getElementById('rBadge').textContent = match.section;
-      document.getElementById('rLaw').textContent = match.actualText;
-      document.getElementById('rExp').textContent = match.simpleExplanation;
-      document.getElementById('rCtx').innerHTML = match.context ? '📌 <strong>Crucial Defense Note:</strong> ' + match.context : '';
-      
-      document.getElementById('res').classList.add('on');
-      document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      document.getElementById('erMsg').innerHTML = `<strong>No direct matches found for "${document.getElementById('q').value}".</strong><br><span style="font-size:0.85rem; color:var(--t2);">Try searching for specific targeted keywords like '498A', 'BNS 85', '125 CrPC', 'POCSO' or 'Dowry'.</span>`;
+  async function initDatabase() {
+    const loader = document.getElementById('loader');
+    loader.classList.add('on');
+    try {
+      const response = await fetch('laws.json');
+      DB = await response.json();
+      renderCards(DB);
+    } catch (err) {
       document.getElementById('er').classList.add('on');
+      document.getElementById('erMsg').textContent = "Failed to synchronize database. Verify laws.json structure.";
+    } finally {
+      loader.classList.remove('on');
     }
   }
 
-  function showTranslation(langCode) {
-    if (!activeLaw || !activeLaw.translations[langCode]) return;
+  function renderCards(data) {
+    const container = document.getElementById('resultsContainer');
+    const errorBox = document.getElementById('er');
+    container.innerHTML = '';
+    
+    if (data.length === 0) {
+      errorBox.classList.add('on');
+      return;
+    }
+    errorBox.classList.remove('on');
 
-    const btnHi = document.getElementById('btnHi');
-    const btnMr = document.getElementById('btnMr');
-    const wrap = document.getElementById('tlWrap');
-    const lbl = document.getElementById('tlLbl');
-    const txt = document.getElementById('tlText');
+    data.forEach((law) => {
+      // Formulate Judgments HTML block dynamically
+      let judgmentsHTML = '';
+      if (law.favorableJudgments && law.favorableJudgments.length > 0) {
+        judgmentsHTML = `
+          <div class="jblock">
+            <div class="blabel">⚖️ Precedents / Judgments (Favorable to Husband)</div>
+            <div>
+              ${law.favorableJudgments.map(j => `
+                <div class="j-item">
+                  <div class="j-cite">${j.citation}</div>
+                  <div class="j-rule">${j.ruling}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
 
-    const targetBtn = (langCode === 'hi') ? btnHi : btnMr;
-    const alternateBtn = (langCode === 'hi') ? btnMr : btnHi;
+      // Formulate Next Steps HTML list block dynamically
+      let stepsHTML = '';
+      if (law.immediateActionPlan && law.immediateActionPlan.length > 0) {
+        stepsHTML = `
+          <div class="sblock">
+            <div class="blabel">🚨 Immediate Action Protocol (Next Steps)</div>
+            <ol class="s-list">
+              ${law.immediateActionPlan.map(step => `
+                <li class="s-item">${step}</li>
+              `).join('')}
+            </ol>
+          </div>
+        `;
+      }
 
-    // Toggle logic if clicking an already active translation button
-    if (targetBtn.classList.contains('active')) {
-      targetBtn.classList.remove('active');
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="ch">
+          <div class="ctitle">${law.lawTitle}</div>
+          <div class="cbadge">${law.section}</div>
+        </div>
+        <div class="cb">
+          <div class="lblock">
+            <div class="blabel">Statutory Provisions (Bare Act)</div>
+            <div class="ltext">${law.actualText}</div>
+          </div>
+          <div class="eblock">
+            <div class="blabel">Plain English Meaning</div>
+            <div class="etext">${law.simpleExplanation}</div>
+          </div>
+          
+          ${judgmentsHTML}
+          ${stepsHTML}
+        </div>
+        <div class="tbar">
+          <span class="tlbl">Contextual Translation:</span>
+          <button class="tbtn" onclick="toggleLanguage('${law.id}', 'hi', this)">Hindi (हिंदी)</button>
+          <button class="tbtn" onclick="toggleLanguage('${law.id}', 'mr', this)">Marathi (मराठी)</button>
+        </div>
+        <div class="tlwrap" id="tl-${law.id}">
+          <div class="tlcard">
+            <div class="tltext" id="tl-txt-${law.id}"></div>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function handleSearch() {
+    const query = document.getElementById('q').value.toLowerCase().trim();
+    const filtered = DB.filter(item => {
+      const matchesCategory = (currentCategory === 'all' || item.category === currentCategory);
+      const matchesQuery = !query || 
+                           item.keywords.some(k => query.includes(k) || k.includes(query)) ||
+                           item.lawTitle.toLowerCase().includes(query);
+      return matchesCategory && matchesQuery;
+    });
+    renderCards(filtered);
+  }
+
+  function filterCategory(cat) {
+    currentCategory = cat;
+    document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`cat-${cat.split('-')[1] || cat}`).classList.add('active');
+    handleSearch();
+  }
+
+  function toggleLanguage(id, lang, btn) {
+    const wrap = document.getElementById(`tl-${id}`);
+    const txt = document.getElementById(`tl-txt-${id}`);
+    const lawItem = DB.find(item => item.id === id);
+
+    if (btn.classList.contains('active')) {
+      btn.classList.remove('active');
       wrap.classList.remove('on');
       return;
     }
 
-    targetBtn.classList.add('active');
-    alternateBtn.classList.remove('active');
-
-    lbl.textContent = activeLaw.translations[langCode].label;
-    txt.textContent = activeLaw.translations[langCode].text;
+    btn.parentElement.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    txt.textContent = lawItem.translations[lang].text;
     wrap.classList.add('on');
   }
+
+  function toggleTheme() {
+    theme = theme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelector('.tog').textContent = theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+  }
+
+  window.onload = initDatabase;
 </script>
 </body>
 </html>
