@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Law Made Simple | Indian Law, Explained</title>
+  <meta name="description" content="Search any Indian law — BNS, BNSS, IPC, CrPC, Family Law and more — with plain language explanations in English, Hindi and Marathi." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #f5f6fa;
+      --surface:   #ffffff;
+      --surface2:  #eef0f7;
+      --border:    #dde1ee;
+      --t1:        #0c1a2e;
+      --t2:        #4a5568;
+      --t3:        #8a97a8;
+      --accent:    #1a42b6;
+      --accent2:   #e8edf9;
+      --atxt:      #1a42b6;
+      --gbg:       #f0faf4;
+      --gbd:       #a0d9b8;
+      --shadow:    0 2px 16px rgba(20,40,100,0.07);
+    }
+    [data-theme="dark"] {
+      --bg:        #0b1120;
+      --surface:   #141f35;
+      --surface2:  #1a2840;
+      --border:    #243352;
+      --t1:        #e8edf7;
+      --t2:        #8a9bbf;
+      --t3:        #4a5e80;
+      --accent:    #4a7aff;
+      --accent2:   #162045;
+      --atxt:      #7aa0ff;
+      --gbg:       #0d2218;
+      --gbd:       #2a6645;
+      --shadow:    0 2px 24px rgba(0,0,0,0.35);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;transition:background .3s,color .3s}
+
+    nav{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:62px}
+    .logo{display:flex;align-items:center;gap:.55rem;text-decoration:none;color:var(--t1)}
+    .logo-name{font-family:'Playfair Display',serif;font-size:1.22rem;font-weight:600;letter-spacing:-.02em}
+    .logo-name span{color:var(--accent)}
+    .nav-r{display:flex;align-items:center;gap:1rem}
+    .nav-hint{font-size:.72rem;color:var(--t3);font-weight:300;display:none}
+    @media(min-width:560px){.nav-hint{display:block}}
+    .tog{display:flex;align-items:center;gap:.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:.32rem .75rem;cursor:pointer;font-family:'Outfit',sans-serif;font-size:.78rem;color:var(--t2);transition:border-color .2s,color .2s}
+    .tog:hover{border-color:var(--accent);color:var(--accent)}
+
+    .hero{max-width:740px;margin:0 auto;padding:4.5rem 1.5rem 2.5rem;text-align:center}
+    .badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--accent2);color:var(--atxt);font-size:.72rem;font-weight:500;padding:.28rem .85rem;border-radius:50px;margin-bottom:1.4rem;letter-spacing:.03em}
+    h1{font-family:'Playfair Display',serif;font-size:clamp(1.95rem,5vw,3.1rem);font-weight:400;line-height:1.2;letter-spacing:-.03em;margin-bottom:.9rem}
+    h1 em{font-style:italic;color:var(--accent)}
+    .hero p{font-size:.95rem;color:var(--t2);max-width:500px;margin:0 auto 2.2rem;font-weight:300;line-height:1.7}
+
+    .sw{max-width:620px;margin:0 auto}
+    .sb{display:flex;align-items:center;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:.3rem .3rem .3rem 1.1rem;box-shadow:var(--shadow);gap:.5rem;transition:border-color .2s,box-shadow .2s}
+    .sb:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,66,182,.08)}
+    .sb svg{color:var(--t3);flex-shrink:0}
+    #q{flex:1;border:none;outline:none;background:transparent;font-family:'Outfit',sans-serif;font-size:.92rem;color:var(--t1);padding:.65rem 0}
+    #q::placeholder{color:var(--t3)}
+    .sbtn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:.65rem 1.35rem;font-family:'Outfit',sans-serif;font-size:.87rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s,transform .1s;flex-shrink:0}
+    .sbtn:hover{opacity:.9}
+    .sbtn:active{transform:scale(.97)}
+    .sbtn:disabled{opacity:.5;cursor:not-allowed}
+    .chips{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-top:.9rem}
+    .chip{background:var(--surface);border:1px solid var(--border);color:var(--t2);font-size:.72rem;padding:.28rem .75rem;border-radius:50px;cursor:pointer;transition:all .2s}
+    .chip:hover{background:var(--accent2);color:var(--atxt);border-color:var(--accent)}
+
+    .st{max-width:680px;margin:2rem auto;padding:0 1.5rem;text-align:center;display:none}
+    .st.on{display:block}
+    .spin{width:34px;height:34px;margin:0 auto 1rem;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .st p{font-size:.85rem;color:var(--t3)}
+    .errtxt{color:#d94444;font-size:.9rem}
+
+    .res{max-width:740px;margin:0 auto;padding:1.5rem 1.5rem 5rem;display:none}
+    .res.on{display:block;animation:up .4s ease}
+    @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+    .ch{padding:1.4rem 1.6rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+    .ctitle{font-family:'Playfair Display',serif;font-size:1.38rem;font-weight:600;line-height:1.3;color:var(--t1)}
+    .cbadge{background:var(--accent2);color:var(--atxt);font-size:.72rem;font-weight:600;padding:.28rem .75rem;border-radius:7px;white-space:nowrap;flex-shrink:0}
+    .cb{padding:1.5rem 1.6rem;display:flex;flex-direction:column;gap:1.25rem}
+
+    .lblock{background:var(--accent2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:1.1rem 1.35rem}
+    .blabel{font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--atxt);margin-bottom:.55rem}
+    .ltext{font-family:'Playfair Display',serif;font-size:.95rem;line-height:1.8;color:var(--t2);font-style:italic}
+
+    .eblock{background:var(--gbg);border:1px solid var(--gbd);border-radius:8px;padding:1.1rem 1.35rem}
+    .etext{font-size:.93rem;line-height:1.75;color:var(--t1)}
+    .ctx{font-size:.8rem;color:var(--t3);padding:0 .2rem;font-style:italic}
+
+    .tbar{border-top:1px solid var(--border);padding:1rem 1.6rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+    .tlbl{font-size:.78rem;color:var(--t3);font-weight:500}
+    .tbtn{background:var(--surface2);border:1px solid var(--border);color:var(--t2);font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:500;padding:.38rem 1rem;border-radius:8px;cursor:pointer;transition:all .2s}
+    .tbtn:hover{background:var(--accent2);color:var(--atxt);border-color:var(--accent)}
+    .tbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .tbtn:disabled{opacity:.5;cursor:not-allowed}
+
+    .tlwrap{padding:0 1.6rem 1.4rem;display:none;animation:up .3s ease}
+    .tlwrap.on{display:block}
+    .tlcard{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1.1rem 1.35rem}
+    .tltext{font-size:.95rem;line-height:1.85;color:var(--t1)}
+
+    .disc{margin-top:1rem;display:flex;gap:.5rem;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-size:.73rem;color:var(--t3)}
+
+    .mission{border-top:1px solid var(--border);padding:4rem 1.5rem;text-align:center}
+    .mi{max-width:580px;margin:0 auto}
+    .mi h2{font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:400;margin-bottom:.7rem;color:var(--t1)}
+    .mi p{font-size:.88rem;color:var(--t2);line-height:1.85;font-weight:300}
+    .mi p+p{margin-top:.8rem}
+
+    footer{border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-size:.72rem;color:var(--t3)}
+
+    @media(max-width:540px){nav{padding:0 1rem}.hero{padding:2.5rem 1rem 2rem}.ch{flex-direction:column}.res,.st{padding-left:1rem;padding-right:1rem}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3v19M5 10l7-7 7 7"/><path d="M3 17h4l2 3h6l2-3h4"/>
+    </svg>
+    <span class="logo-name">Law <span>Made Simple</span></span>
+  </a>
+  <div class="nav-r">
+    <span class="nav-hint">Indian Law · Plain Language</span>
+    <button class="tog" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span id="tIco">🌙</span><span id="tLbl">Dark</span>
+    </button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badge">⚖️ &nbsp;For Every Man Who Deserves to Know His Rights</div>
+  <h1>Know the Law.<br><em>Understand</em> the Law.</h1>
+  <p>Search any Indian law — BNS, BNSS, IPC, CrPC, family law and more — and get the actual statute with a plain language explanation.</p>
+
+  <div class="sw">
+    <div class="sb">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="q" placeholder="e.g. Section 498A IPC, BNS Section 85, Domestic Violence bail rights..." onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off" spellcheck="false" />
+      <button class="sbtn" id="sBtn" onclick="doSearch()">Search</button>
+    </div>
+    <div class="chips">
+      <span class="chip" onclick="fill('Section 498A IPC')">498A IPC</span>
+      <span class="chip" onclick="fill('BNS Section 85 cruelty by husband')">BNS 85 Cruelty</span>
+      <span class="chip" onclick="fill('POCSO Act false accusation defence')">POCSO false accusation</span>
+      <span class="chip" onclick="fill('Dowry Prohibition Act Section 3')">Dowry Prohibition Act</span>
+      <span class="chip" onclick="fill('Domestic Violence Act anticipatory bail for husband')">DV Act bail rights</span>
+      <span class="chip" onclick="fill('Section 125 CrPC maintenance rights of husband')">Sec 125 CrPC</span>
+    </div>
+  </div>
+</section>
+
+<div class="st" id="ld" aria-live="polite">
+  <div class="spin" role="status"></div>
+  <p>Searching Indian law database&hellip;</p>
+</div>
+
+<div class="st" id="er" aria-live="assertive">
+  <p class="errtxt" id="erMsg"></p>
+</div>
+
+<section class="res" id="res" aria-label="Search results">
+  <div class="card">
+    <div class="ch">
+      <div class="ctitle" id="rTitle"></div>
+      <div class="cbadge" id="rBadge"></div>
+    </div>
+    <div class="cb">
+      <div class="lblock">
+        <div class="blabel">Actual Law Text</div>
+        <div class="ltext" id="rLaw"></div>
+      </div>
+      <div class="eblock">
+        <div class="blabel">Simple Explanation</div>
+        <div class="etext" id="rExp"></div>
+      </div>
+      <div class="ctx" id="rCtx"></div>
+    </div>
+    <div class="tbar">
+      <span class="tlbl">Translate explanation to:</span>
+      <button class="tbtn" id="btnHi" onclick="translate('hi','Hindi','हिंदी में सरल व्याख्या')">🇮🇳 &nbsp;Hindi</button>
+      <button class="tbtn" id="btnMr" onclick="translate('mr','Marathi','मराठीत सोपे स्पष्टीकरण')">🟠 &nbsp;Marathi</button>
+    </div>
+    <div class="tlwrap" id="tlWrap">
+      <div class="tlcard">
+        <div class="blabel" id="tlLbl"></div>
+        <div class="tltext" id="tlText"></div>
+      </div>
+    </div>
+  </div>
+  <div class="disc" role="note">
+    <span>⚠️</span>
+    <span>For informational purposes only. Not legal advice. Always consult a qualified advocate for your specific situation.</span>
+  </div>
+</section>
+
+<section class="mission">
+  <div class="mi">
+    <h2>Why Law Made Simple?</h2>
+    <p>Thousands of men in India face false accusations every year. Dense legal language keeps them from understanding their own rights — the very rights that exist to protect them.</p>
+    <p>This tool breaks down every Indian law into plain language. So any man can walk into a courtroom — or a police station — knowing exactly what the law says and what it means for him.</p>
+  </div>
+</section>
+
+<footer>
+  &copy; 2025 Law Made Simple &nbsp;&middot;&nbsp; For informational use only &nbsp;&middot;&nbsp; Not a substitute for legal counsel
+</footer>
+
+<script>
+  // ---- REPLACE THIS after deploying your Cloudflare Worker ----
+  const WORKER = 'YOUR_CLOUDFLARE_WORKER_URL';
+  // -------------------------------------------------------------
+
+  let curExp = '';
+  let curLang = '';
+  let theme = 'light';
+
+  function toggleTheme() {
+    theme = theme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('tIco').textContent = theme === 'light' ? '🌙' : '☀️';
+    document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark' : 'Light';
+  }
+
+  function fill(t) { document.getElementById('q').value = t; doSearch(); }
+
+  function show(id) { document.getElementById(id).classList.add('on'); }
+  function hide(id) { document.getElementById(id).classList.remove('on'); }
+
+  function resetUI() {
+    hide('ld'); hide('res'); hide('er');
+    document.getElementById('tlWrap').classList.remove('on');
+    document.getElementById('btnHi').classList.remove('active');
+    document.getElementById('btnMr').classList.remove('active');
+    curLang = '';
+  }
+
+  async function doSearch() {
+    const q = document.getElementById('q').value.trim();
+    if (!q) return;
+
+    resetUI();
+    show('ld');
+    document.getElementById('sBtn').disabled = true;
+    curExp = '';
+
+    try {
+      const res = await fetch(WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q })
+      });
+
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+      const data = await res.json();
+      const raw = data.text || '';
+
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (!m) throw new Error('Could not parse law response.');
+
+      const r = JSON.parse(m[0]);
+
+      document.getElementById('rTitle').textContent = r.lawTitle || q;
+      document.getElementById('rBadge').textContent = r.section || 'Reference';
+      document.getElementById('rLaw').textContent = r.actualText || 'Statutory text not available.';
+      document.getElementById('rExp').textContent = r.simpleExplanation || '';
+      document.getElementById('rCtx').textContent = r.context ? '📌 ' + r.context : '';
+
+      curExp = r.simpleExplanation || '';
+
+      hide('ld');
+      show('res');
+      document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (e) {
+      hide('ld');
+      document.getElementById('erMsg').textContent =
+        'Could not fetch result. Check connection or try a different search.';
+      show('er');
+    } finally {
+      document.getElementById('sBtn').disabled = false;
+    }
+  }
+
+  // Free Google Translate (no API key needed)
+  async function translate(code, name, label) {
+    if (!curExp) return;
+
+    const btnHi = document.getElementById('btnHi');
+    const btnMr = document.getElementById('btnMr');
+    const wrap = document.getElementById('tlWrap');
+    const lbl = document.getElementById('tlLbl');
+    const txt = document.getElementById('tlText');
+
+    const active = code === 'hi' ? btnHi : btnMr;
+    const other  = code === 'hi' ? btnMr : btnHi;
+
+    if (curLang === code) {
+      active.classList.remove('active');
+      wrap.classList.remove('on');
+      curLang = '';
+      return;
+    }
+
+    active.classList.add('active');
+    other.classList.remove('active');
+    curLang = code;
+
+    btnHi.disabled = true;
+    btnMr.disabled = true;
+
+    lbl.textContent = label;
+    txt.textContent = 'Translating…';
+    wrap.classList.add('on');
+
+    try {
+      const url =
+        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=' +
+        code + '&dt=t&q=' + encodeURIComponent(curExp);
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      // Reassemble all translated sentence chunks
+      const translated = data[0].map(chunk => chunk[0]).join('');
+      txt.textContent = translated;
+
+    } catch {
+      txt.textContent = 'Translation failed. Please try again.';
+    } finally {
+      btnHi.disabled = false;
+      btnMr.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
