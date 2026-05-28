@@ -141,48 +141,92 @@
 <section class="res-list" id="resultsContainer"></section>
 
 <script>
+  // --- Updated Local Architecture Setup ---
   let DB = [];
-  let currentCategory = 'all';
+  let curExp = '';
+  let curLang = '';
   let theme = 'light';
 
-  async function initDatabase() {
-    const loader = document.getElementById('loader');
-    loader.classList.add('on');
+  // Automatically fetch and load the central database file on window startup
+  async function initLocalDatabase() {
+    show('ld');
     try {
       const response = await fetch('laws.json');
+      if (!response.ok) throw new Error("Database file missing.");
       DB = await response.json();
-      renderCards(DB);
-    } catch (err) {
-      document.getElementById('er').classList.add('on');
-      document.getElementById('erMsg').textContent = "Failed to synchronize database. Verify laws.json structure.";
+    } catch (e) {
+      document.getElementById('erMsg').textContent = 'Error initializing laws database. Ensure laws.json is present.';
+      show('er');
     } finally {
-      loader.classList.remove('on');
+      hide('ld');
     }
   }
 
-  function renderCards(data) {
-    const container = document.getElementById('resultsContainer');
-    const errorBox = document.getElementById('er');
-    container.innerHTML = '';
-    
-    if (data.length === 0) {
-      errorBox.classList.add('on');
-      return;
-    }
-    errorBox.classList.remove('on');
+  function toggleTheme() {
+    theme = theme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('tIco').textContent = theme === 'light' ? '🌙' : '☀️';
+    document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark' : 'Light';
+  }
 
-    data.forEach((law) => {
-      // Formulate Judgments HTML block dynamically
-      let judgmentsHTML = '';
-      if (law.favorableJudgments && law.favorableJudgments.length > 0) {
-        judgmentsHTML = `
-          <div class="jblock">
-            <div class="blabel">⚖️ Precedents / Judgments (Favorable to Husband)</div>
-            <div>
-              ${law.favorableJudgments.map(j => `
-                <div class="j-item">
-                  <div class="j-cite">${j.citation}</div>
-                  <div class="j-rule">${j.ruling}</div>
+  function fill(t) { document.getElementById('q').value = t; doSearch(); }
+  function show(id) { document.getElementById(id).classList.add('on'); }
+  function hide(id) { document.getElementById(id).classList.remove('on'); }
+
+  function resetUI() {
+    hide('ld'); hide('res'); hide('er');
+    document.getElementById('tlWrap').classList.remove('on');
+    document.getElementById('btnHi').classList.remove('active');
+    document.getElementById('btnMr').classList.remove('active');
+    curLang = '';
+  }
+
+  // Pure dynamic filtering engine replacing the old Worker API call
+  function doSearch() {
+    const q = document.getElementById('q').value.toLowerCase().trim();
+    if (!q) return;
+
+    resetUI();
+    show('ld');
+    document.getElementById('sBtn').disabled = true;
+    curExp = '';
+
+    // Search matches within title, code tags, or custom metadata keywords
+    const matchedLaw = DB.find(item => 
+      item.lawTitle.toLowerCase().includes(q) || 
+      item.section.toLowerCase().includes(q) ||
+      item.keywords.some(k => q.includes(k) || k.includes(q))
+    );
+
+    setTimeout(() => {
+      if (!matchedLaw) {
+        hide('ld');
+        document.getElementById('erMsg').textContent = 'No matching statute found. Try keywords like "498A", "BNS 85", "Maintenance", or "Perjury".';
+        show('er');
+        document.getElementById('sBtn').disabled = false;
+        return;
+      }
+
+      // Render the matching record fields into the UI templates
+      document.getElementById('rTitle').textContent = matchedLaw.lawTitle;
+      document.getElementById('rBadge').textContent = matchedLaw.section;
+      document.getElementById('rLaw').textContent = matchedLaw.actualText;
+      document.getElementById('rExp').textContent = matchedLaw.simpleExplanation;
+      document.getElementById('rCtx').textContent = matchedLaw.context ? '📌 ' + matchedLaw.context : '';
+
+      curExp = matchedLaw.simpleExplanation;
+
+      // Dynamically assemble and inject Judgments if present
+      let finalDetailsHTML = '';
+      if (matchedLaw.favorableJudgments && matchedLaw.favorableJudgments.length > 0) {
+        finalDetailsHTML += `
+          <div style="margin-top:1.5rem; border-top:1px dashed var(--border); padding-top:1.2rem;">
+            <div class="blabel" style="color: #b58900;">⚖️ Landmark Precedents (Favorable to Men)</div>
+            <div style="display:flex; flex-direction:column; gap:0.9rem; margin-top:0.5rem;">
+              ${matchedLaw.favorableJudgments.map(j => `
+                <div>
+                  <strong style="font-size:0.92rem; color:var(--t1); font-family:'Playfair Display',serif;">${j.citation}</strong>
+                  <p style="font-size:0.88rem; color:var(--t2); line-height:1.6; margin-top:0.2rem;">${j.ruling}</p>
                 </div>
               `).join('')}
             </div>
@@ -190,99 +234,83 @@
         `;
       }
 
-      // Formulate Next Steps HTML list block dynamically
-      let stepsHTML = '';
-      if (law.immediateActionPlan && law.immediateActionPlan.length > 0) {
-        stepsHTML = `
-          <div class="sblock">
-            <div class="blabel">🚨 Immediate Action Protocol (Next Steps)</div>
-            <ol class="s-list">
-              ${law.immediateActionPlan.map(step => `
-                <li class="s-item">${step}</li>
+      // Dynamically assemble and inject Immediate Protocols if present
+      if (matchedLaw.immediateActionPlan && matchedLaw.immediateActionPlan.length > 0) {
+        finalDetailsHTML += `
+          <div style="margin-top:1.5rem; border-top:1px dashed var(--border); padding-top:1.2rem;">
+            <div class="blabel" style="color: #dc3545;">🚨 Immediate Action Protocol (Next Steps)</div>
+            <ol style="margin-top:0.6rem; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">
+              ${matchedLaw.immediateActionPlan.map(step => `
+                <li style="font-size:0.88rem; color:var(--t1); line-height:1.6;">${step}</li>
               `).join('')}
             </ol>
           </div>
         `;
       }
 
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="ch">
-          <div class="ctitle">${law.lawTitle}</div>
-          <div class="cbadge">${law.section}</div>
-        </div>
-        <div class="cb">
-          <div class="lblock">
-            <div class="blabel">Statutory Provisions (Bare Act)</div>
-            <div class="ltext">${law.actualText}</div>
-          </div>
-          <div class="eblock">
-            <div class="blabel">Plain English Meaning</div>
-            <div class="etext">${law.simpleExplanation}</div>
-          </div>
-          
-          ${judgmentsHTML}
-          ${stepsHTML}
-        </div>
-        <div class="tbar">
-          <span class="tlbl">Contextual Translation:</span>
-          <button class="tbtn" onclick="toggleLanguage('${law.id}', 'hi', this)">Hindi (हिंदी)</button>
-          <button class="tbtn" onclick="toggleLanguage('${law.id}', 'mr', this)">Marathi (मराठी)</button>
-        </div>
-        <div class="tlwrap" id="tl-${law.id}">
-          <div class="tlcard">
-            <div class="tltext" id="tl-txt-${law.id}"></div>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
+      // Append additional fields directly beneath the context placeholder element
+      const containerCtx = document.getElementById('rCtx');
+      const existingExtra = document.getElementById('dynamicExtraBlock');
+      if (existingExtra) existingExtra.remove();
+
+      if (finalDetailsHTML) {
+        const extraWrap = document.createElement('div');
+        extraWrap.id = 'dynamicExtraBlock';
+        extraWrap.innerHTML = finalDetailsHTML;
+        containerCtx.parentNode.insertBefore(extraWrap, containerCtx.nextSibling);
+      }
+
+      // Synchronize component state toggles
+      hide('ld');
+      show('res');
+      document.getElementById('sBtn').disabled = false;
+      document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 250); // Small fluid delay emulation
   }
 
-  function handleSearch() {
-    const query = document.getElementById('q').value.toLowerCase().trim();
-    const filtered = DB.filter(item => {
-      const matchesCategory = (currentCategory === 'all' || item.category === currentCategory);
-      const matchesQuery = !query || 
-                           item.keywords.some(k => query.includes(k) || k.includes(query)) ||
-                           item.lawTitle.toLowerCase().includes(query);
-      return matchesCategory && matchesQuery;
-    });
-    renderCards(filtered);
-  }
+  // Free Google Translate Engine implementation
+  async function translate(code, name, label) {
+    if (!curExp) return;
+    const btnHi = document.getElementById('btnHi');
+    const btnMr = document.getElementById('btnMr');
+    const wrap = document.getElementById('tlWrap');
+    const lbl = document.getElementById('tlLbl');
+    const txt = document.getElementById('tlText');
 
-  function filterCategory(cat) {
-    currentCategory = cat;
-    document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`cat-${cat.split('-')[1] || cat}`).classList.add('active');
-    handleSearch();
-  }
+    const active = code === 'hi' ? btnHi : btnMr;
+    const other  = code === 'hi' ? btnMr : btnHi;
 
-  function toggleLanguage(id, lang, btn) {
-    const wrap = document.getElementById(`tl-${id}`);
-    const txt = document.getElementById(`tl-txt-${id}`);
-    const lawItem = DB.find(item => item.id === id);
-
-    if (btn.classList.contains('active')) {
-      btn.classList.remove('active');
+    if (curLang === code) {
+      active.classList.remove('active');
       wrap.classList.remove('on');
+      curLang = '';
       return;
     }
 
-    btn.parentElement.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    txt.textContent = lawItem.translations[lang].text;
+    active.classList.add('active');
+    other.classList.remove('active');
+    curLang = code;
+
+    btnHi.disabled = true; btnMr.disabled = true;
+    lbl.textContent = label;
+    txt.textContent = 'Translating…';
     wrap.classList.add('on');
+
+    try {
+      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=' + code + '&dt=t&q=' + encodeURIComponent(curExp);
+      const res = await fetch(url);
+      const data = await res.json();
+      const translated = data[0].map(chunk => chunk[0]).join('');
+      txt.textContent = translated;
+    } catch {
+      txt.textContent = 'Translation failed. Please try again.';
+    } finally {
+      btnHi.disabled = false; btnMr.disabled = false;
+    }
   }
 
-  function toggleTheme() {
-    theme = theme === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    document.querySelector('.tog').textContent = theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
-  }
-
-  window.onload = initDatabase;
+  // Run initializer automatically on DOM window load
+  window.onload = initLocalDatabase;
 </script>
 </body>
 </html>
