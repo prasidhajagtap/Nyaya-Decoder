@@ -1,5 +1,5 @@
 // PUT YOUR GEMINI API KEY HERE
-const GEMINI_KEY = 'AIzaSyBEHH8dx5uGCGfy3GWRaBnU9_cvN99SWUE';
+const GEMINI_KEY = 'AIzaSyBUX1s_YZYNkaLNxDrbyYW3gDL5InruKLA';
 // -----------------------------------------------
 
 let curExp = '';
