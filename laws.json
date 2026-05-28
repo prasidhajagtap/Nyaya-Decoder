@@ -1,0 +1,73 @@
+[
+  {
+    "id": "bns85",
+    "category": "family-court",
+    "keywords": ["498a", "ipc 498a", "bns 85", "cruelty", "husband", "relative", "harassment", "dowry case"],
+    "lawTitle": "Section 85 of the Bharatiya Nyaya Sanhita (BNS) / Sec 498A IPC",
+    "section": "BNS Sec 85 / IPC 498A",
+    "actualText": "Husband or relative of husband of a woman subjecting her to cruelty.—Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine.",
+    "simpleExplanation": "Criminalizes physical or mental cruelty against a wife by her husband or his family. This section is frequently misused to file vague, omnibus allegations against extended family members who don't even live with the couple.",
+    "context": "A Section 35(3) notice (under new BNSS) or Section 41A notice (under old CrPC) must be served first. Immediate arrest is an exception, not the rule.",
+    "favorableJudgments": [
+      {
+        "citation": "Arnesh Kumar v. State of Bihar (2014) 8 SCC 273",
+        "ruling": "The Supreme Court held that police cannot automatically arrest the husband or his relatives upon the filing of a 498A case. It made the issuance of a notice of appearance mandatory and stated that unnecessary arrests violate civil liberties."
+      },
+      {
+        "citation": "Preeti Gupta & Anr. v. State of Jharkhand (2010) 7 SCC 667",
+        "ruling": "The Supreme Court noted that implications of absolute strangers and distant relatives in 498A complaints are rampant. The court quashed implications against the married sister-in-law and brother-in-law who lived in a separate city."
+      }
+    ],
+    "immediateActionPlan": [
+      "Do not panic or abscond. Absconding makes it look like you are evading justice and weakens bail applications.",
+      "Track down physical/digital separation indicators. Collect separate rental agreements, electricity bills, or job location certificates to prove distant relatives do not share a household.",
+      "Await the mandatory Section 35(3) BNSS / 41A CrPC notice. Secure legal representation to format and submit a rigorous reply listing all compliance documents.",
+      "If the local police appear heavily biased, immediately file for Anticipatory Bail in the Sessions Court or High Court to secure permanent immunity from custodial lockup."
+    ],
+    "translations": {
+      "hi": {
+        "label": "क्रूरता और भरण-पोषण मामले में सुरक्षा नियम",
+        "text": "यह धारा पत्नी के प्रति पति या उसके रिश्तेदारों द्वारा की गई क्रूरता को दंडित करती है। लेकिन झूठे मामलों में पूरे परिवार को फंसाने की आदत पर सुप्रीम कोर्ट ने सख्त रोक लगाई है।"
+      },
+      "mr": {
+        "label": "कौटुंबिक छळ आणि हुंडा प्रकरणात कायदेशीर संरक्षण",
+        "text": "या कलमांतर्गत पती किंवा त्याच्या नातेवाईकांनी पत्नीचा शारीरिक किंवा मानसिक छळ केल्यास शिक्षेची तरतूद आहे. मात्र, खोट्या प्रकरणांमध्ये संपूर्ण कुटुंबाला अडकवण्यास सर्वोच्च न्यायालयाने बंदी घातली आहे।"
+      }
+    }
+  },
+  {
+    "id": "bnss144",
+    "category": "family-court",
+    "keywords": ["125 crpc", "crpc 125", "bnss 144", "maintenance", "poti", "interim maintenance", "wife income"],
+    "lawTitle": "Section 144 of the BNSS / Section 125 of the Criminal Procedure Code (CrPC)",
+    "section": "BNSS Sec 144 / CrPC Sec 125",
+    "actualText": "Order for maintenance of wives, children and parents.—If any person having sufficient means neglects or refuses to maintain his wife, unable to maintain herself... a Magistrate may order monthly maintenance.",
+    "simpleExplanation": "Designed to prevent destitution in separated wives. However, the law explicitly states that if the wife is living in adultery, refuses to live with her husband without valid reasons, or is highly qualified and willfully sitting idle just to extort money, she is legally barred from receiving support.",
+    "context": "Both parties must file a strict, comprehensive affidavit of assets and liabilities to expose actual or hidden revenue flows.",
+    "favorableJudgments": [
+      {
+        "citation": "Rajnesh v. Neha (2021) 2 SCC 324",
+        "ruling": "The Supreme Court laid down comprehensive guidelines to control overlapping maintenance claims across different courts and made it mandatory for both spouses to declare accurate assets, liabilities, and income details on oath."
+      },
+      {
+        "citation": "Damanpreet Kaur v. Indmeet Juneja (2012) Delhi HC",
+        "ruling": "The High Court ruled that a well-qualified wife who holds professional degrees and was earning well in the past cannot choose to sit idle and force the husband to pay maintenance simply to penalize him."
+      }
+    ],
+    "immediateActionPlan": [
+      "Compile clear evidence of her educational qualifications (Degrees, Certificates, LinkedIn profiles, past employment letters).",
+      "Request a bank account search through a formal discovery application if you suspect she is hiding active income sources.",
+      "Draft a systematic 'Affidavit of Assets and Liabilities' exactly matching the Rajnesh v. Neha mandate, carefully indexing all your liabilities (loans, dependent parents) to lower disposable income evaluation."
+    ],
+    "translations": {
+      "hi": {
+        "label": "पत्नी के गुजारा भत्ता (खर्चा) दावों पर कानूनी सीमाएं",
+        "text": "यह कानून अलग रह रही पत्नी को गुजारा भत्ता देने का प्रावधान करता है। लेकिन यदि पत्नी खुद कमाने में सक्षम है, उच्च शिक्षित है और केवल पति पर आर्थिक बोझ डालने के लिए जानबूझकर नौकरी छोड़ देती है, तो कोर्ट उसकी अर्जी खारिज कर सकता है।"
+      },
+      "mr": {
+        "label": "पत्नीच्या पोटगी मागण्यांवर कायदेशीर निर्बंध",
+        "text": "हे कलम पत्नीला उदरनिर्वाहासाठी पोटगी देण्याबाबत आहे. तथापि, जर पत्नी उच्चशिक्षित असेल आणि केवळ पतीकडून पैसे उकळण्यासाठी स्वतःहून नोकरी करत नसेल, तर न्यायालय पोटगी फेटाळू शकते।"
+      }
+    }
+  }
+]
