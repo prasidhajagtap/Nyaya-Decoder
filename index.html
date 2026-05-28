@@ -3,230 +3,308 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nyaya Decoder | Strategic Legal Engine</title>
+  <title>Law Made Simple | Indian Law Decoder</title>
+  <meta name="description" content="Search any Indian law — BNS, BNSS, IPC, CrPC, Family Law and more — with plain language explanations, judgments, and next steps." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,400;0,600;1,400&family=Outfit:wght=300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:        #f8f9fa;
+      --bg:        #f5f6fa;
       --surface:   #ffffff;
-      --surface2:  #f1f3f7;
-      --border:    #e2e8f0;
-      --t1:        #0f172a;
-      --t2:        #475569;
-      --t3:        #94a3b8;
-      --accent:    #1e3a8a;
-      --accent2:   #eff6ff;
-      --jbg:       #fcf8f2;
-      --jborder:   #eede7b;
-      --jtxt:      #855d0a;
-      --sbg:       #fff1f2;
-      --sborder:   #fecdd3;
-      --stxt:      #9f1239;
-      --shadow:    0 4px 20px rgba(15, 23, 42, 0.05);
+      --surface2:  #eef0f7;
+      --border:    #dde1ee;
+      --t1:        #0c1a2e;
+      --t2:        #4a5568;
+      --t3:        #8a97a8;
+      --accent:    #1a42b6;
+      --accent2:   #e8edf9;
+      --atxt:      #1a42b6;
+      --gbg:       #f0faf4;
+      --gbd:       #a0d9b8;
+      --jbg:       #fdfaf2;
+      --jborder:   #ebd29b;
+      --jtxt:      #7d5a13;
+      --sbg:       #fff5f5;
+      --sborder:   #f8d7da;
+      --stxt:      #b02a37;
+      --shadow:    0 2px 16px rgba(20,40,100,0.07);
     }
     [data-theme="dark"] {
-      --bg:        #0f172a;
-      --surface:   #1e293b;
-      --surface2:  #334155;
-      --border:    #475569;
-      --t1:        #f8fafc;
-      --t2:        #cbd5e1;
-      --t3:        #64748b;
-      --accent:    #3b82f6;
-      --accent2:   #1e3a8a;
-      --jbg:       #2a2415;
-      --jborder:   #715c1e;
-      --jtxt:      #fef08a;
-      --sbg:       #4c0519;
-      --sborder:   #9f1239;
-      --stxt:      #fecdd3;
-      --shadow:    0 4px 25px rgba(0, 0, 0, 0.3);
+      --bg:        #0b1120;
+      --surface:   #141f35;
+      --surface2:  #1a2840;
+      --border:    #243352;
+      --t1:        #e8edf7;
+      --t2:        #8a9bbf;
+      --t3:        #4a5e80;
+      --accent:    #4a7aff;
+      --accent2:   #162045;
+      --atxt:      #7aa0ff;
+      --gbg:       #0d2218;
+      --gbd:       #2a6645;
+      --jbg:       #262116;
+      --jborder:   #594723;
+      --jtxt:      #ffd075;
+      --sbg:       #281416;
+      --sborder:   #582327;
+      --stxt:      #ff858d;
+      --shadow:    0 2px 24px rgba(0,0,0,0.35);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--t1); min-height: 100vh; transition: background .3s, color .3s; padding-bottom: 5rem; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;transition:background .3s,color .3s}
 
-    nav { position: sticky; top: 0; z-index: 50; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 65px; box-shadow: var(--shadow); }
-    .logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--t1); font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; }
-    .logo span { color: var(--accent); }
-    .tog { background: var(--surface2); border: 1px solid var(--border); border-radius: 50px; padding: .4rem .9rem; cursor: pointer; font-size: .8rem; color: var(--t2); font-weight: 500; }
+    nav{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:62px;box-shadow:var(--shadow)}
+    .logo{display:flex;align-items:center;gap:.55rem;text-decoration:none;color:var(--t1)}
+    .logo-name{font-family:'Playfair Display',serif;font-size:1.22rem;font-weight:600;letter-spacing:-.02em}
+    .logo-name span{color:var(--accent)}
+    .nav-r{display:flex;align-items:center;gap:1rem}
+    .nav-hint{font-size:.72rem;color:var(--t3);font-weight:300;display:none}
+    @media(min-width:560px){.nav-hint{display:block}}
+    .tog{display:flex;align-items:center;gap:.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:.32rem .75rem;cursor:pointer;font-family:'Outfit',sans-serif;font-size:.78rem;color:var(--t2);transition:border-color .2s,color .2s}
+    .tog:hover{border-color:var(--accent);color:var(--accent)}
 
-    .hero { max-width: 800px; margin: 0 auto; padding: 4rem 1.5rem 2rem; text-align: center; }
-    h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 400; line-height: 1.2; margin-bottom: 1.5rem; }
-    h1 em { font-style: italic; color: var(--accent); font-weight: 600; }
+    .hero{max-width:740px;margin:0 auto;padding:3.5rem 1.5rem 2rem;text-align:center}
+    .badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--accent2);color:var(--atxt);font-size:.72rem;font-weight:500;padding:.28rem .85rem;border-radius:50px;margin-bottom:1.4rem;letter-spacing:.03em}
+    h1{font-family:'Playfair Display',serif;font-size:clamp(1.95rem,5vw,3.1rem);font-weight:400;line-height:1.2;letter-spacing:-.03em;margin-bottom:.9rem}
+    h1 em{font-style:italic;color:var(--accent);font-weight:600}
+    .hero p{font-size:.95rem;color:var(--t2);max-width:500px;margin:0 auto 1.8rem;font-weight:300;line-height:1.7}
 
-    .sw { max-width: 650px; margin: 0 auto; }
-    .sb { display: flex; align-items: center; background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: .4rem .4rem .4rem 1.2rem; box-shadow: var(--shadow); gap: .6rem; }
-    #q { flex: 1; border: none; outline: none; background: transparent; font-family: 'Outfit', sans-serif; font-size: .95rem; color: var(--t1); padding: .7rem 0; }
-    .sbtn { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .7rem 1.6rem; font-size: .9rem; font-weight: 500; cursor: pointer; }
+    .sw{max-width:620px;margin:0 auto}
+    .sb{display:flex;align-items:center;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:.3rem .3rem .3rem 1.1rem;box-shadow:var(--shadow);gap:.5rem;transition:border-color .2s,box-shadow .2s}
+    .sb:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,66,182,.08)}
+    .sb svg{color:var(--t3);flex-shrink:0}
+    #q{flex:1;border:none;outline:none;background:transparent;font-family:'Outfit',sans-serif;font-size:.92rem;color:var(--t1);padding:.65rem 0}
+    #q::placeholder{color:var(--t3)}
+    .sbtn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:.65rem 1.35rem;font-family:'Outfit',sans-serif;font-size:.87rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s,transform .1s;flex-shrink:0}
+    .sbtn:hover{opacity:.9}
+    .sbtn:active{transform:scale(.97)}
+    .sbtn:disabled{opacity:.5;cursor:not-allowed}
     
-    .cat-bar { display: flex; justify-content: center; gap: .5rem; margin-top: 1.5rem; flex-wrap: wrap; }
-    .cat-btn { background: var(--surface); border: 1px solid var(--border); color: var(--t2); padding: .5rem 1rem; border-radius: 8px; font-size: .85rem; cursor: pointer; font-weight: 500; }
-    .cat-btn.active, .cat-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .chips{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-top:1.2rem}
+    .chip{background:var(--surface);border:1px solid var(--border);color:var(--t2);font-size:.75rem;padding:.35rem .85rem;border-radius:50px;cursor:pointer;transition:all .2s;font-weight:500}
+    .chip:hover, .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-    .st { max-width: 700px; margin: 2rem auto; padding: 0 1.5rem; text-align: center; display: none; }
-    .st.on { display: block; }
-    .errtxt { color: #ef4444; font-size: .95rem; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .st{max-width:680px;margin:2rem auto;padding:0 1.5rem;text-align:center;display:none}
+    .st.on{display:block}
+    .spin{width:34px;height:34px;margin:0 auto 1rem;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .st p{font-size:.85rem;color:var(--t3)}
+    .errtxt{color:#d94444;font-size:.9rem;background:rgba(217,68,68,0.08);padding:0.8rem;border-radius:8px;border:1px solid rgba(217,68,68,0.15)}
 
-    .res-list { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
-    .ch { padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 1.2rem; background: linear-gradient(to bottom, var(--surface), var(--bg)); }
-    .ctitle { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 600; color: var(--t1); }
-    .cbadge { background: var(--accent); color: #fff; font-size: .75rem; font-weight: 600; padding: .35rem .85rem; border-radius: 8px; text-transform: uppercase; }
+    .res{max-width:740px;margin:0 auto;padding:1.5rem 1.5rem 4rem;display:none;flex-direction:column;gap:2rem}
+    .res.on{display:flex;animation:up .4s ease}
+    @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+    .ch{padding:1.4rem 1.6rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;background:linear-gradient(to bottom, var(--surface), var(--bg))}
+    .ctitle{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;line-height:1.3;color:var(--t1)}
+    .cbadge{background:var(--accent2);color:var(--atxt);font-size:.72rem;font-weight:600;padding:.28rem .75rem;border-radius:7px;white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:0.02em}
+    .cb{padding:1.5rem 1.6rem;display:flex;flex-direction:column;gap:1.4rem}
+
+    .lblock{background:var(--accent2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:1.1rem 1.35rem}
+    .blabel{font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:.55rem}
+    .lblock .blabel{color:var(--atxt)}
+    .ltext{font-family:'Playfair Display',serif;font-size:.95rem;line-height:1.8;color:var(--t2);font-style:italic}
+
+    .eblock{background:var(--gbg);border-left:3px solid var(--gbd);border-radius:0 8px 8px 0;padding:1.1rem 1.35rem}
+    .eblock .blabel{color:var(--gbd)}
+    .etext{font-size:.93rem;line-height:1.75;color:var(--t1)}
     
-    .cb { padding: 1.8rem; display: flex; flex-direction: column; gap: 1.8rem; }
-    .lblock { background: var(--surface2); border-left: 4px solid var(--t2); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; }
-    .eblock { background: var(--accent2); border-left: 4px solid var(--accent); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; }
-    .blabel { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t3); margin-bottom: .5rem; }
-    .eblock .blabel { color: var(--accent); }
-    .ltext { font-family: 'Playfair Display', serif; font-size: 1rem; line-height: 1.7; color: var(--t2); font-style: italic; }
-    .etext { font-size: .95rem; line-height: 1.7; color: var(--t1); }
-    
-    /* Precedents Section Setup */
-    .jblock { background: var(--jbg); border: 1px dashed var(--jborder); padding: 1.2rem; border-radius: 12px; }
-    .jblock .blabel { color: var(--jtxt); opacity: 0.9; }
-    .j-item { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.06); }
-    .j-item:first-child { margin-top: .5rem; padding-top: 0; border-top: none; }
-    .j-cite { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; color: var(--t1); margin-bottom: .25rem; }
-    .j-rule { font-size: .9rem; line-height: 1.6; color: var(--t2); }
+    /* Precedents & Action Protocols Styles */
+    .jblock{background:var(--jbg);border:1px dashed var(--jborder);border-radius:12px;padding:1.1rem 1.35rem}
+    .jblock .blabel{color:var(--jtxt);font-weight:600}
+    .j-list{margin-top:0.5rem;display:flex;flex-direction:column;gap:0.85rem}
+    .j-item{border-top:1px dashed rgba(0,0,0,0.08);padding-top:0.8rem}
+    .j-item:first-child{border-top:none;padding-top:0}
+    .j-cite{font-family:'Playfair Display',serif;font-size:0.98rem;font-weight:600;color:var(--t1);margin-bottom:0.2rem}
+    .j-rule{font-size:0.88rem;line-height:1.6;color:var(--t2)}
 
-    /* Next Steps Protocols */
-    .sblock { background: var(--sbg); border: 1px dashed var(--sborder); padding: 1.2rem; border-radius: 12px; }
-    .sblock .blabel { color: var(--stxt); opacity: 0.9; }
-    .s-list { margin-top: .6rem; padding-left: 1.2rem; display: flex; flex-direction: column; gap: .6rem; }
-    .s-item { font-size: .92rem; line-height: 1.6; color: var(--t1); }
-    .s-item strong { color: var(--stxt); font-weight: 500; }
+    .sblock{background:var(--sbg);border:1px dashed var(--sborder);border-radius:12px;padding:1.1rem 1.35rem}
+    .sblock .blabel{color:var(--stxt);font-weight:600}
+    .s-list{margin-top:0.6rem;padding-left:1.2rem;display:flex;flex-direction:column;gap:0.55rem}
+    .s-item{font-size:0.88rem;line-height:1.6;color:var(--t1)}
 
-    .tbar { border-top: 1px solid var(--border); padding: 1rem 1.8rem; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; background: var(--surface); }
-    .tlbl { font-size: .8rem; color: var(--t2); }
-    .tbtn { background: var(--surface2); border: 1px solid var(--border); color: var(--t2); font-size: .8rem; font-weight: 500; padding: .4rem .9rem; border-radius: 6px; cursor: pointer; }
-    .tbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tbar{border-top:1px solid var(--border);padding:1rem 1.6rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;background:var(--surface)}
+    .tlbl{font-size:.78rem;color:var(--t3);font-weight:500}
+    .tbtn{background:var(--surface2);border:1px solid var(--border);color:var(--t2);font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:500;padding:.38rem 1rem;border-radius:8px;cursor:pointer;transition:all .2s}
+    .tbtn:hover{background:var(--accent2);color:var(--atxt);border-color:var(--accent)}
+    .tbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-    .tlwrap { padding: 0 1.8rem 1.8rem; display: none; }
-    .tlwrap.on { display: block; }
-    .tlcard { background: var(--surface2); border-left: 4px solid #10b981; border-radius: 0 12px 12px 0; padding: 1.2rem 1.5rem; }
-    .tltext { font-size: .95rem; line-height: 1.7; color: var(--t1); }
-    
-    .loading { text-align: center; color: var(--t3); padding: 2rem; font-size: 1rem; display: none; }
-    .loading.on { display: block; }
+    .tlwrap{padding:0 1.6rem 1.4rem;display:none;animation:up .3s ease;background:var(--surface)}
+    .tlwrap.on{display:block}
+    .tlcard{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1.1rem 1.35rem}
+    .tltext{font-size:.95rem;line-height:1.85;color:var(--t1)}
+
+    .disc{margin-top:1rem;display:flex;gap:.5rem;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-size:.73rem;color:var(--t3);max-width:740px;margin:0 auto}
+
+    .mission{border-top:1px solid var(--border);padding:4rem 1.5rem;text-align:center}
+    .mi{max-width:580px;margin:0 auto}
+    .mi h2{font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:400;margin-bottom:.7rem;color:var(--t1)}
+    .mi p{font-size:.88rem;color:var(--t2);line-height:1.85;font-weight:300}
+    .mi p+p{margin-top:.8rem}
+
+    footer{border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-size:.72rem;color:var(--t3);background:var(--surface)}
+
+    @media(max-width:540px){nav{padding:0 1rem}.hero{padding:2.5rem 1rem 2rem}.ch{flex-direction:column;align-items:flex-start}.res,.st{padding-left:1rem;padding-right:1rem}}
   </style>
 </head>
 <body>
 
 <nav>
-  <a class="logo" href="#">Nyaya<span>Decoder</span></a>
-  <button class="tog" onclick="toggleTheme()">🌙 Dark Mode</button>
+  <a class="logo" href="#">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3v19M5 10l7-7 7 7"/><path d="M3 17h4l2 3h6l2-3h4"/>
+    </svg>
+    <span class="logo-name">Law <span>Made Simple</span></span>
+  </a>
+  <div class="nav-r">
+    <span class="nav-hint">Indian Law · Plain Language</span>
+    <button class="tog" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span id="tIco">🌙</span><span id="tLbl">Dark Mode</span>
+    </button>
+  </div>
 </nav>
 
 <section class="hero">
-  <h1>Statute Analyzer & <em>Defense Precedents</em> Portal</h1>
+  <div class="badge">⚖️ &nbsp;For Every Person Who Deserves to Know Their Rights</div>
+  <h1>Know the Law.<br><em>Understand</em> the Law.</h1>
+  <p>Search core legal provisions spanning old codes (IPC/CrPC) and new rules (BNS/BNSS) with plain explanations, landmark rulings, and next steps.</p>
+
   <div class="sw">
     <div class="sb">
-      <input type="text" id="q" placeholder="Type sections (e.g., '498A', 'BNS 85', 'Maintenance')..." onkeyup="handleSearch()" autocomplete="off" />
-      <button class="sbtn" onclick="handleSearch()">Search</button>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="q" placeholder="Type keywords (e.g., '498A', 'BNS 85', 'Maintenance', 'Perjury')..." onkeyup="doSearch()" autocomplete="off" spellcheck="false" />
+      <button class="sbtn" id="sBtn" onclick="doSearch()">Search</button>
     </div>
-    <div class="cat-bar">
-      <button class="cat-btn active" id="cat-all" onclick="filterCategory('all')">All Statutes</button>
-      <button class="cat-btn" id="cat-family" onclick="filterCategory('family-court')">Family & Matrimonial</button>
+    
+    <div class="chips">
+      <button class="chip active" id="cat-all" onclick="filterCategory('all')">All Statutes</button>
+      <button class="chip" id="cat-family" onclick="filterCategory('family-court')">Matrimonial & Family</button>
+      <button class="chip" id="cat-procedural" onclick="filterCategory('procedural-shield')">Procedural Shields</button>
     </div>
   </div>
 </section>
 
-<div class="loading" id="loader">Syncing legal defense nodes...</div>
-
-<div class="st" id="er">
-  <p class="errtxt" id="erMsg">No regulations match your framework query.</p>
+<div class="st" id="ld" aria-live="polite">
+  <div class="spin" role="status"></div>
+  <p>Synchronizing local database nodes&hellip;</p>
 </div>
 
-<section class="res-list" id="resultsContainer"></section>
+<div class="st" id="er" aria-live="assertive">
+  <p class="errtxt" id="erMsg"></p>
+</div>
+
+<section class="res" id="resultsContainer" aria-label="Search results"></section>
+
+<div class="disc" role="note">
+  <span>⚠️</span>
+  <span>For informational purposes only. Not legal advice. Always consult a qualified advocate for your specific litigation needs.</span>
+</div>
+
+<section class="mission">
+  <div class="mi">
+    <h2>Why Law Made Simple?</h2>
+    <p>Complex, archaic phrasing often keeps people from understanding their basic statutory rights. When dense codes hide protections, procedural missteps happen easily.</p>
+    <p>This engine balances clear statutory text with structural context. It provides a strategic defense index, helping anyone face legal processes with clarity and confidence.</p>
+  </div>
+</section>
+
+<footer>
+  &copy; 2026 Law Made Simple &nbsp;&middot;&nbsp; Offline Database Architecture &nbsp;&middot;&nbsp; Secure & Confidential
+</footer>
 
 <script>
-  // --- Updated Local Architecture Setup ---
   let DB = [];
-  let curExp = '';
-  let curLang = '';
+  let currentCategory = 'all';
   let theme = 'light';
 
-  // Automatically fetch and load the central database file on window startup
+  // Core system configuration loader
   async function initLocalDatabase() {
     show('ld');
     try {
       const response = await fetch('laws.json');
-      if (!response.ok) throw new Error("Database file missing.");
+      if (!response.ok) throw new Error("JSON framework array missing.");
       DB = await response.json();
+      doSearch(); // Initial render of all items
     } catch (e) {
-      document.getElementById('erMsg').textContent = 'Error initializing laws database. Ensure laws.json is present.';
+      document.getElementById('erMsg').textContent = 'Error tracking framework: Verify laws.json structure and local location.';
       show('er');
     } finally {
       hide('ld');
     }
   }
 
+  function show(id) { 
+    const el = document.getElementById(id);
+    if(el) el.classList.add('on'); 
+  }
+  
+  function hide(id) { 
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('on'); 
+  }
+
   function toggleTheme() {
     theme = theme === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', theme);
     document.getElementById('tIco').textContent = theme === 'light' ? '🌙' : '☀️';
-    document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark' : 'Light';
+    document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
   }
 
-  function fill(t) { document.getElementById('q').value = t; doSearch(); }
-  function show(id) { document.getElementById(id).classList.add('on'); }
-  function hide(id) { document.getElementById(id).classList.remove('on'); }
-
-  function resetUI() {
-    hide('ld'); hide('res'); hide('er');
-    document.getElementById('tlWrap').classList.remove('on');
-    document.getElementById('btnHi').classList.remove('active');
-    document.getElementById('btnMr').classList.remove('active');
-    curLang = '';
+  function filterCategory(cat) {
+    currentCategory = cat;
+    document.querySelectorAll('.chip').forEach(btn => btn.classList.remove('active'));
+    
+    // Safety selection matching string splits
+    const targetId = `cat-${cat.split('-')[0]}`;
+    const targetEl = document.getElementById(targetId);
+    if (targetEl) targetEl.classList.add('active');
+    
+    doSearch();
   }
 
-  // Pure dynamic filtering engine replacing the old Worker API call
   function doSearch() {
     const q = document.getElementById('q').value.toLowerCase().trim();
-    if (!q) return;
+    hide('er');
+    
+    const filtered = DB.filter(item => {
+      const matchesCategory = (currentCategory === 'all' || item.category === currentCategory);
+      const matchesQuery = !q || 
+                           item.lawTitle.toLowerCase().includes(q) || 
+                           item.section.toLowerCase().includes(q) ||
+                           item.keywords.some(k => k.includes(q) || q.includes(k));
+      return matchesCategory && matchesQuery;
+    });
 
-    resetUI();
-    show('ld');
-    document.getElementById('sBtn').disabled = true;
-    curExp = '';
+    renderCards(filtered);
+  }
 
-    // Search matches within title, code tags, or custom metadata keywords
-    const matchedLaw = DB.find(item => 
-      item.lawTitle.toLowerCase().includes(q) || 
-      item.section.toLowerCase().includes(q) ||
-      item.keywords.some(k => q.includes(k) || k.includes(q))
-    );
+  function renderCards(data) {
+    const container = document.getElementById('resultsContainer');
+    container.innerHTML = '';
 
-    setTimeout(() => {
-      if (!matchedLaw) {
-        hide('ld');
-        document.getElementById('erMsg').textContent = 'No matching statute found. Try keywords like "498A", "BNS 85", "Maintenance", or "Perjury".';
-        show('er');
-        document.getElementById('sBtn').disabled = false;
-        return;
-      }
+    if (data.length === 0) {
+      hide('resultsContainer');
+      document.getElementById('erMsg').textContent = 'No corresponding regulations found. Try references like "498A", "BNS 85", "Maintenance", or "Perjury".';
+      show('er');
+      return;
+    }
 
-      // Render the matching record fields into the UI templates
-      document.getElementById('rTitle').textContent = matchedLaw.lawTitle;
-      document.getElementById('rBadge').textContent = matchedLaw.section;
-      document.getElementById('rLaw').textContent = matchedLaw.actualText;
-      document.getElementById('rExp').textContent = matchedLaw.simpleExplanation;
-      document.getElementById('rCtx').textContent = matchedLaw.context ? '📌 ' + matchedLaw.context : '';
-
-      curExp = matchedLaw.simpleExplanation;
-
-      // Dynamically assemble and inject Judgments if present
-      let finalDetailsHTML = '';
-      if (matchedLaw.favorableJudgments && matchedLaw.favorableJudgments.length > 0) {
-        finalDetailsHTML += `
-          <div style="margin-top:1.5rem; border-top:1px dashed var(--border); padding-top:1.2rem;">
-            <div class="blabel" style="color: #b58900;">⚖️ Landmark Precedents (Favorable to Men)</div>
-            <div style="display:flex; flex-direction:column; gap:0.9rem; margin-top:0.5rem;">
-              ${matchedLaw.favorableJudgments.map(j => `
-                <div>
-                  <strong style="font-size:0.92rem; color:var(--t1); font-family:'Playfair Display',serif;">${j.citation}</strong>
-                  <p style="font-size:0.88rem; color:var(--t2); line-height:1.6; margin-top:0.2rem;">${j.ruling}</p>
+    data.forEach(law => {
+      // Dynamic construction of precedent elements
+      let precedentsHTML = '';
+      if (law.favorableJudgments && law.favorableJudgments.length > 0) {
+        precedentsHTML = `
+          <div class="jblock">
+            <div class="blabel">⚖️ Landmark Precedents (Favorable Counter-Rulings)</div>
+            <div class="j-list">
+              ${law.favorableJudgments.map(j => `
+                <div class="j-item">
+                  <div class="j-cite">${j.citation}</div>
+                  <div class="j-rule">${j.ruling}</div>
                 </div>
               `).join('')}
             </div>
@@ -234,82 +312,88 @@
         `;
       }
 
-      // Dynamically assemble and inject Immediate Protocols if present
-      if (matchedLaw.immediateActionPlan && matchedLaw.immediateActionPlan.length > 0) {
-        finalDetailsHTML += `
-          <div style="margin-top:1.5rem; border-top:1px dashed var(--border); padding-top:1.2rem;">
-            <div class="blabel" style="color: #dc3545;">🚨 Immediate Action Protocol (Next Steps)</div>
-            <ol style="margin-top:0.6rem; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">
-              ${matchedLaw.immediateActionPlan.map(step => `
-                <li style="font-size:0.88rem; color:var(--t1); line-height:1.6;">${step}</li>
-              `).join('')}
+      // Dynamic construction of tactical action steps elements
+      let actionsHTML = '';
+      if (law.immediateActionPlan && law.immediateActionPlan.length > 0) {
+        actionsHTML = `
+          <div class="sblock">
+            <div class="blabel">🚨 Immediate Action Protocol (Strategic Next Steps)</div>
+            <ol class="s-list">
+              ${law.immediateActionPlan.map(step => `<li class="s-item">${step}</li>`).join('')}
             </ol>
           </div>
         `;
       }
 
-      // Append additional fields directly beneath the context placeholder element
-      const containerCtx = document.getElementById('rCtx');
-      const existingExtra = document.getElementById('dynamicExtraBlock');
-      if (existingExtra) existingExtra.remove();
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="ch">
+          <div class="ctitle">${law.lawTitle}</div>
+          <div class="cbadge">${law.section}</div>
+        </div>
+        <div class="cb">
+          <div class="lblock">
+            <div class="blabel">Statutory Provisions (Bare Act)</div>
+            <div class="ltext">${law.actualText}</div>
+          </div>
+          <div class="eblock">
+            <div class="blabel">Plain English Meaning</div>
+            <div class="etext">${law.simpleExplanation}</div>
+          </div>
+          ${precedentsHTML}
+          ${actionsHTML}
+        </div>
+        <div class="tbar">
+          <span class="tlbl">Contextual Translation:</span>
+          <button class="tbtn" id="btn-hi-${law.id}" onclick="toggleLanguage('${law.id}', 'hi')">हिंदी व्याख्या</button>
+          <button class="tbtn" id="btn-mr-${law.id}" onclick="toggleLanguage('${law.id}', 'mr')">मराठी स्पष्टीकरण</button>
+        </div>
+        <div class="tlwrap" id="tl-${law.id}">
+          <div class="tlcard">
+            <div class="blabel" id="tl-lbl-${law.id}">Translation</div>
+            <div class="tltext" id="tl-txt-${law.id}"></div>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
 
-      if (finalDetailsHTML) {
-        const extraWrap = document.createElement('div');
-        extraWrap.id = 'dynamicExtraBlock';
-        extraWrap.innerHTML = finalDetailsHTML;
-        containerCtx.parentNode.insertBefore(extraWrap, containerCtx.nextSibling);
-      }
-
-      // Synchronize component state toggles
-      hide('ld');
-      show('res');
-      document.getElementById('sBtn').disabled = false;
-      document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 250); // Small fluid delay emulation
+    show('resultsContainer');
   }
 
-  // Free Google Translate Engine implementation
-  async function translate(code, name, label) {
-    if (!curExp) return;
-    const btnHi = document.getElementById('btnHi');
-    const btnMr = document.getElementById('btnMr');
-    const wrap = document.getElementById('tlWrap');
-    const lbl = document.getElementById('tlLbl');
-    const txt = document.getElementById('tlText');
+  function toggleLanguage(id, lang) {
+    const wrap = document.getElementById(`tl-${id}`);
+    const txt = document.getElementById(`tl-txt-${id}`);
+    const lbl = document.getElementById(`tl-lbl-${id}`);
+    const btnHi = document.getElementById(`btn-hi-${id}`);
+    const btnMr = document.getElementById(`btn-mr-${id}`);
+    
+    const targetBtn = lang === 'hi' ? btnHi : btnMr;
+    const otherBtn = lang === 'hi' ? btnMr : btnHi;
+    const lawItem = DB.find(item => item.id === id);
 
-    const active = code === 'hi' ? btnHi : btnMr;
-    const other  = code === 'hi' ? btnMr : btnHi;
-
-    if (curLang === code) {
-      active.classList.remove('active');
+    if (targetBtn.classList.contains('active')) {
+      targetBtn.classList.remove('active');
       wrap.classList.remove('on');
-      curLang = '';
       return;
     }
 
-    active.classList.add('active');
-    other.classList.remove('active');
-    curLang = code;
+    targetBtn.classList.add('active');
+    otherBtn.classList.remove('active');
 
-    btnHi.disabled = true; btnMr.disabled = true;
-    lbl.textContent = label;
-    txt.textContent = 'Translating…';
-    wrap.classList.add('on');
-
-    try {
-      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=' + code + '&dt=t&q=' + encodeURIComponent(curExp);
-      const res = await fetch(url);
-      const data = await res.json();
-      const translated = data[0].map(chunk => chunk[0]).join('');
-      txt.textContent = translated;
-    } catch {
-      txt.textContent = 'Translation failed. Please try again.';
-    } finally {
-      btnHi.disabled = false; btnMr.disabled = false;
+    if (lawItem && lawItem.translations && lawItem.translations[lang]) {
+      lbl.textContent = lawItem.translations[lang].label || 'Translation';
+      txt.textContent = lawItem.translations[lang].text;
+    } else {
+      lbl.textContent = 'Notification';
+      txt.textContent = 'Translation block not initialized for this database entry.';
     }
+    
+    wrap.classList.add('on');
   }
 
-  // Run initializer automatically on DOM window load
+  // Bind browser load stack sequence
   window.onload = initLocalDatabase;
 </script>
 </body>
