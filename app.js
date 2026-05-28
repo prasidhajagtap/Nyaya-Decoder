@@ -1,5 +1,5 @@
 // PUT YOUR GEMINI API KEY HERE
-const GEMINI_KEY = 'AIzaSyBUX1s_YZYNkaLNxDrbyYW3gDL5InruKLA';
+const GROQ_KEY = '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';
 // -----------------------------------------------
 
 let curExp = '';
@@ -7,7 +7,7 @@ let curFullText = '';
 let curLang = '';
 let theme = 'light';
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GROQ_KEY}`;
 
 async function callGemini(prompt, retries = 2) {
   const res = await fetch(GEMINI_URL, {
