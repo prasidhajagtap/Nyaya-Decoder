@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Law Made Simple | Indian Law, Explained</title>
+  <meta name="description" content="Search any Indian law — BNS, BNSS, IPC, CrPC, Family Law and more — with plain language explanations in English, Hindi and Marathi." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3v19M5 10l7-7 7 7"/><path d="M3 17h4l2 3h6l2-3h4"/>
+    </svg>
+    <span class="logo-name">Law <span>Made Simple</span></span>
+  </a>
+  <div class="nav-r">
+    <span class="nav-hint">Indian Law · Plain Language</span>
+    <button class="tog" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span id="tIco">🌙</span><span id="tLbl">Dark</span>
+    </button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badge">⚖️ &nbsp;For Every Man Who Deserves to Know His Rights</div>
+  <h1>Know the Law.<br><em>Understand</em> the Law.</h1>
+  <p>Search any Indian law — BNS, BNSS, IPC, CrPC, family law and more — and get the actual statute with a plain language explanation.</p>
+  <div class="sw">
+    <div class="sb">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="q" placeholder="e.g. Section 498A IPC, BNS Section 85, bail rights under POCSO..." onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off" spellcheck="false" />
+      <button class="sbtn" id="sBtn" onclick="doSearch()">Search</button>
+    </div>
+    <div class="chips">
+      <span class="chip" onclick="fill('Section 498A IPC')">498A IPC</span>
+      <span class="chip" onclick="fill('BNS Section 85 cruelty by husband')">BNS 85 Cruelty</span>
+      <span class="chip" onclick="fill('POCSO Act false accusation defence')">POCSO false accusation</span>
+      <span class="chip" onclick="fill('Dowry Prohibition Act Section 3')">Dowry Prohibition Act</span>
+      <span class="chip" onclick="fill('Domestic Violence Act anticipatory bail for husband')">DV Act bail rights</span>
+      <span class="chip" onclick="fill('Section 125 CrPC maintenance rights of husband')">Sec 125 CrPC</span>
+    </div>
+  </div>
+</section>
+
+<div class="st" id="ld" aria-live="polite">
+  <div class="spin" role="status"></div>
+  <p>Searching Indian law database&hellip;</p>
+</div>
+
+<div class="st" id="er" aria-live="assertive">
+  <p class="errtxt" id="erMsg"></p>
+</div>
+
+<section class="res" id="res" aria-label="Search results">
+  <div class="card">
+    <div class="ch">
+      <div class="ctitle" id="rTitle"></div>
+      <div class="cbadge" id="rBadge"></div>
+    </div>
+    <div class="cb">
+      <div class="lblock">
+        <div class="blabel">Actual Law Text</div>
+        <div class="ltext" id="rLaw"></div>
+      </div>
+      <div class="eblock">
+        <div class="blabel">Simple Explanation</div>
+        <div class="etext" id="rExp"></div>
+      </div>
+      <div class="ctx" id="rCtx"></div>
+    </div>
+    <div class="tbar">
+      <span class="tlbl">Translate explanation to:</span>
+      <button class="tbtn" id="btnHi" onclick="translate('hi','Hindi','हिंदी में सरल व्याख्या')">🇮🇳 &nbsp;Hindi</button>
+      <button class="tbtn" id="btnMr" onclick="translate('mr','Marathi','मराठीत सोपे स्पष्टीकरण')">🟠 &nbsp;Marathi</button>
+    </div>
+    <div class="tlwrap" id="tlWrap">
+      <div class="tlcard">
+        <div class="blabel" id="tlLbl"></div>
+        <div class="tltext" id="tlText"></div>
+      </div>
+    </div>
+  </div>
+  <div class="disc" role="note">
+    <span>⚠️</span>
+    <span>For informational purposes only. Not legal advice. Always consult a qualified advocate for your specific situation.</span>
+  </div>
+</section>
+
+<section class="mission">
+  <div class="mi">
+    <h2>Why Law Made Simple?</h2>
+    <p>Thousands of men in India face false accusations every year. Dense legal language keeps them from understanding their own rights — the very rights that exist to protect them.</p>
+    <p>This tool breaks down every Indian law into plain language. So any man can walk into a courtroom — or a police station — knowing exactly what the law says and what it means for him.</p>
+  </div>
+</section>
+
+<footer>
+  &copy; 2025 Law Made Simple &nbsp;&middot;&nbsp; For informational use only &nbsp;&middot;&nbsp; Not a substitute for legal counsel
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
