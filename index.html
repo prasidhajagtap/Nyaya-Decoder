@@ -1,1249 +1,415 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nyaya Decoder v3 - Professional Legal OCR</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js'></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nyaya Decoder | Law Made Simple for Men</title>
+  <meta name="description" content="Search Indian laws (BNS, BNSS, IPC, CrPC) with plain language explanations and context-aware translations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #f8f9fa;
+      --surface:   #ffffff;
+      --surface2:  #f1f3f7;
+      --border:    #e2e8f0;
+      --t1:        #0f172a;
+      --t2:        #475569;
+      --t3:        #94a3b8;
+      --accent:    #1e3a8a;
+      --accent2:   #eff6ff;
+      --atxt:      #1e40af;
+      --gbg:       #f0fdf4;
+      --gbd:       #bbf7d0;
+      --shadow:    0 4px 20px rgba(15, 23, 42, 0.05);
+    }
+    [data-theme="dark"] {
+      --bg:        #0f172a;
+      --surface:   #1e293b;
+      --surface2:  #334155;
+      --border:    #475569;
+      --t1:        #f8fafc;
+      --t2:        #cbd5e1;
+      --t3:        #64748b;
+      --accent:    #3b82f6;
+      --accent2:   #1e3a8a;
+      --atxt:      #93c5fd;
+      --gbg:       #064e3b;
+      --gbd:       #047857;
+      --shadow:    0 4px 25px rgba(0, 0, 0, 0.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--t1); min-height: 100vh; transition: background .3s, color .3s; }
 
-        :root {
-            --primary: #CB2129;
-            --secondary: #F7944B;
-            --accent: #BAD644;
-            --dark: #323232;
-            --light-gray: #BBBBBB;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-        }
+    nav { position: sticky; top: 0; z-index: 50; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 65px; box-shadow: var(--shadow); }
+    .logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--t1); }
+    .logo-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; letter-spacing: -.02em; }
+    .logo-name span { color: var(--accent); }
+    .nav-r { display: flex; align-items: center; gap: 1.2rem; }
+    .nav-hint { font-size: .8rem; color: var(--t3); font-weight: 400; display: none; }
+    @media(min-width: 560px) { .nav-hint { display: block; } }
+    .tog { display: flex; align-items: center; gap: .4rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 50px; padding: .4rem .9rem; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: .8rem; color: var(--t2); font-weight: 500; transition: all .2s; }
+    .tog:hover { border-color: var(--accent); color: var(--accent); }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-            overflow-x: hidden;
-        }
+    .hero { max-width: 800px; margin: 0 auto; padding: 5rem 1.5rem 3rem; text-align: center; }
+    .badge { display: inline-flex; align-items: center; gap: .4rem; background: var(--accent2); color: var(--atxt); font-size: .75rem; font-weight: 600; padding: .35rem 1rem; border-radius: 50px; margin-bottom: 1.5rem; letter-spacing: .03em; text-transform: uppercase; }
+    h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 400; line-height: 1.15; letter-spacing: -.03em; margin-bottom: 1rem; }
+    h1 em { font-style: italic; color: var(--accent); font-weight: 600; }
+    .hero p { font-size: 1rem; color: var(--t2); max-width: 540px; margin: 0 auto 2.5rem; font-weight: 300; line-height: 1.7; }
 
-        .app-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-        }
+    .sw { max-width: 650px; margin: 0 auto; }
+    .sb { display: flex; align-items: center; background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: .4rem .4rem .4rem 1.2rem; box-shadow: var(--shadow); gap: .6rem; transition: all .2s; }
+    .sb:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+    .sb svg { color: var(--t3); flex-shrink: 0; }
+    #q { flex: 1; border: none; outline: none; background: transparent; font-family: 'Outfit', sans-serif; font-size: .95rem; color: var(--t1); padding: .7rem 0; }
+    #q::placeholder { color: var(--t3); }
+    .sbtn { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: .7rem 1.6rem; font-family: 'Outfit', sans-serif; font-size: .9rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all .15s; flex-shrink: 0; }
+    .sbtn:hover { opacity: .95; transform: translateY(-1px); }
+    .sbtn:active { transform: translateY(1px); }
+    
+    .chips { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1.2rem; }
+    .chip { background: var(--surface); border: 1px solid var(--border); color: var(--t2); font-size: .78rem; padding: .35rem .85rem; border-radius: 50px; cursor: pointer; transition: all .2s; font-weight: 400; }
+    .chip:hover { background: var(--accent2); color: var(--atxt); border-color: var(--accent); }
 
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
+    .st { max-width: 700px; margin: 2rem auto; padding: 0 1.5rem; text-align: center; display: none; }
+    .st.on { display: block; }
+    .errtxt { color: #ef4444; font-size: .95rem; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+    .res { max-width: 760px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; display: none; }
+    .res.on { display: block; animation: up .4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
+    .ch { padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 1.2rem; background: linear-gradient(to bottom, var(--surface), var(--bg)); }
+    .ctitle { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 600; line-height: 1.3; color: var(--t1); }
+    .cbadge { background: var(--accent); color: #fff; font-size: .75rem; font-weight: 600; padding: .35rem .85rem; border-radius: 8px; white-space: nowrap; flex-shrink: 0; letter-spacing: 0.02em; }
+    .cb { padding: 1.8rem; display: flex; flex-direction: column; gap: 1.5rem; }
 
-        .header p {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
+    .lblock { background: var(--surface2); border-left: 4px solid var(--t2); border-radius: 0 10px 10px 0; padding: 1.2rem 1.5rem; }
+    .blabel { font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t3); margin-bottom: .6rem; }
+    .ltext { font-family: 'Playfair Display', serif; font-size: 1.05rem; line-height: 1.8; color: var(--t2); font-style: italic; }
 
-        .upload-zone {
-            border: 2px dashed var(--glass-border);
-            border-radius: 16px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .eblock { background: var(--accent2); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0; padding: 1.2rem 1.5rem; }
+    .eblock .blabel { color: var(--accent); }
+    .etext { font-size: 1rem; line-height: 1.75; color: var(--t1); font-weight: 400; }
+    .ctx { font-size: .85rem; color: var(--t3); padding: 0 .2rem; font-style: italic; display: flex; align-items: center; gap: .4rem; }
 
-        .upload-zone:hover {
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.05);
-        }
+    .tbar { border-top: 1px solid var(--border); padding: 1.2rem 1.8rem; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; background: var(--surface); }
+    .tlbl { font-size: .85rem; color: var(--t2); font-weight: 500; }
+    .tbtn { background: var(--surface2); border: 1px solid var(--border); color: var(--t2); font-family: 'Outfit', sans-serif; font-size: .85rem; font-weight: 500; padding: .45rem 1.1rem; border-radius: 8px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: .3rem; }
+    .tbtn:hover { background: var(--accent2); color: var(--atxt); border-color: var(--accent); }
+    .tbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-        .upload-zone.drag-over {
-            border-color: var(--accent);
-            background: rgba(186, 214, 68, 0.1);
-        }
+    .tlwrap { padding: 0 1.8rem 1.8rem; display: none; }
+    .tlwrap.on { display: block; animation: up .3s ease; }
+    .tlcard { background: var(--gbg); border: 1px solid var(--gbd); border-radius: 12px; padding: 1.2rem 1.5rem; }
+    .tlcard .blabel { color: var(--gbd); filter: brightness(0.7); }
+    .tltext { font-size: 1rem; line-height: 1.8; color: var(--t1); }
 
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            opacity: 0.6;
-        }
+    .disc { margin-top: 1.2rem; display: flex; gap: .6rem; align-items: flex-start; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.2rem; font-size: .8rem; color: var(--t2); line-height: 1.5; }
+    .disc span:first-child { font-size: 1.1rem; }
 
-        .btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(203, 33, 41, 0.3);
-            min-height: 48px;
-        }
+    .mission { border-top: 1px solid var(--border); padding: 5rem 1.5rem; text-align: center; background: var(--surface); }
+    .mi { max-width: 620px; margin: 0 auto; }
+    .mi h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 500; margin-bottom: 1rem; color: var(--t1); }
+    .mi p { font-size: .95rem; color: var(--t2); line-height: 1.85; font-weight: 300; }
+    .mi p+p { margin-top: 1rem; }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(203, 33, 41, 0.4);
-        }
+    footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: .8rem; color: var(--t3); background: var(--bg); }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, var(--accent), #8fb800);
-        }
-
-        .controls-section {
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .control-group {
-            margin-bottom: 16px;
-        }
-
-        .control-label {
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            font-weight: 600;
-            opacity: 0.9;
-        }
-
-        .lang-selector, .search-box {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 8px;
-        }
-
-        .lang-option {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid var(--glass-border);
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.85rem;
-            font-weight: 500;
-            min-height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .lang-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--secondary);
-        }
-
-        .lang-option.active {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-color: var(--accent);
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 0.95rem;
-            margin-bottom: 12px;
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .progress-container {
-            margin-top: 20px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--secondary));
-            transition: width 0.3s ease;
-            border-radius: 4px;
-        }
-
-        .progress-text {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top: 3px solid var(--accent);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .results-container {
-            margin-top: 30px;
-        }
-
-        .result-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            margin-bottom: 16px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .result-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .result-badges {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .result-badge {
-            background: rgba(203, 33, 41, 0.3);
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .confidence-badge {
-            background: rgba(186, 214, 68, 0.3);
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .result-section {
-            margin-top: 12px;
-        }
-
-        .result-label {
-            font-size: 0.85rem;
-            opacity: 0.7;
-            margin-bottom: 4px;
-        }
-
-        .result-content {
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .language-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .language-tab {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--glass-border);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 40px;
-        }
-
-        .language-tab.active {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .language-tab:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .ocrStats {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 0.85rem;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            opacity: 0.7;
-        }
-
-        .extracted-text {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            max-height: 300px;
-            overflow-y: auto;
-            line-height: 1.6;
-            word-break: break-word;
-        }
-
-        .error-message {
-            background: rgba(203, 33, 41, 0.2);
-            border: 1px solid var(--primary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 20px;
-            font-size: 0.9rem;
-        }
-
-        .warning-message {
-            background: rgba(247, 148, 75, 0.2);
-            border: 1px solid var(--secondary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 20px;
-            font-size: 0.9rem;
-        }
-
-        .tabs-container {
-            margin-top: 30px;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .tab-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid var(--glass-border);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-
-        .tab-button.active {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .tab-button:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .search-results {
-            margin-top: 20px;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            opacity: 0.6;
-        }
-
-        @media (max-width: 768px) {
-            .app-container {
-                padding: 12px;
-            }
-
-            .glass-card {
-                padding: 16px;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .lang-selector, .search-box {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+    @media(max-width: 540px) { nav { padding: 0 1rem; } .hero { padding: 3.5rem 1rem 2rem; } .ch { flex-direction: column; align-items: flex-start; gap: .6rem; } .res, .st { padding-left: 1rem; padding-right: 1rem; } }
+  </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        // EXPANDED Legal Database with Family Court & Marathi sections
-        const LEGAL_DATABASE = [
-            // ============ FAMILY COURT SPECIFIC ============
-            {
-                id: "crpc_61",
-                act: "Code of Criminal Procedure, 1973",
-                section: "Section 61",
-                patterns: ["section 61", "sec 61", "s 61", "धारा 61", "कलम 61", "summons"],
-                title: {
-                    en: "Summons to Accused",
-                    hi: "आरोपी को समन",
-                    mr: "आरोपीला समन"
-                },
-                explanation: {
-                    en: "Court may issue summons to compel attendance of accused person. Summons must be served personally on accused or at his last known address. Failure to attend without valid excuse may result in contempt proceedings.",
-                    hi: "न्यायालय आरोपी की उपस्थिति के लिए समन जारी कर सकता है। समन को आरोपी के व्यक्तिगत रूप से या उसके अंतिम ज्ञात पते पर सेवा दी जानी चाहिए।",
-                    mr: "न्यायालय आरोपीची हजेरी आवश्यक करण्यासाठी समन जारी करू शकते. समन आरोपीला व्यक्तिमत: किंवा त्याच्या शेवटच्या ज्ञात पत्त्यावर सेवा देणे आवश्यक आहे."
-                },
-                category: "Procedural Law"
-            },
-            {
-                id: "hma_5",
-                act: "Hindu Marriage Act, 1955",
-                section: "Section 5",
-                patterns: ["section 5", "sec 5", "s 5", "धारा 5", "कलम 5", "conditions for marriage"],
-                title: {
-                    en: "Conditions for Hindu Marriage",
-                    hi: "हिंदू विवाह की शर्तें",
-                    mr: "हिंदू विवाहाच्या अटी"
-                },
-                explanation: {
-                    en: "Prescribes conditions for valid Hindu marriage: neither party has living spouse, both of sound mind, bridegroom 21+, bride 18+, not within prohibited degrees, not sapindas of each other.",
-                    hi: "वैध हिंदू विवाह की शर्तें: किसी का जीवित पति/पत्नी न हो, दोनों स्वस्थ मन के हों, वर 21+, वधू 18+, निषिद्ध डिग्री में न हों।",
-                    mr: "वैध हिंदू विवाहाच्या अटी: कोणत्याही पक्षाचा जिवंत जोडीदार नसावा, दोघेही सुदृढ मनाचे असावेत, वर 21+, वधू 18+."
-                },
-                category: "Family Law"
-            },
-            {
-                id: "hma_13",
-                act: "Hindu Marriage Act, 1955",
-                section: "Section 13",
-                patterns: ["section 13", "sec 13", "s 13", "धारा 13", "कलम 13", "divorce", "तलाक", "घटस्फोट"],
-                title: {
-                    en: "Grounds for Divorce",
-                    hi: "तलाक के आधार",
-                    mr: "घटस्फोटाचे कारण"
-                },
-                explanation: {
-                    en: "Either spouse may seek divorce on grounds: adultery, cruelty, desertion (2+ years), conversion, mental disorder, leprosy, venereal disease, renunciation, presumption of death (7+ years). Wife has additional grounds for husband's polygamy or rape.",
-                    hi: "कोई भी पक्ष तलाक के लिए आवेदन कर सकता है: व्यभिचार, क्रूरता, परित्याग (2+ वर्ष), धर्मांतरण, मानसिक विकार।",
-                    mr: "कोणताही पक्ष घटस्फोटासाठी अर्ज करू शकतो: व्यभिचार, क्रूरता, 2+ वर्षे सोडून जाणे, धर्मांतर, मानसिक विकार."
-                },
-                category: "Family Law"
-            },
-            {
-                id: "hma_24",
-                act: "Hindu Marriage Act, 1955",
-                section: "Section 24",
-                patterns: ["section 24", "sec 24", "s 24", "धारा 24", "कलम 24", "maintenance during proceedings"],
-                title: {
-                    en: "Maintenance Pendente Lite",
-                    hi: "विवाह प्रकरण के दौरान भरण-पोषण",
-                    mr: "विवाह खटल्याच्या दरम्यान पोषण"
-                },
-                explanation: {
-                    en: "During matrimonial proceedings, if wife lacks independent income, court may order husband to pay maintenance and litigation expenses. Amount determined based on husband's income and wife's needs.",
-                    hi: "विवाह प्रकरण के दौरान, यदि पत्नी के पास आय नहीं है, तो न्यायालय पति को भरण-पोषण देने का आदेश दे सकता है।",
-                    mr: "विवाह खटल्याच्या दरम्यान, जर पत्नीला आय नसेल, तर न्यायालय पतीला पोषण देण्याचा आदेश देऊ शकते."
-                },
-                category: "Family Law"
-            },
-            {
-                id: "hma_26",
-                act: "Hindu Marriage Act, 1955",
-                section: "Section 26",
-                patterns: ["section 26", "sec 26", "s 26", "धारा 26", "कलम 26", "custody of children"],
-                title: {
-                    en: "Custody of Children",
-                    hi: "बच्चों की हिरासत",
-                    mr: "मुलांची कोठडी"
-                },
-                explanation: {
-                    en: "Court may order custody of minor children to either parent. Welfare of child is paramount consideration. Court may allow reasonable access to non-custodial parent and direct child maintenance.",
-                    hi: "न्यायालय नाबालिग बच्चों की हिरासत का आदेश दे सकता है। बच्चे का कल्याण सर्वोपरि विचार है।",
-                    mr: "न्यायालय अल्पवयीन मुलांची कोठडी आदेश करू शकते. मुलाचे कल्याण सर्वोच्च विचार आहे."
-                },
-                category: "Family Law"
-            },
-            {
-                id: "ipc_498a",
-                act: "Indian Penal Code, 1860",
-                section: "Section 498A",
-                patterns: ["498a", "498-a", "section 498a", "sec 498a", "धारा 498अ", "कलम 498अ", "cruelty"],
-                title: {
-                    en: "Cruelty by Husband/Relatives",
-                    hi: "पति/रिश्तेदारों द्वारा क्रूरता",
-                    mr: "पती/नातेवाईकांद्वारे क्रूरता"
-                },
-                explanation: {
-                    en: "Husband or his relatives subjecting woman to cruelty punishable with up to 3 years imprisonment and fine. Cruelty includes physical harm, harassment for dowry, or conduct endangering life/health.",
-                    hi: "पति या उसके रिश्तेदार महिला को क्रूरता के अधीन करने पर 3 वर्ष तक की कैद।",
-                    mr: "पती किंवा त्याचे नातेवाईक स्त्रीला क्रूरता करण्यास 3 वर्षांपर्यंत कारावास."
-                },
-                category: "Criminal Law"
-            },
-            {
-                id: "crpc_125",
-                act: "Code of Criminal Procedure, 1973",
-                section: "Section 125",
-                patterns: ["125", "section 125", "sec 125", "धारा 125", "कलम 125", "maintenance wife children"],
-                title: {
-                    en: "Maintenance of Wife/Children/Parents",
-                    hi: "पत्नी/बच्चों/माता-पिता का भरण-पोषण",
-                    mr: "पत्नी/मुले/पालकांचे पोषण"
-                },
-                explanation: {
-                    en: "Person of sufficient means must maintain wife (unable to maintain herself), legitimate/illegitimate children, and parents. Magistrate may order monthly maintenance. Wife loses entitlement if living in adultery or without reasonable excuse.",
-                    hi: "पर्याप्त साधनों वाला व्यक्ति पत्नी, बच्चों, माता-पिता का भरण-पोषण करे।",
-                    mr: "पुरेशा साधनांसह व्यक्तीने पत्नी, मुले, पालकांचे पोषण करणे."
-                },
-                category: "Procedural Law"
-            },
-            {
-                id: "dv_3",
-                act: "Protection of Women from Domestic Violence Act, 2005",
-                section: "Section 3",
-                patterns: ["dv act section 3", "pwdva 3", "section 3 dv", "धारा 3 घरेलू हिंसा", "domestic violence definition"],
-                title: {
-                    en: "Definition of Domestic Violence",
-                    hi: "घरेलू हिंसा की परिभाषा",
-                    mr: "घरगुती हिंसाचाराची व्याख्या"
-                },
-                explanation: {
-                    en: "Any act causing harm/injury/endangerment to health/safety/life/limb or mental wellbeing, or harassment for dowry/property. Includes physical, sexual, verbal/emotional, and economic abuse.",
-                    hi: "कोई भी कार्य जो स्वास्थ्य, सुरक्षा, जीवन या मानसिक कल्याण को नुकसान पहुंचाता है।",
-                    mr: "कोणतीही कृती जी आरोग्य, सुरक्षा, जीवन किंवा मानसिक कल्याणाला हानी करते."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "dv_12",
-                act: "Protection of Women from Domestic Violence Act, 2005",
-                section: "Section 12",
-                patterns: ["dv act section 12", "pwdva 12", "section 12 dv", "धारा 12 घरेलू हिंसा"],
-                title: {
-                    en: "Protection Orders",
-                    hi: "संरक्षण आदेश",
-                    mr: "संरक्षण आदेश"
-                },
-                explanation: {
-                    en: "Magistrate may pass protection order restraining respondent from committing domestic violence, entering residence/workplace, attempting communication, or alienating assets.",
-                    hi: "मजिस्ट्रेट संरक्षण आदेश दे सकता है जो प्रतिवादी को घरेलू हिंसा करने से रोकता है।",
-                    mr: "दंडाधिकारी संरक्षण आदेश देऊ शकतो जो प्रतिवादीला घरगुती हिंसा करण्यास रोकते."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "dv_18",
-                act: "Protection of Women from Domestic Violence Act, 2005",
-                section: "Section 18",
-                patterns: ["dv act section 18", "pwdva 18", "section 18 dv", "धारा 18 घरेलू हिंसा", "monetary relief"],
-                title: {
-                    en: "Monetary Relief",
-                    hi: "आर्थिक राहत",
-                    mr: "आर्थिक मदत"
-                },
-                explanation: {
-                    en: "Aggrieved person entitled to monetary relief for loss of earnings, medical expenses, property destruction, maintenance for self/children, and litigation expenses.",
-                    hi: "पीड़ित को कमाई की हानि, चिकित्सा खर्च, संपत्ति विनाश, भरण-पोषण और कानूनी खर्च के लिए मुआवजा।",
-                    mr: "पीडित व्यक्तीला उत्पन्नाची हानी, वैद्यकीय खर्च, मालमत्ता नाश, पोषण आणि कानूनी खर्चासाठी मुआवजा."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "dv_20",
-                act: "Protection of Women from Domestic Violence Act, 2005",
-                section: "Section 20",
-                patterns: ["dv act section 20", "pwdva 20", "section 20 dv", "धारा 20 घरेलू हिंसा", "custody order"],
-                title: {
-                    en: "Custody Orders",
-                    hi: "हिरासत आदेश",
-                    mr: "कोठडी आदेश"
-                },
-                explanation: {
-                    en: "Magistrate may grant temporary custody of children to aggrieved person and specify visitation rights. May also direct return of stridhan (woman's property/valuables).",
-                    hi: "मजिस्ट्रेट पीड़ित को बच्चों की अस्थायी हिरासत दे सकता है और मिलन के अधिकार निर्दिष्ट कर सकता है।",
-                    mr: "दंडाधिकारी पीडित व्यक्तीला मुलांची तात्पुरती कोठडी देऊ शकतो आणि भेट अधिकार निर्दिष्ट करू शकतो."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "gwa_7",
-                act: "Guardians and Wards Act, 1890",
-                section: "Section 7",
-                patterns: ["gwa section 7", "section 7 gwa", "guardianship section 7", "धारा 7 संरक्षकता"],
-                title: {
-                    en: "Application for Guardianship",
-                    hi: "संरक्षकता के लिए आवेदन",
-                    mr: "पालकत्वासाठी अर्ज"
-                },
-                explanation: {
-                    en: "Person desiring guardianship may apply to District Court. Court may appoint guardian of person (personal care) or property (estate management) or both, considering minor's welfare as paramount.",
-                    hi: "संरक्षक बनने की इच्छा रखने वाला व्यक्ति जिला न्यायालय में आवेदन कर सकता है।",
-                    mr: "पालक होण्याची इच्छा असलेली व्यक्ती जिल्हा न्यायालयात अर्ज करू शकते."
-                },
-                category: "Family Law"
-            },
-            {
-                id: "sma_27",
-                act: "Special Marriage Act, 1954",
-                section: "Section 27",
-                patterns: ["sma section 27", "special marriage act 27", "section 27 sma", "धारा 27 विशेष विवाह"],
-                title: {
-                    en: "Divorce under Special Marriage Act",
-                    hi: "विशेष विवाह अधिनियम के तहत तलाक",
-                    mr: "विशेष विवाह कायद्यांतर्गत घटस्फोट"
-                },
-                explanation: {
-                    en: "Either spouse may petition for divorce on grounds: adultery, cruelty, desertion (2+ years), conversion, mental disorder, leprosy, venereal disease, renunciation, presumption of death.",
-                    hi: "कोई भी पक्ष विशेष विवाह अधिनियम के तहत तलाक के लिए याचिका दायर कर सकता है।",
-                    mr: "कोणताही पक्ष विशेष विवाह कायद्यांतर्गत घटस्फोटासाठी याचिका दाखल करू शकतो."
-                },
-                category: "Family Law"
-            },
-
-            // ============ CRIMINAL LAW - BNS & Legacy ============
-            {
-                id: "bns_85",
-                act: "Bharatiya Nyaya Sanhita, 2023",
-                section: "Section 85",
-                patterns: ["bns 85", "section 85 bns", "भारतीय न्याय संहिता", "धारा 85 बीएनएस"],
-                title: {
-                    en: "Cruelty by Husband/Relatives (BNS)",
-                    hi: "पति/रिश्तेदारों द्वारा क्रूरता (बीएनएस)",
-                    mr: "पती/नातेवाईकांद्वारे क्रूरता (बीएनएस)"
-                },
-                explanation: {
-                    en: "Replaces IPC 498A. Husband or relative subjecting woman to cruelty punishable with 3 years imprisonment and fine. Includes willful conduct causing injury/danger to life or harassment for dowry.",
-                    hi: "आईपीसी 498ए को बदलता है। पति या रिश्तेदार द्वारा क्रूरता के लिए 3 वर्ष तक कैद।",
-                    mr: "आयपीसी 498अ बदलते. पती किंवा रिश्तेदार द्वारे क्रूरता 3 वर्षांपर्यंत कारावास."
-                },
-                category: "Criminal Law"
-            },
-            {
-                id: "ipc_304b",
-                act: "Indian Penal Code, 1860",
-                section: "Section 304B",
-                patterns: ["304b", "304-b", "section 304b", "sec 304b", "धारा 304ब", "कलम 304ब", "dowry death"],
-                title: {
-                    en: "Dowry Death",
-                    hi: "दहेज मृत्यु",
-                    mr: "हुंडा मृत्यू"
-                },
-                explanation: {
-                    en: "Woman's death within 7 years of marriage under abnormal circumstances due to cruelty/harassment for dowry. Punishment: minimum 7 years (up to life) imprisonment and fine.",
-                    hi: "विवाह के 7 वर्षों में दहेज के लिए क्रूरता के कारण महिला की मृत्यु। 7 वर्ष से आजीवन कैद।",
-                    mr: "लग्नाच्या 7 वर्षांच्या आत हुंडासाठी क्रूरतामुळे स्त्रीचा मृत्यू. 7 वर्षांपासून आजीवन कारावास."
-                },
-                category: "Criminal Law"
-            },
-
-            // ============ DOWRY PROHIBITION ============
-            {
-                id: "dp_2",
-                act: "Dowry Prohibition Act, 1961",
-                section: "Section 2",
-                patterns: ["dowry prohibition section 2", "dp act 2", "section 2 dp", "धारा 2 दहेज निषेध"],
-                title: {
-                    en: "Definition of Dowry",
-                    hi: "दहेज की परिभाषा",
-                    mr: "हुंड्याची व्याख्या"
-                },
-                explanation: {
-                    en: "Dowry means property/valuable security given by one party to marriage to the other at/before/after marriage as consideration for marriage. Excludes mahr/dower in Muslim marriages.",
-                    hi: "दहेज का अर्थ विवाह के एक पक्ष द्वारा दूसरे पक्ष को दी गई संपत्ति या मूल्यवान सुरक्षा।",
-                    mr: "हुंडा म्हणजे विवाहाच्या एका पक्षाद्वारा दुसऱ्या पक्षाला दिलेली मालमत्ता किंवा मौल्यवान सुरक्षा."
-                },
-                category: "Protection Acts"
-            },
-            {
-                id: "dp_3",
-                act: "Dowry Prohibition Act, 1961",
-                section: "Section 3",
-                patterns: ["dowry prohibition section 3", "dp act 3", "section 3 dp", "धारा 3 दहेज निषेध"],
-                title: {
-                    en: "Penalty for Giving/Taking Dowry",
-                    hi: "दहेज देने/लेने के लिए दंड",
-                    mr: "हुंडा देणे/घेणे यासाठी शिक्षा"
-                },
-                explanation: {
-                    en: "Giving or taking dowry punishable with minimum 5 years imprisonment (up to 10 years) and fine minimum Rs. 15,000 or dowry amount, whichever is more.",
-                    hi: "दहेज देना या लेना 5 से 10 वर्ष की कैद और न्यूनतम 15,000 रुपये का जुर्माना।",
-                    mr: "हुंडा देणे किंवा घेणे 5 ते 10 वर्षांचा कारावास आणि कमीतकमी 15,000 रुपयांचा दंड."
-                },
-                category: "Protection Acts"
-            }
-        ];
-
-        // Image preprocessing for Marathi
-        const preprocessImageForMarathi = (canvas) => {
-            const ctx = canvas.getContext('2d');
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-
-            // Binarization + Contrast enhancement for Devanagari
-            for (let i = 0; i < data.length; i += 4) {
-                const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-                const bw = gray > 150 ? 255 : 0;
-                data[i] = data[i + 1] = data[i + 2] = bw;
-            }
-
-            ctx.putImageData(imageData, 0, 0);
-        };
-
-        // Main App
-        function NyayaDecoder() {
-            const [file, setFile] = useState(null);
-            const [isProcessing, setIsProcessing] = useState(false);
-            const [progress, setProgress] = useState(0);
-            const [progressText, setProgressText] = useState("");
-            const [extractedText, setExtractedText] = useState("");
-            const [matchedSections, setMatchedSections] = useState([]);
-            const [showExtractedText, setShowExtractedText] = useState(false);
-            const [error, setError] = useState("");
-            const [dragOver, setDragOver] = useState(false);
-            const [selectedLanguage, setSelectedLanguage] = useState("en");
-            const [selectedOCRLanguage, setSelectedOCRLanguage] = useState("mar");
-            const [activeTab, setActiveTab] = useState("scan");
-            const [searchQuery, setSearchQuery] = useState("");
-            const [searchResults, setSearchResults] = useState([]);
-            const [ocrStats, setOcrStats] = useState(null);
-
-            const fileInputRef = useRef(null);
-
-            const handleFileSelect = (selectedFile) => {
-                setFile(selectedFile);
-                setExtractedText("");
-                setMatchedSections([]);
-                setError("");
-                setProgress(0);
-            };
-
-            const handleDrop = (e) => {
-                e.preventDefault();
-                setDragOver(false);
-                const droppedFile = e.dataTransfer.files[0];
-                if (droppedFile) handleFileSelect(droppedFile);
-            };
-
-            const handleDragOver = (e) => {
-                e.preventDefault();
-                setDragOver(true);
-            };
-
-            const handleDragLeave = () => {
-                setDragOver(false);
-            };
-
-            const processPDF = async (file) => {
-                try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    const numPages = pdf.numPages;
-                    let fullText = "";
-
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-
-                    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                        setProgressText(`Rendering page ${pageNum} of ${numPages}...`);
-                        setProgress((pageNum / (numPages * 2)) * 100);
-
-                        const page = await pdf.getPage(pageNum);
-                        const viewport = page.getViewport({ scale: 5.0 });
-
-                        canvas.width = viewport.width;
-                        canvas.height = viewport.height;
-
-                        await page.render({
-                            canvasContext: context,
-                            viewport: viewport
-                        }).promise;
-
-                        preprocessImageForMarathi(canvas);
-                        const imageData = canvas.toDataURL('image/png');
-
-                        setProgressText(`Processing page ${pageNum} of ${numPages} with OCR...`);
-
-                        const startTime = performance.now();
-                        const { data: { text } } = await Tesseract.recognize(
-                            imageData,
-                            selectedOCRLanguage,
-                            {
-                                logger: m => {
-                                    if (m.status === 'recognizing text') {
-                                        setProgress(((pageNum - 1) / numPages) * 50 + (m.progress * 50 / numPages));
-                                    }
-                                }
-                            }
-                        );
-                        const endTime = performance.now();
-
-                        fullText += `\n--- Page ${pageNum} ---\n${text}\n`;
-
-                        canvas.width = 0;
-                        canvas.height = 0;
-                    }
-
-                    setOcrStats({
-                        totalPages: numPages,
-                        processingTime: (endTime - startTime).toFixed(2),
-                        language: selectedOCRLanguage
-                    });
-
-                    return fullText;
-                } catch (err) {
-                    throw new Error(`PDF processing failed: ${err.message}`);
-                }
-            };
-
-            const processImage = async (file) => {
-                try {
-                    setProgressText("Loading image...");
-                    setProgress(10);
-
-                    const reader = new FileReader();
-                    const imagePromise = new Promise((resolve, reject) => {
-                        reader.onload = (e) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                canvas.width = img.width;
-                                canvas.height = img.height;
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(img, 0, 0);
-                                preprocessImageForMarathi(canvas);
-                                const imageData = canvas.toDataURL('image/png');
-                                resolve(imageData);
-                            };
-                            img.onerror = () => reject(new Error("Image loading failed"));
-                            img.src = e.target.result;
-                        };
-                        reader.onerror = () => reject(new Error("File reading failed"));
-                        reader.readAsDataURL(file);
-                    });
-
-                    const imageData = await imagePromise;
-
-                    setProgressText("Extracting text from image...");
-                    setProgress(30);
-
-                    const startTime = performance.now();
-                    const { data: { text } } = await Tesseract.recognize(
-                        imageData,
-                        selectedOCRLanguage,
-                        {
-                            logger: m => {
-                                if (m.status === 'recognizing text') {
-                                    setProgress(30 + (m.progress * 60));
-                                }
-                            }
-                        }
-                    );
-                    const endTime = performance.now();
-
-                    setOcrStats({
-                        totalPages: 1,
-                        processingTime: (endTime - startTime).toFixed(2),
-                        language: selectedOCRLanguage
-                    });
-
-                    return text;
-                } catch (err) {
-                    throw new Error(`Image processing failed: ${err.message}`);
-                }
-            };
-
-            const matchLegalSections = (text) => {
-                const matches = [];
-                const textLower = text.toLowerCase();
-
-                LEGAL_DATABASE.forEach(section => {
-                    const hasMatch = section.patterns.some(pattern => 
-                        textLower.includes(pattern.toLowerCase())
-                    );
-
-                    if (hasMatch) {
-                        matches.push(section);
-                    }
-                });
-
-                return matches;
-            };
-
-            const searchLegalDatabase = (query) => {
-                const lowerQuery = query.toLowerCase();
-                const results = LEGAL_DATABASE.filter(section => 
-                    section.section.toLowerCase().includes(lowerQuery) ||
-                    section.act.toLowerCase().includes(lowerQuery) ||
-                    section.title.en.toLowerCase().includes(lowerQuery) ||
-                    section.title.hi.toLowerCase().includes(lowerQuery) ||
-                    section.title.mr.toLowerCase().includes(lowerQuery)
-                );
-                setSearchResults(results);
-            };
-
-            const handleScan = async () => {
-                if (!file) return;
-
-                setIsProcessing(true);
-                setError("");
-                setProgress(0);
-                setExtractedText("");
-                setMatchedSections([]);
-                setOcrStats(null);
-
-                try {
-                    let text = "";
-
-                    if (file.type === "application/pdf") {
-                        text = await processPDF(file);
-                    } else if (file.type.startsWith("image/")) {
-                        text = await processImage(file);
-                    } else {
-                        throw new Error("Unsupported file type");
-                    }
-
-                    setExtractedText(text);
-                    setProgress(95);
-                    setProgressText("Analyzing legal sections...");
-
-                    const matches = matchLegalSections(text);
-                    setMatchedSections(matches);
-
-                    setProgress(100);
-                    setProgressText("Complete!");
-
-                } catch (err) {
-                    setError(err.message);
-                } finally {
-                    setIsProcessing(false);
-                }
-            };
-
-            const handleReset = () => {
-                setFile(null);
-                setExtractedText("");
-                setMatchedSections([]);
-                setProgress(0);
-                setError("");
-                setOcrStats(null);
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
-                }
-            };
-
-            return (
-                <div className="app-container">
-                    <div className="header">
-                        <h1>⚖️ Nyaya Decoder v3</h1>
-                        <p>Marathi-Optimized Legal Document Scanner</p>
-                    </div>
-
-                    <div className="tabs-container">
-                        <div className="tab-buttons">
-                            <div className={`tab-button ${activeTab === 'scan' ? 'active' : ''}`} onClick={() => setActiveTab('scan')}>
-                                🔍 Scan Document
-                            </div>
-                            <div className={`tab-button ${activeTab === 'search' ? 'active' : ''}`} onClick={() => setActiveTab('search')}>
-                                📚 Search Database
-                            </div>
-                        </div>
-                    </div>
-
-                    {activeTab === 'scan' && (
-                        <>
-                            <div className="glass-card">
-                                <div 
-                                    className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
-                                    onClick={() => fileInputRef.current?.click()}
-                                    onDrop={handleDrop}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                >
-                                    <div className="upload-icon">📄</div>
-                                    <div style={{fontSize: "1.1rem", marginBottom: "8px"}}>
-                                        {file ? file.name : "Click or Drop File Here"}
-                                    </div>
-                                    <div style={{fontSize: "0.85rem", opacity: "0.6"}}>
-                                        PDF, JPG, PNG (Multi-page supported)
-                                    </div>
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        style={{display: "none"}}
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        onChange={(e) => handleFileSelect(e.target.files[0])}
-                                    />
-                                </div>
-
-                                {file && !isProcessing && matchedSections.length === 0 && (
-                                    <div className="controls-section">
-                                        <div className="control-group">
-                                            <div className="control-label">📝 OCR Language (Optimized for Marathi):</div>
-                                            <div className="lang-selector">
-                                                <div 
-                                                    className={`lang-option ${selectedOCRLanguage === 'eng' ? 'active' : ''}`}
-                                                    onClick={() => setSelectedOCRLanguage('eng')}
-                                                >
-                                                    English
-                                                </div>
-                                                <div 
-                                                    className={`lang-option ${selectedOCRLanguage === 'hin' ? 'active' : ''}`}
-                                                    onClick={() => setSelectedOCRLanguage('hin')}
-                                                >
-                                                    हिंदी
-                                                </div>
-                                                <div 
-                                                    className={`lang-option ${selectedOCRLanguage === 'mar' ? 'active' : ''}`}
-                                                    onClick={() => setSelectedOCRLanguage('mar')}
-                                                >
-                                                    मराठी ⭐
-                                                </div>
-                                                <div 
-                                                    className={`lang-option ${selectedOCRLanguage === 'eng+hin+mar' ? 'active' : ''}`}
-                                                    onClick={() => setSelectedOCRLanguage('eng+hin+mar')}
-                                                >
-                                                    All Three
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="action-buttons">
-                                            <button className="btn" onClick={handleScan}>
-                                                🔍 Scan & Analyze
-                                            </button>
-                                            <button className="btn btn-secondary" onClick={handleReset}>
-                                                🔄 Reset
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {isProcessing && (
-                                    <div className="progress-container">
-                                        <div className="progress-bar">
-                                            <div className="progress-fill" style={{ width: `${progress}%` }} />
-                                        </div>
-                                        <div className="progress-text">{progressText} ({Math.round(progress)}%)</div>
-                                        <div className="spinner" />
-                                    </div>
-                                )}
-
-                                {error && <div className="error-message">❌ {error}</div>}
-                            </div>
-
-                            {matchedSections.length > 0 && (
-                                <div className="results-container">
-                                    <div className="glass-card">
-                                        <h2 style={{ marginBottom: '16px' }}>📋 Detected Sections ({matchedSections.length})</h2>
-
-                                        {ocrStats && (
-                                            <div className="ocrStats">
-                                                <div className="stat-row"><span className="stat-label">Pages:</span><span>{ocrStats.totalPages}</span></div>
-                                                <div className="stat-row"><span className="stat-label">Time:</span><span>{ocrStats.processingTime}ms</span></div>
-                                                <div className="stat-row"><span className="stat-label">Language:</span><span>{ocrStats.language}</span></div>
-                                            </div>
-                                        )}
-
-                                        <div className="language-tabs">
-                                            {['en', 'hi', 'mr'].map(lang => (
-                                                <div 
-                                                    key={lang}
-                                                    className={`language-tab ${selectedLanguage === lang ? 'active' : ''}`}
-                                                    onClick={() => setSelectedLanguage(lang)}
-                                                >
-                                                    {lang === 'en' ? 'English' : lang === 'hi' ? 'हिंदी' : 'मराठी'}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {matchedSections.map((section, idx) => (
-                                            <div key={idx} className="result-card">
-                                                <div className="result-header">
-                                                    <div className="result-title">{section.title[selectedLanguage]}</div>
-                                                    <div className="result-badges">
-                                                        <div className="result-badge">{section.category}</div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="result-section">
-                                                    <div className="result-label">Act & Section:</div>
-                                                    <div className="result-content"><strong>{section.act}</strong> - {section.section}</div>
-                                                </div>
-
-                                                <div className="result-section">
-                                                    <div className="result-label">Explanation:</div>
-                                                    <div className="result-content">{section.explanation[selectedLanguage]}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-
-                                        <div className="action-buttons">
-                                            <button className="btn btn-secondary" onClick={() => setShowExtractedText(!showExtractedText)}>
-                                                {showExtractedText ? '🙈 Hide' : '👁️ Show'} Extracted Text
-                                            </button>
-                                            <button className="btn" onClick={handleReset}>
-                                                🔄 New Scan
-                                            </button>
-                                        </div>
-
-                                        {showExtractedText && extractedText && (
-                                            <div className="extracted-text">
-                                                <strong>Extracted Text:</strong>
-                                                <div style={{ marginTop: '8px' }}>{extractedText}</div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-
-                    {activeTab === 'search' && (
-                        <div className="glass-card">
-                            <h2 style={{ marginBottom: '16px' }}>🔎 Search Legal Database</h2>
-                            <div className="control-group">
-                                <div className="control-label">Search by Section Number, Act Name, or Keyword:</div>
-                                <input
-                                    type="text"
-                                    className="search-input"
-                                    placeholder="e.g., 'Section 61', 'CrPC 125', 'marriage', 'maintenance', etc."
-                                    value={searchQuery}
-                                    onChange={(e) => {
-                                        setSearchQuery(e.target.value);
-                                        if (e.target.value.trim()) {
-                                            searchLegalDatabase(e.target.value);
-                                        } else {
-                                            setSearchResults([]);
-                                        }
-                                    }}
-                                />
-                            </div>
-
-                            {searchQuery && (
-                                <div className="search-results">
-                                    {searchResults.length > 0 ? (
-                                        <>
-                                            <h3 style={{marginBottom: "16px"}}>Found {searchResults.length} Result(s)</h3>
-
-                                            <div className="language-tabs">
-                                                {['en', 'hi', 'mr'].map(lang => (
-                                                    <div 
-                                                        key={lang}
-                                                        className={`language-tab ${selectedLanguage === lang ? 'active' : ''}`}
-                                                        onClick={() => setSelectedLanguage(lang)}
-                                                    >
-                                                        {lang === 'en' ? 'English' : lang === 'hi' ? 'हिंदी' : 'मराठी'}
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            {searchResults.map((section, idx) => (
-                                                <div key={idx} className="result-card">
-                                                    <div className="result-header">
-                                                        <div className="result-title">{section.title[selectedLanguage]}</div>
-                                                        <div className="result-badges">
-                                                            <div className="result-badge">{section.category}</div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="result-section">
-                                                        <div className="result-label">Act & Section:</div>
-                                                        <div className="result-content"><strong>{section.act}</strong> - {section.section}</div>
-                                                    </div>
-
-                                                    <div className="result-section">
-                                                        <div className="result-label">Explanation:</div>
-                                                        <div className="result-content">{section.explanation[selectedLanguage]}</div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </>
-                                    ) : (
-                                        <div className="no-results">
-                                            No sections found matching "{searchQuery}"
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            );
+<nav>
+  <a class="logo" href="#">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v19M5 10l7-7 7 7"/><path d="M3 17h4l2 3h6l2-3h4"/>
+    </svg>
+    <span class="logo-name">Nyaya<span>Decoder</span></span>
+  </a>
+  <div class="nav-r">
+    <span class="nav-hint">Empowering Innocent Men with Absolute Clarity</span>
+    <button class="tog" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span id="tIco">🌙</span><span id="tLbl">Dark</span>
+    </button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badge">⚖️ Statutory Protection & Legal Awareness</div>
+  <h1>Know Your Rights.<br><em>Counter</em> False Allegations.</h1>
+  <p>Instantly clear up complex legal terminology. Search any critical section across the old codes and the newly enforced Bharatiya Nyaya Sanhita.</p>
+
+  <div class="sw">
+    <div class="sb">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="q" placeholder="e.g., Section 498A IPC, BNS Section 85, False complaint protection..." onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off" spellcheck="false" />
+      <button class="sbtn" onclick="doSearch()">Search</button>
+    </div>
+    <div class="chips">
+      <span class="chip" onclick="fill('Section 498A IPC')">498A IPC (Cruelty)</span>
+      <span class="chip" onclick="fill('BNS Section 85')">BNS Section 85</span>
+      <span class="chip" onclick="fill('POCSO Act Section 22')">POCSO Sec 22 (False Cases)</span>
+      <span class="chip" onclick="fill('Dowry Prohibition Act Section 3')">Dowry Act Sec 3</span>
+      <span class="chip" onclick="fill('Domestic Violence Act Protection')">DV Act Safeguards</span>
+      <span class="chip" onclick="fill('Section 125 CrPC')">Sec 125 CrPC (Maintenance)</span>
+    </div>
+  </div>
+</section>
+
+<div class="st" id="er">
+  <p class="errtxt" id="erMsg"></p>
+</div>
+
+<section class="res" id="res">
+  <div class="card">
+    <div class="ch">
+      <div class="ctitle" id="rTitle"></div>
+      <div class="cbadge" id="rBadge"></div>
+    </div>
+    <div class="cb">
+      <div class="lblock">
+        <div class="blabel">Actual Bare Act Text</div>
+        <div class="ltext" id="rLaw"></div>
+      </div>
+      <div class="eblock">
+        <div class="blabel">Plain English Meaning</div>
+        <div class="etext" id="rExp"></div>
+      </div>
+      <div class="ctx" id="rCtx"></div>
+    </div>
+    <div class="tbar">
+      <span class="tlbl">Translate explanation with contextual accuracy:</span>
+      <button class="tbtn" id="btnHi" onclick="showTranslation('hi')">🇮🇳 &nbsp;Hindi (हिंदी)</button>
+      <button class="tbtn" id="btnMr" onclick="showTranslation('mr')">🟠 &nbsp;Marathi (मराठी)</button>
+    </div>
+    <div class="tlwrap" id="tlWrap">
+      <div class="tlcard">
+        <div class="blabel" id="tlLbl"></div>
+        <div class="tltext" id="tlText"></div>
+      </div>
+    </div>
+  </div>
+  <div class="disc">
+    <span>⚠️</span>
+    <span><strong>Legal Disclaimer:</strong> This portal offers public information compiled directly from the Indian Penal Code, Criminal Procedure Code, and Bharatiya Nyaya Sanhita. It does not constitute formal legal counsel. If you are confronting malicious legal disputes or false litigation, immediately engage a qualified defense advocate.</span>
+  </div>
+</section>
+
+<section class="mission">
+  <div class="mi">
+    <h2>Why This Framework Exists</h2>
+    <p>Navigating structural gender imbalances in standard procedural laws leaves many innocent men highly vulnerable. Complex legal jargon can act as a barrier to understanding basic statutory shields.</p>
+    <p>This localized database resolves this asymmetry by presenting raw statutory provisions right alongside actionable plain-language analysis, ensuring a balanced, precise understanding of your rights.</p>
+  </div>
+</section>
+
+<footer>
+  &copy; 2026 Nyaya Decoder &nbsp;&middot;&nbsp; Designed to demystify Indian law for citizens under stress.
+</footer>
+
+<script>
+  // Robust Client-Side Legal Database with true Contextual Translations
+  const LEGAL_DATABASE = [
+    {
+      id: "498a",
+      keywords: ["498a", "ipc 498a", "cruelty", "husband", "relative", "harassment"],
+      lawTitle: "Section 498A of the Indian Penal Code (IPC)",
+      section: "Section 498A IPC",
+      actualText: "Husband or relative of husband of a woman subjecting her to cruelty.—Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine.",
+      simpleExplanation: "This provision penalizes a husband or his family members if they subject the wife to physical or psychological cruelty. It is a non-bailable offense. Note: In malicious or staged cases, Supreme Court guidelines (such as Arnesh Kumar v. State of Bihar) mandate that police cannot arbitrarily arrest you or your family without primary verification and issuing a Section 41A notice first.",
+      context: "Supreme Court mandates a strict check on automatic arrests under this section to avoid misuse.",
+      translations: {
+        hi: {
+          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
+          text: "यह धारा पति या उसके रिश्तेदारों द्वारा पत्नी के प्रति क्रूरता (शारीरिक या मानसिक उत्पीड़न) को दंडित करती है। यह गैर-जमानती है। लेकिन ध्यान दें: झूठे मामलों से सुरक्षा के लिए, सुप्रीम कोर्ट (अर्णेश कुमार बनाम बिहार राज्य) के सख्त निर्देश हैं कि पुलिस बिना प्राथमिक जांच या धारा 41A के नोटिस के आपको या आपके परिवार को सीधे गिरफ्तार नहीं कर सकती।"
+        },
+        mr: {
+          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
+          text: "या कलमांतर्गत पती किंवा त्याच्या नातेवाईकांनी पत्नीचा शारीरिक किंवा मानसिक छळ केल्यास शिक्षेची तरतूद आहे. हा गुन्हा अजामीनपात्र आहे. परंतु महत्त्वाची बाब म्हणजे: खोट्या प्रकरणांमध्ये संरक्षण मिळवण्यासाठी, सर्वोच्च न्यायालयाने (अर्णेश कुमार वि. बिहार राज्य) आदेश दिला आहे की, प्राथमिक चौकशी केल्याशिवाय आणि कलम 41A ची नोटीस दिल्याशिवाय पोलीस थेट अटक करू शकत नाहीत."
         }
+      }
+    },
+    {
+      id: "bns85",
+      keywords: ["bns 85", "section 85", "bns", "cruelty bns", "new law"],
+      lawTitle: "Section 85 of the Bharatiya Nyaya Sanhita (BNS), 2023",
+      section: "Section 85 BNS",
+      actualText: "Husband or relative of husband of a woman subjecting her to cruelty.—Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine.",
+      simpleExplanation: "This is the newly enacted equivalent of the classic Section 498A IPC under the revised criminal codes. The fundamental components of the offense remain identical to 498A IPC, and standard protective procedural guidelines set by high courts against arbitrary arrests continue to apply to this new section.",
+      context: "Replaces Section 498A IPC starting July 2024. All supreme court safeguards against misuse apply here completely.",
+      translations: {
+        hi: {
+          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
+          text: "यह नए कानूनों (BNS) के तहत पुरानी धारा 498A IPC का नया रूप है। इसके तहत परिभाषा और सजा वही है। इसके दुरुपयोग को रोकने के लिए सुप्रीम कोर्ट द्वारा बनाए गए सभी सुरक्षा नियम (जैसे कि बिना जांच मनमानी गिरफ्तारी पर रोक) इस नई धारा पर भी पूरी तरह लागू होते हैं।"
+        },
+        mr: {
+          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
+          text: "नवीन फौजदारी कायद्यानुसार (BNS) हे जुन्या कलम 498A IPC चे नवे रूप आहे. गुन्ह्याचे स्वरूप आणि शिक्षा पूर्वीसारखीच आहे. या कायद्याचा गैरवापर रोखण्यासाठी सर्वोच्च न्यायालयाने दिलेले सर्व मार्गदर्शक तत्वे (उदा. चौकशीशिवाय थेट अटकेला बंदी) या नवीन कलमालाही लागू आहेत."
+        }
+      }
+    },
+    {
+      id: "pocso22",
+      keywords: ["pocso", "pocso 22", "false accusation", "false complaint", "pocso false"],
+      lawTitle: "Section 22 of the POCSO Act, 2012",
+      section: "Section 22 POCSO",
+      actualText: "Punishment for false complaint or false information.—Where a person makes a false complaint or provides false information against any person solely with the intention to humiliate, extort, threaten or defame him... such person shall be punished with imprisonment which may extend to six months or with fine or with both.",
+      simpleExplanation: "If an individual maliciously files a totally fabricated case under the POCSO Act against a man solely to blackmail, defame, or extort money, that accuser can be criminally prosecuted under this section and sentenced to prison.",
+      context: "A direct statutory defense shield against extortion or manufactured cases involving minors.",
+      translations: {
+        hi: {
+          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
+          text: "यदि कोई व्यक्ति किसी निर्दोष पुरुष को केवल अपमानित करने, पैसे वसूलने (ब्लैकमेल), या बदनाम करने के इरादे से पॉक्सो (POCSO) एक्ट के तहत झूठी शिकायत दर्ज कराता है, तो इस धारा के तहत उस झूठी शिकायत करने वाली महिला या व्यक्ति को 6 महीने तक की जेल या जुर्माना हो सकता है।"
+        },
+        mr: {
+          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
+          text: "जर एखाद्या व्यक्तीने केवळ पैसे उकळण्याच्या (ब्लॅकमेल), अपमान करण्याच्या किंवा बदनाम करण्याच्या हेतूने पॉक्सो (POCSO) कायद्यांतर्गत खोटा गुन्हा दाखल केला, तर या कलमानुसार खोटा गुन्हा दाखल करणाऱ्या व्यक्तीला ६ महिन्यांपर्यंतची जेल किंवा दंडाची शिक्षा होऊ शकते."
+        }
+      }
+    },
+    {
+      id: "dowry3",
+      keywords: ["dowry", "dowry 3", "dowry prohibition", "giving dowry"],
+      lawTitle: "Section 3 of the Dowry Prohibition Act, 1961",
+      section: "Section 3 Dowry Act",
+      actualText: "Penalty for giving or taking dowry.—If any person, after the commencement of this Act, gives or takes or abets the giving or taking of dowry, he shall be punishable with imprisonment for a term which shall not be less than five years, and with fine...",
+      simpleExplanation: "This law penalizes both giving and taking dowry. In cases where a wife's family files a false case alleging dowry extraction, if they record in court that they 'gave' dowry willingly, this section theoretically exposes the accuser's family to legal penalties as well, serving as an effective cross-check against exaggerations.",
+      context: "The law treats the giver and taker of dowry with equal strictness, which acts as a deterrent against falsified financial statements.",
+      translations: {
+        hi: {
+          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
+          text: "यह कानून दहेज देने और लेने दोनों को अपराध मानता है। यदि कोई पक्ष कोर्ट में झूठा केस दर्ज कराता है और यह दावा करता है कि उसने शादी में भारी दहेज 'दिया' था, तो कानूनी तौर पर दहेज देने के जुर्म में शिकायतकर्ता का परिवार भी इस धारा के तहत कार्रवाई के दायरे में आ सकता है।"
+        },
+        mr: {
+          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
+          text: "हा कायदा हुंडा देणे आणि घेणे या दोन्ही गोष्टींना गुन्हा मानतो. जर सासरच्या छळाचा खोटा गुन्हा दाखल करताना वधू पक्षाने कोर्टात कबूल केले की त्यांनी हुंडा 'दिला' होता, तर या कलमाचा वापर करून हुंडा देणाऱ्यांवरही कायदेशीर कारवाईची मागणी करता येऊ शकते."
+        }
+      }
+    },
+    {
+      id: "dvact",
+      keywords: ["dv act", "domestic violence", "bail", "protection", "false dv"],
+      lawTitle: "The Protection of Women from Domestic Violence Act, 2005 (Safeguards)",
+      section: "DV Act Overview",
+      actualText: "Provisions for monetary reliefs, residence orders, and protection orders to aggrieved persons under Sections 18, 19, and 20.",
+      simpleExplanation: "The DV Act is a civil remedy, meaning standard complaints under it do not lead to instant criminal arrest. Husbands cannot be thrown out of their ancestral homes without extensive evidence. Courts heavily scrutinize complaints where a wife files for maintenance simultaneously across multiple forums (DV, 125 CrPC, and HMA).",
+      context: "Purely civil in nature initially. No immediate arrest can take place under a basic DV application.",
+      translations: {
+        hi: {
+          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
+          text: "घरेलू हिंसा अधिनियम (DV Act) एक दीवानी (Civil) कानून है, आपराधिक नहीं। इसलिए इसमें शिकायत दर्ज होते ही कोई तुरंत गिरफ्तारी नहीं होती। कोर्ट अब इस बात पर सख्त हैं कि पत्नियां एक ही समय में कई अलग-अलग कोर्ट में (जैसे DV Act, 125 CrPC और तलाक केस में) अलग-अलग गुजारा भत्ते की मांग नहीं कर सकतीं।"
+        },
+        mr: {
+          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
+          text: "कौटुंबिक हिंसाचार कायदा (DV Act) हा मूळतः दिवाणी (Civil) स्वरूपाचा आहे, फौजदारी नाही. त्यामुळे तक्रार होताच लगेच अटक होत नाही. एकाच वेळी अनेक न्यायालयांमध्ये (DV Act, कलम १२५ आणि घटस्फोट खटला) वेगवेगळ्या देखभालीच्या (पोटगी) मागण्या करण्याच्या प्रवृत्तीला कोर्ट आता चाप लावत आहे."
+        }
+      }
+    },
+    {
+      id: "crpc125",
+      keywords: ["125", "crpc 125", "maintenance", "poti", "wife earning", "bnss 144"],
+      lawTitle: "Section 125 of the Criminal Procedure Code (CrPC) / Sec 144 BNSS",
+      section: "Section 125 CrPC",
+      actualText: "Order for maintenance of wives, children and parents.—If any person having sufficient means neglects or refuses to maintain his wife, unable to maintain herself... a Magistrate may order monthly maintenance.",
+      simpleExplanation: "While this law secures support for a dependent wife, if she is highly qualified, voluntarily resigns from work to sit idle, or is living in adultery, the husband cannot be legally forced to pay maintenance. The husband must present proof of her income, qualifications, or desertion to successfully defend his position.",
+      context: "Earning or highly qualified wives are legally ineligible for financial maintenance if they willfully exit jobs.",
+      translations: {
+        hi: {
+          label: "कानूनी संदर्भ के साथ हिंदी व्याख्या",
+          text: "यह धारा पत्नी को गुजारा भत्ता (खर्चा) देने का प्रावधान करती है। लेकिन, यदि पत्नी अत्यधिक शिक्षित है, अपनी मर्जी से नौकरी छोड़कर बैठी है, या बिना किसी ठोस कारण के अलग रह रही है, तो पति उसे गुजारा भत्ता देने से इनकार कर सकता है। इसके लिए पति को कोर्ट में उसकी डिग्री या कमाई के सबूत पेश करने होंगे।"
+        },
+        mr: {
+          label: "कानूनी संदर्भासह मराठी स्पष्टीकरण",
+          text: "हे कलम पत्नीला पोटगी देण्याबाबत आहे. तथापि, जर पत्नी उच्चशिक्षित असेल, स्वतःहून नोकरी सोडली असेल, किंवा कोणत्याही ठोस कारणाशिवाय पतीपासून वेगळी राहत असेल, तर पती पोटगी देण्यास नकार देऊ शकतो. पतीला न्यायालयात तिच्या शिक्षणाचे किंवा उत्पन्नाचे पुरावे सादर करावे लागतील."
+        }
+      }
+    }
+  ];
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<NyayaDecoder />);
-    </script>
+  let activeLaw = null;
+  let theme = 'light';
+
+  function toggleTheme() {
+    theme = theme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('tIco').textContent = theme === 'light' ? '🌙' : '☀️';
+    document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark' : 'Light';
+  }
+
+  function fill(text) {
+    document.getElementById('q').value = text;
+    doSearch();
+  }
+
+  function resetUI() {
+    document.getElementById('er').classList.remove('on');
+    document.getElementById('res').classList.remove('on');
+    document.getElementById('tlWrap').classList.remove('on');
+    document.getElementById('btnHi').classList.remove('active');
+    document.getElementById('btnMr').classList.remove('active');
+  }
+
+  function doSearch() {
+    const rawQuery = document.getElementById('q').value.trim().toLowerCase();
+    if (!rawQuery) return;
+
+    resetUI();
+
+    // Smart Client Side Fuzzy Finder
+    const match = LEGAL_DATABASE.find(item => {
+      return item.keywords.some(keyword => rawQuery.includes(keyword)) || 
+             item.section.toLowerCase().includes(rawQuery) || 
+             item.lawTitle.toLowerCase().includes(rawQuery);
+    });
+
+    if (match) {
+      activeLaw = match;
+      document.getElementById('rTitle').textContent = match.lawTitle;
+      document.getElementById('rBadge').textContent = match.section;
+      document.getElementById('rLaw').textContent = match.actualText;
+      document.getElementById('rExp').textContent = match.simpleExplanation;
+      document.getElementById('rCtx').innerHTML = match.context ? '📌 <strong>Crucial Defense Note:</strong> ' + match.context : '';
+      
+      document.getElementById('res').classList.add('on');
+      document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      document.getElementById('erMsg').innerHTML = `<strong>No direct matches found for "${document.getElementById('q').value}".</strong><br><span style="font-size:0.85rem; color:var(--t2);">Try searching for specific targeted keywords like '498A', 'BNS 85', '125 CrPC', 'POCSO' or 'Dowry'.</span>`;
+      document.getElementById('er').classList.add('on');
+    }
+  }
+
+  function showTranslation(langCode) {
+    if (!activeLaw || !activeLaw.translations[langCode]) return;
+
+    const btnHi = document.getElementById('btnHi');
+    const btnMr = document.getElementById('btnMr');
+    const wrap = document.getElementById('tlWrap');
+    const lbl = document.getElementById('tlLbl');
+    const txt = document.getElementById('tlText');
+
+    const targetBtn = (langCode === 'hi') ? btnHi : btnMr;
+    const alternateBtn = (langCode === 'hi') ? btnMr : btnHi;
+
+    // Toggle logic if clicking an already active translation button
+    if (targetBtn.classList.contains('active')) {
+      targetBtn.classList.remove('active');
+      wrap.classList.remove('on');
+      return;
+    }
+
+    targetBtn.classList.add('active');
+    alternateBtn.classList.remove('active');
+
+    lbl.textContent = activeLaw.translations[langCode].label;
+    txt.textContent = activeLaw.translations[langCode].text;
+    wrap.classList.add('on');
+  }
+</script>
 </body>
 </html>
