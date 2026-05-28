@@ -1,4 +1,6 @@
-// PUT YOUR GEMINI API KEY HERE
+// -----------------------------------------------
+// PUT YOUR GROQ API KEY HERE
+// Free key at: console.groq.com
 const GROQ_KEY = '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';
 // -----------------------------------------------
 
@@ -7,29 +9,34 @@ let curFullText = '';
 let curLang = '';
 let theme = 'light';
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GROQ_KEY}`;
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-async function callGemini(prompt, retries = 2) {
-  const res = await fetch(GEMINI_URL, {
+async function callGroq(prompt, retries = 2) {
+  const res = await fetch(GROQ_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_KEY}`
+    },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.2, maxOutputTokens: 1500 }
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.2,
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }]
     })
   });
 
   if (res.status === 429) {
     if (retries > 0) {
       await new Promise(r => setTimeout(r, 4000));
-      return callGemini(prompt, retries - 1);
+      return callGroq(prompt, retries - 1);
     }
     throw new Error('Too many requests. Wait a few seconds and try again.');
   }
 
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return data.choices?.[0]?.message?.content || '';
 }
 
 function toggleTheme() {
@@ -82,7 +89,7 @@ Respond ONLY with a valid JSON object. No markdown fences. No preamble. Raw JSON
 You must know all Indian laws: BNS 2023, BNSS 2023, BSA 2023, IPC 1860, CrPC 1973, Indian Evidence Act 1872, Protection of Women from Domestic Violence Act 2005, POCSO Act 2012, Dowry Prohibition Act 1961, Hindu Marriage Act 1955, Special Marriage Act 1954, Hindu Succession Act 1956, Muslim Personal Law, Christian Personal Law, Guardians and Wards Act 1890, Maintenance and Welfare of Parents Act, IT Act 2000, Companies Act, Income Tax Act, GST Act, RTI Act, Constitution of India, all Fundamental Rights, all Directive Principles, and every other Central or State law from the beginning of Indian legal history including colonial era laws.`;
 
   try {
-    const raw = await callGemini(prompt);
+    const raw = await callGroq(prompt);
     const m = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('Parse error');
     const r = JSON.parse(m[0]);
@@ -136,7 +143,6 @@ async function translate(code, name, label) {
   txt.textContent = 'Translating with full context...';
   wrap.classList.add('on');
 
-  // Use Gemini for context-aware translation. Not word-for-word.
   const prompt = `You are an expert Indian legal translator fluent in ${name}.
 
 Here is the original law text for context:
@@ -156,10 +162,10 @@ Critical rules:
 - Return ONLY the translated explanation. Nothing else. No labels. No quotes.`;
 
   try {
-    const translated = await callGemini(prompt);
+    const translated = await callGroq(prompt);
     txt.textContent = translated.trim();
-  } catch {
-    txt.textContent = 'Translation failed. Please try again.';
+  } catch (e) {
+    txt.textContent = e.message || 'Translation failed. Please try again.';
   } finally {
     btnHi.disabled = false;
     btnMr.disabled = false;
