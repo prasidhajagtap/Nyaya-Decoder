@@ -3,7 +3,6 @@
 // No API key here. Key is safe inside Cloudflare.
 const WORKER = 'https://law-made-simple-proxy.jkuku7866.workers.dev';
 // -----------------------------------------------
-
 let curExp = '';
 let curFullText = '';
 let curLang = '';
@@ -80,8 +79,24 @@ async function doSearch() {
     makeList(document.getElementById('rJudgeList'), r.keyJudgments);
     makeList(document.getElementById('rStepsList'), r.stepsForMen);
 
+    // Show amendment note if present
+    const amendBox = document.getElementById('rAmend');
+    if (amendBox) {
+      if (r.amendmentNote && r.amendmentNote !== 'null') {
+        amendBox.textContent = '📋 ' + r.amendmentNote;
+        amendBox.style.display = 'block';
+      } else {
+        amendBox.style.display = 'none';
+      }
+    }
     curExp = r.simpleExplanation || '';
     curFullText = r.actualText || '';
+
+    // India Code verify link
+    const lawQuery = encodeURIComponent((r.lawTitle || q).replace(/section/gi,'').trim());
+    const indiaCodeUrl = 'https://www.indiacode.nic.in/search?searchstring=' + lawQuery;
+    const verifyLink = document.getElementById('verifyLink');
+    if (verifyLink) verifyLink.href = indiaCodeUrl;
 
     hide('ld'); show('res');
     document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -95,7 +110,7 @@ async function doSearch() {
   }
 }
 
-async function translate(code, name, label) {
+async function doTranslate(code, name, label) {
   if (!curExp) return;
 
   const btnHi = document.getElementById('btnHi');
