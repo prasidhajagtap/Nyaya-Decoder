@@ -33,7 +33,19 @@ function toggleTheme() {
   document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark' : 'Light';
 }
 
-function fill(t) { document.getElementById('q').value = t; doSearch(); }
+// Fill search from chip clicks
+function fillSearch(actValue, section) {
+  const sel = document.getElementById('actSelect');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value.toLowerCase().includes(actValue.toLowerCase())) {
+      sel.selectedIndex = i;
+      break;
+    }
+  }
+  document.getElementById('sectionInput').value = section;
+  doSearch();
+}
+
 function show(id) { document.getElementById(id).classList.add('on'); }
 function hide(id) { document.getElementById(id).classList.remove('on'); }
 
@@ -48,63 +60,52 @@ function resetUI() {
 function makeList(el, items) {
   el.innerHTML = '';
   (items || []).forEach(item => {
+    if (!item || item === 'null') return;
     const li = document.createElement('li');
     li.textContent = item;
     el.appendChild(li);
   });
 }
 
-function normalizeQuery(q) {
-  // Fix common shorthand: BNSS144 -> BNSS Section 144, BNS85 -> BNS Section 85
-  q = q.replace(/(BNS|BNSS|BSA|IPC|CrPC)\s*(\d+)/gi, (_, act, num) => act.toUpperCase() + ' Section ' + num);
-  // Fix sec/s. shorthand: sec144 -> Section 144
-  q = q.replace(/(sec|s\.)\s*(\d+)/gi, 'Section $2');
-  // Normalize known act names
-  q = q.replace(/bnss/gi, 'BNSS');
-  q = q.replace(/bns/gi, 'BNS');
-  q = q.replace(/bsa/gi, 'BSA');
-  q = q.replace(/ipc/gi, 'IPC');
-  q = q.replace(/cr\.?pc/gi, 'CrPC');
-  return q.trim();
-}
-
 async function doSearch() {
-  const q = document.getElementById('q').value.trim();
-  if (!q) return;
+  const act     = document.getElementById('actSelect').value.trim();
+  const section = document.getElementById('sectionInput').value.trim();
+
+  if (!section) {
+    document.getElementById('erMsg').textContent = 'Please enter a section number.';
+    show('er'); return;
+  }
 
   resetUI();
   show('ld');
   document.getElementById('sBtn').disabled = true;
   curExp = ''; curFullText = '';
 
+  // Build precise query from structured inputs
+  const query = `Section ${section} of ${act}`;
+
   try {
-    const nq = normalizeQuery(q);
-  const raw = await callWorker({ type: 'search', query: nq });
+    const raw = await callWorker({ type: 'search', query });
     const m = raw.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('Could not read response. Try again.');
+    if (!m) throw new Error('Could not read response. Please try again.');
     const r = JSON.parse(m[0]);
 
-    // Law not found — show clear message, do not render empty result
     if (r.found === false) {
       document.getElementById('erMsg').innerHTML =
-        '<strong>Law not found.</strong> ' +
-        (r.notFoundReason || '') +
-        (r.suggestion ? '<br><em>Try: ' + r.suggestion + '</em>' : '');
-      show('er');
-      hide('ld');
+        '<strong>Not found.</strong> ' + (r.notFoundReason || '') +
+        (r.suggestion ? '<br><em>Suggestion: ' + r.suggestion + '</em>' : '');
+      show('er'); hide('ld');
       return;
     }
 
-    // Populate result
-    document.getElementById('rTitle').textContent = r.lawTitle || q;
-    document.getElementById('rBadge').textContent = r.section || 'Reference';
-    document.getElementById('rLaw').textContent = r.actualText || 'Text not available.';
-    document.getElementById('rExp').textContent = r.simpleExplanation || '';
+    document.getElementById('rTitle').textContent   = r.lawTitle || query;
+    document.getElementById('rBadge').textContent   = r.section  || `Section ${section}`;
+    document.getElementById('rLaw').textContent     = r.lawSummary || r.actualText || '';
+    document.getElementById('rExp').textContent     = r.simpleExplanation || '';
     document.getElementById('rMenText').textContent = r.menContext || '';
-    makeList(document.getElementById('rJudgeList'), r.keyJudgments);
-    makeList(document.getElementById('rStepsList'), r.stepsForMen);
+    makeList(document.getElementById('rJudgeList'),  r.keyJudgments);
+    makeList(document.getElementById('rStepsList'),  r.stepsForMen);
 
-    // Amendment note
     const amendBox = document.getElementById('rAmend');
     if (amendBox) {
       if (r.amendmentNote && r.amendmentNote !== 'null') {
@@ -115,21 +116,20 @@ async function doSearch() {
       }
     }
 
-    // Indian Kanoon verify link (clean search term — section + law name only)
-    const searchTerm = (r.section || '') + ' ' + (r.lawTitle || q);
-    const cleanTerm = searchTerm.replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    // Indian Kanoon link — precise section search
+    const ikQuery = `section ${section} ${act}`;
     const verifyLink = document.getElementById('verifyLink');
-    if (verifyLink) verifyLink.href = 'https://indiankanoon.org/search/?formInput=' + encodeURIComponent(cleanTerm);
+    if (verifyLink) verifyLink.href = 'https://indiankanoon.org/search/?formInput=' + encodeURIComponent(ikQuery);
 
-    curExp = r.simpleExplanation || '';
-    curFullText = r.actualText || '';
+    curExp      = r.simpleExplanation || '';
+    curFullText = r.lawSummary || r.actualText || '';
 
     hide('ld'); show('res');
     document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch (e) {
     hide('ld');
-    document.getElementById('erMsg').textContent = e.message || 'Search failed. Try again.';
+    document.getElementById('erMsg').textContent = e.message || 'Search failed. Please try again.';
     show('er');
   } finally {
     document.getElementById('sBtn').disabled = false;
@@ -139,13 +139,13 @@ async function doSearch() {
 async function doTranslate(code, name, label) {
   if (!curExp) return;
 
-  const btnHi = document.getElementById('btnHi');
-  const btnMr = document.getElementById('btnMr');
-  const wrap  = document.getElementById('tlWrap');
-  const lbl   = document.getElementById('tlLbl');
-  const txt   = document.getElementById('tlText');
+  const btnHi  = document.getElementById('btnHi');
+  const btnMr  = document.getElementById('btnMr');
+  const wrap   = document.getElementById('tlWrap');
+  const lbl    = document.getElementById('tlLbl');
+  const txt    = document.getElementById('tlText');
   const active = code === 'hi' ? btnHi : btnMr;
-  const other  = code === 'hi' ? btnMr : btnHi;
+  const other  = code === 'hi' ? btnMr  : btnHi;
 
   if (curLang === code) {
     active.classList.remove('active');
@@ -170,7 +170,7 @@ async function doTranslate(code, name, label) {
     });
     txt.textContent = translated.trim().replace(/^["']|["']$/g, '');
   } catch (e) {
-    txt.textContent = e.message || 'Translation failed. Try again.';
+    txt.textContent = e.message || 'Translation failed. Please try again.';
   } finally {
     btnHi.disabled = false; btnMr.disabled = false;
   }
