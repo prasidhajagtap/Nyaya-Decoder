@@ -33,13 +33,11 @@ function toggleTheme() {
   document.getElementById('tLbl').textContent = theme === 'light' ? 'Dark' : 'Light';
 }
 
-// Fill search from chip clicks
 function fillSearch(actValue, section) {
   const sel = document.getElementById('actSelect');
   for (let i = 0; i < sel.options.length; i++) {
     if (sel.options[i].value.toLowerCase().includes(actValue.toLowerCase())) {
-      sel.selectedIndex = i;
-      break;
+      sel.selectedIndex = i; break;
     }
   }
   document.getElementById('sectionInput').value = section;
@@ -72,20 +70,29 @@ async function doSearch() {
   const section = document.getElementById('sectionInput').value.trim();
 
   if (!section) {
-    document.getElementById('erMsg').textContent = 'Please enter a section number.';
+    document.getElementById('erMsg').textContent = 'Please enter a section or article number.';
     show('er'); return;
   }
 
   resetUI();
   show('ld');
+
+  // Update loading message to show live fetch is happening
+  const ldMsg = document.querySelector('#ld p');
+  if (ldMsg) ldMsg.textContent = 'Fetching live content from Indian Kanoon…';
+
   document.getElementById('sBtn').disabled = true;
   curExp = ''; curFullText = '';
 
-  // Build precise query from structured inputs
-  const query = `Section ${section} of ${act}`;
-
   try {
-    const raw = await callWorker({ type: 'search', query });
+    // Send act and section separately so worker builds precise Indian Kanoon URL
+    const raw = await callWorker({
+      type: 'search',
+      act,
+      section,
+      query: `Section ${section} of ${act}`
+    });
+
     const m = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('Could not read response. Please try again.');
     const r = JSON.parse(m[0]);
@@ -98,14 +105,19 @@ async function doSearch() {
       return;
     }
 
-    document.getElementById('rTitle').textContent   = r.lawTitle || query;
+    document.getElementById('rTitle').textContent   = r.lawTitle || `Section ${section}`;
     document.getElementById('rBadge').textContent   = r.section  || `Section ${section}`;
-    document.getElementById('rLaw').textContent     = r.lawSummary || r.actualText || '';
+    document.getElementById('rLaw').textContent     = r.lawSummary || '';
     document.getElementById('rExp').textContent     = r.simpleExplanation || '';
     document.getElementById('rMenText').textContent = r.menContext || '';
-    makeList(document.getElementById('rJudgeList'),  r.keyJudgments);
-    makeList(document.getElementById('rStepsList'),  r.stepsForMen);
+    makeList(document.getElementById('rJudgeList'), r.keyJudgments);
+    makeList(document.getElementById('rStepsList'), r.stepsForMen);
 
+    // Source note
+    const sourceEl = document.getElementById('rSource');
+    if (sourceEl) sourceEl.textContent = r.sourceNote || '';
+
+    // Amendment note
     const amendBox = document.getElementById('rAmend');
     if (amendBox) {
       if (r.amendmentNote && r.amendmentNote !== 'null') {
@@ -116,13 +128,13 @@ async function doSearch() {
       }
     }
 
-    // Indian Kanoon link — precise section search
+    // Indian Kanoon verify link
     const ikQuery = `section ${section} ${act}`;
     const verifyLink = document.getElementById('verifyLink');
-    if (verifyLink) verifyLink.href = 'https://indiankanoon.org/search/?formInput=' + encodeURIComponent(ikQuery);
+    if (verifyLink) verifyLink.href = 'https://indiankanoon.org/search/?formInput=' + encodeURIComponent(ikQuery) + '&doctypes=acts';
 
     curExp      = r.simpleExplanation || '';
-    curFullText = r.lawSummary || r.actualText || '';
+    curFullText = r.lawSummary || '';
 
     hide('ld'); show('res');
     document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -133,6 +145,7 @@ async function doSearch() {
     show('er');
   } finally {
     document.getElementById('sBtn').disabled = false;
+    if (ldMsg) ldMsg.textContent = 'Fetching live content from Indian Kanoon…';
   }
 }
 
