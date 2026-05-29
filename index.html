@@ -41,7 +41,8 @@
         <label class="field-label" for="actSelect">Select Act</label>
         <div class="select-wrap">
           <select id="actSelect">
-            <optgroup label="New Laws 2023">
+            <option value="all">🔍 All Acts / I am not sure</option>
+          <optgroup label="New Laws 2023">
               <option value="Bharatiya Nyaya Sanhita 2023 (BNS)">BNS 2023 — Bharatiya Nyaya Sanhita</option>
               <option value="Bharatiya Nagarik Suraksha Sanhita 2023 (BNSS)">BNSS 2023 — Bharatiya Nagarik Suraksha Sanhita</option>
               <option value="Bharatiya Sakshya Adhiniyam 2023 (BSA)">BSA 2023 — Bharatiya Sakshya Adhiniyam</option>
@@ -103,7 +104,7 @@
 <!-- States -->
 <div class="st" id="ld">
   <div class="spin"></div>
-  <p>Searching Indian law database&hellip;</p>
+  <p id="ldMsg">Searching Indian law database&hellip;</p>
 </div>
 <div class="st" id="er">
   <p class="errtxt" id="erMsg"></p>
