@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Law Made Simple | Indian Law, Explained</title>
-  <meta name="description" content="Search any Indian law with plain language explanations in English, Hindi and Marathi. Built to help men understand their rights." />
+  <meta name="description" content="Search any Indian law with plain language explanations. Built to help men understand their rights." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;600&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -30,48 +30,100 @@
 <section class="hero">
   <div class="badge">⚖️ &nbsp;For Every Man Who Deserves to Know His Rights</div>
   <h1>Know the Law.<br><em>Understand</em> the Law.</h1>
-  <p>Search any Indian law — BNS, BNSS, IPC, CrPC, family law and more. Get the actual statute, a plain explanation, key judgments, and steps to protect yourself.</p>
+  <p>Select the Act, enter a section number and get a plain language explanation, men's rights context, key judgments and steps to protect yourself.</p>
+
+  <!-- STRUCTURED SEARCH -->
   <div class="sw">
-    <div class="sb">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input type="text" id="q" placeholder="e.g. Section 498A IPC, BNS 85, POCSO bail rights..." onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off" spellcheck="false" />
+    <div class="search-grid">
+
+      <!-- Act Dropdown -->
+      <div class="field-wrap">
+        <label class="field-label" for="actSelect">Select Act</label>
+        <div class="select-wrap">
+          <select id="actSelect">
+            <optgroup label="New Laws 2023">
+              <option value="Bharatiya Nyaya Sanhita 2023 (BNS)">BNS 2023 — Bharatiya Nyaya Sanhita</option>
+              <option value="Bharatiya Nagarik Suraksha Sanhita 2023 (BNSS)">BNSS 2023 — Bharatiya Nagarik Suraksha Sanhita</option>
+              <option value="Bharatiya Sakshya Adhiniyam 2023 (BSA)">BSA 2023 — Bharatiya Sakshya Adhiniyam</option>
+            </optgroup>
+            <optgroup label="Criminal Laws">
+              <option value="Indian Penal Code 1860 (IPC)">IPC 1860 — Indian Penal Code</option>
+              <option value="Code of Criminal Procedure 1973 (CrPC)">CrPC 1973 — Code of Criminal Procedure</option>
+              <option value="Indian Evidence Act 1872">Indian Evidence Act 1872</option>
+            </optgroup>
+            <optgroup label="Family &amp; Personal Laws">
+              <option value="Hindu Marriage Act 1955">Hindu Marriage Act 1955</option>
+              <option value="Special Marriage Act 1954">Special Marriage Act 1954</option>
+              <option value="Hindu Succession Act 1956">Hindu Succession Act 1956</option>
+              <option value="Guardians and Wards Act 1890">Guardians and Wards Act 1890</option>
+              <option value="Muslim Personal Law (Shariat) Application Act 1937">Muslim Personal Law 1937</option>
+            </optgroup>
+            <optgroup label="Protection Acts">
+              <option value="Protection of Women from Domestic Violence Act 2005 (PWDVA)">DV Act 2005 — Domestic Violence</option>
+              <option value="Protection of Children from Sexual Offences Act 2012 (POCSO)">POCSO Act 2012</option>
+              <option value="Dowry Prohibition Act 1961">Dowry Prohibition Act 1961</option>
+              <option value="Sexual Harassment of Women at Workplace Act 2013 (POSH)">POSH Act 2013</option>
+            </optgroup>
+            <optgroup label="Other Laws">
+              <option value="Constitution of India">Constitution of India</option>
+              <option value="Right to Information Act 2005 (RTI)">RTI Act 2005</option>
+              <option value="Information Technology Act 2000 (IT Act)">IT Act 2000</option>
+              <option value="Maintenance and Welfare of Parents and Senior Citizens Act 2007">Maintenance of Parents Act 2007</option>
+              <option value="Indian Contract Act 1872">Indian Contract Act 1872</option>
+              <option value="Code of Civil Procedure 1908 (CPC)">CPC 1908 — Civil Procedure</option>
+            </optgroup>
+          </select>
+          <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Section Input -->
+      <div class="field-wrap">
+        <label class="field-label" for="sectionInput">Section / Article</label>
+        <input type="text" id="sectionInput" class="section-input" placeholder="e.g. 144, 498A, 21, 351(1)" onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off" />
+      </div>
+
+      <!-- Search Button -->
       <button class="sbtn" id="sBtn" onclick="doSearch()">Search</button>
+
     </div>
+
+    <!-- Quick chips -->
     <div class="chips">
-      <span class="chip" onclick="fill('Section 498A IPC')">498A IPC</span>
-      <span class="chip" onclick="fill('BNS Section 85 cruelty by husband')">BNS 85 Cruelty</span>
-      <span class="chip" onclick="fill('POCSO Act false accusation defence')">POCSO false accusation</span>
-      <span class="chip" onclick="fill('Dowry Prohibition Act Section 3')">Dowry Prohibition Act</span>
-      <span class="chip" onclick="fill('Domestic Violence Act anticipatory bail for husband')">DV Act bail rights</span>
-      <span class="chip" onclick="fill('Section 125 CrPC maintenance rights of husband')">Sec 125 CrPC</span>
+      <span class="chip" onclick="fillSearch('IPC 1860','498A')">498A IPC — Cruelty</span>
+      <span class="chip" onclick="fillSearch('BNSS 2023','144')">BNSS 144 — Maintenance</span>
+      <span class="chip" onclick="fillSearch('BNS 2023','85')">BNS 85 — Cruelty by Husband</span>
+      <span class="chip" onclick="fillSearch('BNSS 2023','351')">BNSS 351 — Bail</span>
+      <span class="chip" onclick="fillSearch('DV Act 2005','12')">DV Act Sec 12 — Application</span>
+      <span class="chip" onclick="fillSearch('POCSO 2012','19')">POCSO 19 — Reporting</span>
     </div>
   </div>
 </section>
 
+<!-- States -->
 <div class="st" id="ld">
   <div class="spin"></div>
   <p>Searching Indian law database&hellip;</p>
 </div>
-
 <div class="st" id="er">
   <p class="errtxt" id="erMsg"></p>
 </div>
 
+<!-- Results -->
 <section class="res" id="res">
   <div class="card">
 
-    <!-- Header -->
     <div class="ch">
       <div class="ctitle" id="rTitle"></div>
       <div class="cbadge" id="rBadge"></div>
     </div>
 
-    <!-- Actual Law Text -->
     <div class="cb">
-      <div class="sec-head">📜 Actual Law Text</div>
+
+      <!-- Law Summary -->
+      <div class="sec-head">📜 Law Summary</div>
       <div class="lblock">
+        <div class="law-disclaimer">AI-generated summary. Not verbatim text. Use the verify link below for the official statute.</div>
         <div class="ltext" id="rLaw"></div>
       </div>
 
@@ -87,6 +139,9 @@
         <div class="mtext" id="rMenText"></div>
       </div>
 
+      <!-- Amendment Note -->
+      <div id="rAmend" class="amend-note-inline" style="display:none"></div>
+
       <!-- Key Judgments -->
       <div class="sec-head">⚖️ Key Court Judgments</div>
       <div class="jblock">
@@ -98,18 +153,17 @@
       <div class="sblock">
         <ol class="slist" id="rStepsList"></ol>
       </div>
+
     </div>
 
-      <div id="rAmend" class="amend-note-inline" style="display:none"></div>
-
-    <!-- Amendment Note + Verify -->
+    <!-- Verify + Amendment bar -->
     <div class="amend-bar">
       <div class="amend-note">
-        <span>🕐</span>
-        <span>Law text is based on AI knowledge and may not reflect the very latest amendments. Always verify before acting.</span>
+        <span>⚠️</span>
+        <span>Law summary is AI-generated and may not be verbatim. Always verify the exact text before taking legal action.</span>
       </div>
-      <a id="verifyLink" href="https://www.indiacode.nic.in" target="_blank" rel="noopener" class="verify-btn">
-        🔗 Verify on Indian Kanoon (Case Law + Statutes)
+      <a id="verifyLink" href="https://indiankanoon.org" target="_blank" rel="noopener" class="verify-btn">
+        🔗 Read Exact Text on Indian Kanoon
       </a>
     </div>
 
