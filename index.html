@@ -100,11 +100,24 @@
       </div>
     </div>
 
+      <div id="rAmend" class="amend-note-inline" style="display:none"></div>
+
+    <!-- Amendment Note + Verify -->
+    <div class="amend-bar">
+      <div class="amend-note">
+        <span>🕐</span>
+        <span>Law text is based on AI knowledge and may not reflect the very latest amendments. Always verify before acting.</span>
+      </div>
+      <a id="verifyLink" href="https://www.indiacode.nic.in" target="_blank" rel="noopener" class="verify-btn">
+        🔗 Verify on India Code (Official Gov. Database)
+      </a>
+    </div>
+
     <!-- Translate Bar -->
     <div class="tbar">
       <span class="tlbl">Translate explanation to:</span>
-      <button class="tbtn" id="btnHi" onclick="translate('hi','Hindi','हिंदी में सरल व्याख्या')">🇮🇳 &nbsp;Hindi</button>
-      <button class="tbtn" id="btnMr" onclick="translate('mr','Marathi','मराठीत सोपे स्पष्टीकरण')">🟠 &nbsp;Marathi</button>
+      <button class="tbtn" id="btnHi" onclick="doTranslate('hi','Hindi','हिंदी में सरल व्याख्या')">🇮🇳 &nbsp;Hindi</button>
+      <button class="tbtn" id="btnMr" onclick="doTranslate('mr','Marathi','मराठीत सोपे स्पष्टीकरण')">🟠 &nbsp;Marathi</button>
     </div>
     <div class="tlwrap" id="tlWrap">
       <div class="tlcard">
