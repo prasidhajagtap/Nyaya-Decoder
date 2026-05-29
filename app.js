@@ -14,7 +14,6 @@ async function callWorker(payload, retries = 2) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-
   if (res.status === 429) {
     if (retries > 0) {
       await new Promise(r => setTimeout(r, 4000));
@@ -22,7 +21,6 @@ async function callWorker(payload, retries = 2) {
     }
     throw new Error('Too many requests. Wait a few seconds and try again.');
   }
-
   const data = await res.json();
   if (data.error) throw new Error(data.error);
   return data.text || '';
@@ -71,6 +69,18 @@ async function doSearch() {
     if (!m) throw new Error('Could not read response. Try again.');
     const r = JSON.parse(m[0]);
 
+    // Law not found — show clear message, do not render empty result
+    if (r.found === false) {
+      document.getElementById('erMsg').innerHTML =
+        '<strong>Law not found.</strong> ' +
+        (r.notFoundReason || '') +
+        (r.suggestion ? '<br><em>Try: ' + r.suggestion + '</em>' : '');
+      show('er');
+      hide('ld');
+      return;
+    }
+
+    // Populate result
     document.getElementById('rTitle').textContent = r.lawTitle || q;
     document.getElementById('rBadge').textContent = r.section || 'Reference';
     document.getElementById('rLaw').textContent = r.actualText || 'Text not available.';
@@ -79,24 +89,25 @@ async function doSearch() {
     makeList(document.getElementById('rJudgeList'), r.keyJudgments);
     makeList(document.getElementById('rStepsList'), r.stepsForMen);
 
-    // Show amendment note if present
+    // Amendment note
     const amendBox = document.getElementById('rAmend');
     if (amendBox) {
       if (r.amendmentNote && r.amendmentNote !== 'null') {
-        amendBox.textContent = '📋 ' + r.amendmentNote;
+        amendBox.textContent = '📋 Recent Amendment: ' + r.amendmentNote;
         amendBox.style.display = 'block';
       } else {
         amendBox.style.display = 'none';
       }
     }
+
+    // Indian Kanoon verify link (clean search term — section + law name only)
+    const searchTerm = (r.section || '') + ' ' + (r.lawTitle || q);
+    const cleanTerm = searchTerm.replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    const verifyLink = document.getElementById('verifyLink');
+    if (verifyLink) verifyLink.href = 'https://indiankanoon.org/search/?formInput=' + encodeURIComponent(cleanTerm);
+
     curExp = r.simpleExplanation || '';
     curFullText = r.actualText || '';
-
-    // India Code verify link
-    const lawQuery = encodeURIComponent((r.lawTitle || q).replace(/section/gi,'').trim());
-    const indiaCodeUrl = 'https://www.indiacode.nic.in/search?searchstring=' + lawQuery;
-    const verifyLink = document.getElementById('verifyLink');
-    if (verifyLink) verifyLink.href = indiaCodeUrl;
 
     hide('ld'); show('res');
     document.getElementById('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
