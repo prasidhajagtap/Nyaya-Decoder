@@ -3,15 +3,15 @@
 **Live URL:** https://prasidhajagtap.github.io/Nyaya-Decoder/
 **Repository:** https://github.com/prasidhajagtap/Nyaya-Decoder
 **Last Updated:** May 2025
-**Current Version:** v1.3
+**Current Version:** v2.0
 
 ---
 
 ## Project Purpose
 
-Law Made Simple is a free, public-facing web tool that helps men in India search and understand any Indian law in plain language. It addresses the critical gap where men facing false accusations or gender-biased legal situations cannot access or understand their own rights due to complex legal language.
+Law Made Simple is a free, public-facing web tool that helps men in India search and understand any Indian law in plain language. It addresses the critical gap where men facing false accusations or gender-biased legal situations cannot access or understand their rights due to complex legal language.
 
-Every search returns the actual statute text, a plain language explanation, how the law affects men specifically, key court judgments, and a step-by-step action plan. Explanations can be translated to Hindi and Marathi with full legal context preserved.
+Every search returns a law summary, plain language explanation, how the law affects men specifically, key court judgments, and a step-by-step action plan. Explanations can be translated to Hindi and Marathi with full legal context preserved.
 
 ---
 
@@ -20,9 +20,9 @@ Every search returns the actual statute text, a plain language explanation, how 
 | Layer | Tool | Cost |
 |---|---|---|
 | Hosting | GitHub Pages | Free |
-| API Proxy | Cloudflare Workers (free tier) | Free |
-| AI Engine | Groq API — llama-3.3-70b-versatile | Free (14,400 req/day) |
-| Translation | Groq API (context-aware, not word-for-word) | Free |
+| API Proxy + Security | Cloudflare Workers (free tier) | Free |
+| Real-time Law Search | Tavily Search API | Free (1000 searches/month) |
+| AI Explanation + Translation | Groq API — llama-3.3-70b-versatile | Free (14,400 req/day) |
 | Fonts | Google Fonts — Roboto Slab + Open Sans | Free |
 | Database | None | — |
 | Backend | None | — |
@@ -35,13 +35,13 @@ Every search returns the actual statute text, a plain language explanation, how 
 Nyaya-Decoder/
 ├── index.html       # Main HTML. All page sections and structure.
 ├── style.css        # All styles. Light and dark theme. Mobile responsive.
-├── app.js           # All JavaScript. Calls Cloudflare Worker. No API key.
-├── worker.js        # Cloudflare Worker code. Deployed to Cloudflare only.
-│                    # NOT pushed to GitHub repo.
+├── app.js           # All JavaScript. Calls Cloudflare Worker. No API keys.
+├── worker.js        # Cloudflare Worker. Deployed to Cloudflare ONLY.
+│                    # NOT pushed to GitHub repo. Contains Tavily + Groq logic.
 └── UPDATES.md       # This file. Project documentation and update log.
 ```
 
-> `worker.js` is deployed directly to Cloudflare. It is not part of the GitHub repo and should never be pushed there.
+> `worker.js` is deployed directly to Cloudflare. Never push it to GitHub.
 
 ---
 
@@ -50,27 +50,26 @@ Nyaya-Decoder/
 ```
 User Browser
     |
-    | HTTPS POST (query only, no key)
+    | HTTPS POST (section + act only, no keys)
     v
 app.js on GitHub Pages
     |
-    | HTTPS POST (query only, no key)
+    | HTTPS POST (structured query)
     v
 Cloudflare Worker (worker.js)
     |
-    | HTTPS POST (query + GROQ_KEY from encrypted secret)
-    v
-Groq API
+    |─── HTTPS POST → Tavily API (real-time law search)
+    |         ↓ returns live law text from Indian Kanoon,
+    |           India Code, legislative.gov.in
     |
-    | Response
-    v
-Cloudflare Worker (strips key, forwards text)
+    |─── HTTPS POST → Groq API (explanation + translation)
+              ↓ returns structured JSON with all sections
     |
     v
 app.js → renders result to user
 ```
 
-The Groq API key is stored as an encrypted secret in Cloudflare. It is never sent to the browser. It is never visible in the GitHub repo. It is never logged.
+All API keys (GROQ_KEY, TAVILY_KEY) stored as encrypted secrets in Cloudflare. Never sent to browser. Never in GitHub repo. Never logged.
 
 ---
 
@@ -78,49 +77,106 @@ The Groq API key is stored as an encrypted secret in Cloudflare. It is never sen
 
 1. Go to cloudflare.com. Sign up free.
 2. Workers and Pages. Create Worker. Name: `law-made-simple-proxy`. Deploy.
-3. Edit Code. Paste full contents of `worker.js`. Deploy again.
-4. Settings tab. Variables and Secrets. Add:
-   - Variable name: `GROQ_KEY`
-   - Value: your Groq API key
-   - Type: Secret (Encrypt)
-   - Click Save and Deploy.
-5. Copy the Worker URL shown at top. Looks like: `https://law-made-simple-proxy.YOURNAME.workers.dev`
-6. Open `app.js` line 3. Replace placeholder with actual Worker URL.
+3. Edit Code. Paste full contents of `worker.js`. Deploy.
+4. Settings tab. Variables and Secrets. Add two secrets:
+
+| Variable Name | Value | Where to get it |
+|---|---|---|
+| `GROQ_KEY` | Your Groq API key | console.groq.com (free) |
+| `TAVILY_KEY` | Your Tavily API key | app.tavily.com (free) |
+
+5. For each: Type = Secret (Encrypt). Click Save and Deploy.
+6. Copy Worker URL. Paste into `app.js` line 3.
 
 ---
 
 ## API Details
 
-**Provider:** Groq
-**Model:** llama-3.3-70b-versatile
-**Key location:** Cloudflare Worker secret (`GROQ_KEY`)
-**Key in browser:** Never. Zero exposure.
-**Free tier limits:** 30 requests per minute. 14,400 requests per day.
-**Auto-retry:** app.js retries up to 2 times with 4 second wait on 429 errors.
+### Groq
+- Model: llama-3.3-70b-versatile
+- Purpose: AI explanation, men's context, judgments, steps, translation
+- Free tier: 30 req/minute, 14,400 req/day
+- Key: Cloudflare secret `GROQ_KEY`
+- Get key: console.groq.com
 
-**Get a Groq key:** console.groq.com. Sign up free. No credit card needed.
+### Tavily
+- Purpose: Real-time search of Indian legal databases
+- Searches: indiankanoon.org, indiacode.nic.in, legislative.gov.in, sci.gov.in, mha.gov.in
+- Free tier: 1000 searches/month
+- Paid tier: $30/month for 30,000 searches
+- Key: Cloudflare secret `TAVILY_KEY`
+- Get key: app.tavily.com
+- Fallback: If Tavily fails or quota runs out, worker falls back to Groq knowledge automatically. Site never breaks.
 
 ---
 
-## Result Sections (Per Search)
+## How Real-Time Search Works
 
-Every search returns five sections:
+Every search does two things in sequence inside the Cloudflare Worker:
+
+1. **Tavily search** — queries `indiankanoon.org`, `indiacode.nic.in`, `legislative.gov.in` with the exact section and act. Returns live law content from authoritative sources.
+
+2. **Groq explanation** — receives the live content as context. Generates law summary, simple explanation, men's context, key judgments, steps, and amendment note based on real content. Not from training data alone.
+
+Result card shows a source note:
+- "Content fetched live from Indian legal databases." — Tavily succeeded.
+- "Live fetch unavailable. Based on AI training knowledge. Verify on Indian Kanoon." — Tavily failed, Groq fallback used.
+
+---
+
+## Search Interface
+
+### Dropdown Acts Available
+
+**New Laws 2023**
+- BNS 2023 — Bharatiya Nyaya Sanhita (replaced IPC 1860)
+- BNSS 2023 — Bharatiya Nagarik Suraksha Sanhita (replaced CrPC 1973)
+- BSA 2023 — Bharatiya Sakshya Adhiniyam (replaced Evidence Act 1872)
+
+**Criminal Laws**
+- IPC 1860 — Indian Penal Code
+- CrPC 1973 — Code of Criminal Procedure
+- Indian Evidence Act 1872
+
+**Family and Personal Laws**
+- Hindu Marriage Act 1955
+- Special Marriage Act 1954
+- Hindu Succession Act 1956
+- Guardians and Wards Act 1890
+- Muslim Personal Law 1937
+
+**Protection Acts**
+- DV Act 2005 — Domestic Violence
+- POCSO Act 2012
+- Dowry Prohibition Act 1961
+- POSH Act 2013
+
+**Other Laws**
+- Constitution of India
+- RTI Act 2005
+- IT Act 2000
+- Maintenance of Parents Act 2007
+- Indian Contract Act 1872
+- CPC 1908 — Civil Procedure
+
+**Special Option**
+- 🔍 All Acts / I am not sure — Groq identifies the correct Act from section number
+
+---
+
+## Result Sections Per Search
 
 | Section | Content |
 |---|---|
-| 📜 Actual Law Text | Verbatim statutory text as written in the Indian statute |
-| 💡 Simple Explanation | Plain English. Under 80 words. Zero legal jargon. |
-| 🛡️ How This Affects Men | Misuse patterns. Men's rights. What to know. |
-| ⚖️ Key Court Judgments | Supreme Court and High Court cases relevant to the law |
-| 🚨 Steps to Protect Yourself | Numbered action plan. What to do immediately. |
+| 📜 Law Summary | Faithful AI summary based on live law content. Not verbatim. Disclaimer shown. |
+| 💡 Simple Explanation | Plain English. Under 80 words. Zero jargon. |
+| 🛡️ How This Affects Men | Misuse patterns against men. Men's rights under this section. |
+| ⚖️ Key Court Judgments | Real verified Supreme Court and High Court cases. |
+| 🚨 Steps to Protect Yourself | Numbered immediate action plan for men. |
+| 📋 Amendment Note | Shown only if a recent confirmed amendment exists. |
+| 🔗 Verify on Indian Kanoon | Direct link to exact section on indiankanoon.org. Always shown. |
 
-Translation of the simple explanation is available in Hindi and Marathi. Both use Groq for context-aware translation, not word-for-word.
-
----
-
-## Laws Covered
-
-BNS 2023, BNSS 2023, BSA 2023, IPC 1860, CrPC 1973, Indian Evidence Act 1872, Protection of Women from Domestic Violence Act 2005, POCSO Act 2012, Dowry Prohibition Act 1961, Hindu Marriage Act 1955, Special Marriage Act 1954, Hindu Succession Act 1956, Muslim Personal Law, Christian Personal Law, Guardians and Wards Act 1890, Maintenance and Welfare of Parents and Senior Citizens Act, IT Act 2000, Companies Act, Income Tax Act, GST Act, RTI Act 2005, Constitution of India (all Articles, Fundamental Rights, Directive Principles), and all other Central and State laws from the beginning of Indian legal history including colonial era laws.
+Translation of Simple Explanation available in Hindi and Marathi. Both use Groq with full law summary passed as context for accurate, non-word-for-word translation.
 
 ---
 
@@ -136,26 +192,42 @@ git push
 GitHub Pages auto-deploys on push. Live in 1 to 2 minutes.
 
 If `worker.js` changed, re-deploy manually to Cloudflare (Edit Code, paste, Deploy).
+`worker.js` is NEVER pushed to GitHub.
 
 ---
 
-## How to Replace Groq API Key
+## How to Rotate API Keys
 
-1. Go to console.groq.com. API Keys. Create new key.
-2. Cloudflare dashboard. Your worker. Settings. Variables and Secrets.
-3. Edit `GROQ_KEY`. Delete old value. Paste new key. Encrypt. Save and Deploy.
-4. No change needed to GitHub files.
+### Groq key
+1. console.groq.com. API Keys. Create new key.
+2. Cloudflare. Worker. Settings. Variables and Secrets. Edit `GROQ_KEY`. Save and Deploy.
+
+### Tavily key
+1. app.tavily.com. API Keys. Create new key.
+2. Cloudflare. Worker. Settings. Variables and Secrets. Edit `TAVILY_KEY`. Save and Deploy.
 
 ---
 
-## Known Issues
+## Known Limitations
 
-| Issue | Status | Notes |
+| Item | Status | Notes |
 |---|---|---|
-| Judgment references are AI-generated | Known | Verify critical cases independently before relying on them |
-| No search history | Pending | Future feature |
-| No bookmark or save feature | Pending | Future feature |
-| Translation only covers simple explanation | Known | Full result translation planned for future |
+| Tavily free tier: 1000 searches/month | Active limit | Upgrade to $30/month if traffic grows. Or apply for Indian Kanoon API (free for non-commercial). |
+| Law summary is not verbatim | By design | LLMs cannot reliably reproduce verbatim text. Summary + Indian Kanoon link is the correct approach. |
+| AI-generated judgments | Risk | Model prompted to use real cases only. Always verify critical cases independently. |
+| Translation covers Simple Explanation only | By design | Full result translation is in roadmap. |
+
+---
+
+## Future Upgrade: Indian Kanoon API
+
+For a fully authoritative solution, apply for the **Indian Kanoon API** at `developer.indiankanoon.org`. It provides:
+- Actual verbatim statute text
+- Complete case law database
+- Regular updates from government sources
+- Free for non-commercial use
+
+This would replace Tavily for law text fetching and eliminate any remaining accuracy concerns.
 
 ---
 
@@ -171,50 +243,90 @@ Add items here before next session with Claude.
 
 ## Full Version History
 
-### v1.3 — May 2025 — Cloudflare Security Layer Restored
-- Moved Groq API key out of browser and into Cloudflare Worker encrypted secret
-- `app.js` now calls Cloudflare Worker only. Zero secrets in frontend code.
-- `worker.js` updated to use Groq API (replaces old Gemini/Claude versions)
-- Worker handles both search and translation requests
-- Security architecture: Browser > Cloudflare Worker > Groq API
-- `GROQ_KEY` stored as encrypted secret in Cloudflare, never exposed
+### v2.0 — May 2025 — Real-Time Law Search via Tavily
+- Added Tavily Search API in Cloudflare Worker for live content from Indian legal databases
+- Worker now searches indiankanoon.org, indiacode.nic.in, legislative.gov.in in real time
+- Groq receives live content as context, not just training knowledge
+- Source note on every result: shows whether content came from live fetch or AI knowledge
+- Graceful fallback: if Tavily fails, Groq knowledge used automatically. Site never breaks.
+- Added TAVILY_KEY as second Cloudflare encrypted secret alongside GROQ_KEY
 
-### v1.2 — May 2025 — Font and Readability Update
-- Replaced Playfair Display with Roboto Slab for headings
-- Replaced Outfit with Open Sans for all body text
-- Law text block changed from italic serif to Open Sans regular for easier reading
+### v1.9 — May 2025 — Structured Search with Act Dropdown
+- Replaced free text search with dropdown (Act selection) + section number input
+- Dropdown covers all major Indian Acts in categorised groups
+- Added "All Acts / I am not sure" as first option for users unsure of Act name
+- Search builds precise query: "Section X of Act Y" for accurate model response
+- Quick chips updated to fill both dropdown and section field on click
+- Groq prompt rebuilt with explicit section-level knowledge of BNS, BNSS, BSA, IPC, CrPC
+- Jina AI dependency removed (unreliable in Cloudflare Workers)
+- Found-false threshold raised: model answers confidently, only rejects truly invalid queries
+
+### v1.8 — May 2025 — Anti-Hallucination + Indian Kanoon Link
+- Renamed "Actual Law Text" to "Law Summary" with clear AI disclaimer
+- Model instructed to write faithful summaries, not fabricate verbatim text
+- Added "found" boolean in JSON response to handle truly invalid law queries
+- When found is false, shows clear "Not found" message with suggestion
+- Switched verification link from India Code to Indian Kanoon (more reliable URL format)
+- Indian Kanoon link now pre-searches the exact section and act
+
+### v1.7 — May 2025 — Translation Fixed
+- Renamed translate() to doTranslate() — was conflicting with browser built-in name
+- Translation now confirmed working for both Hindi and Marathi
+- Full law summary passed as lawContext to Groq for every translation
+- Groq translates with full legal meaning, not word-for-word
+
+### v1.6 — May 2025 — Amendment Notes + Verify Button
+- Amendment note box added: yellow highlight appears when recent amendment detected
+- Verify on India Code button added to every result
+- Source note displayed under law summary
+
+### v1.5 — May 2025 — Font Update for Readability
+- Headings: Playfair Display replaced with Roboto Slab
+- Body text: Outfit replaced with Open Sans
+- Law text block: italic serif replaced with Open Sans regular
 - Letter spacing and line height improved throughout
 
-### v1.1 — May 2025 — Content and Feature Expansion
-- Added three new result sections: How This Affects Men, Key Court Judgments, Steps to Protect Yourself
-- Translation fixed. Both Hindi and Marathi now use Groq for context-aware output
-- Translation passes full law text as context so meaning is preserved
-- Prompt engineering improved for cleaner JSON output
-- Error messages now show actual error reason instead of generic text
-- Favicon added (emoji SVG, no 404)
-- Retry logic added: auto-retries up to 2 times on 429 rate limit errors
+### v1.4 — May 2025 — Five Result Sections
+- Added three new sections to every result: How This Affects Men, Key Court Judgments, Steps to Protect Yourself
+- Groq prompt rebuilt to return structured JSON with all five sections
+- Men-specific context added throughout
+- Error messages now show actual error reason
 
-### v1.0 — May 2025 — Initial Launch
-- Three-file structure: index.html, style.css, app.js
-- Groq API (llama-3.3-70b-versatile) for law search and explanation
-- Context-aware translation to Hindi and Marathi
-- Five result sections per search
+### v1.3 — May 2025 — Cloudflare Security Layer
+- API key moved from browser (exposed) to Cloudflare Worker encrypted secret
+- app.js now contains no secrets. Only the Worker URL.
+- Worker uses env.GROQ_KEY server-side
+- Switched from Gemini to Groq API throughout
+
+### v1.2 — May 2025 — Groq API
+- Switched from Gemini (429 rate limit issues, daily quota exhausted during testing) to Groq
+- Groq free tier: 30 req/minute, 14,400 req/day. Far more generous.
+- Retry logic: auto-retries 2 times with 4 second wait on 429
+
+### v1.1 — May 2025 — Three File Structure
+- Split single HTML file into index.html + style.css + app.js
+- Direct Gemini API call from browser (later replaced with Cloudflare Worker for security)
+
+### v1.0 — May 2025 — Initial Build
+- Single page web app on GitHub Pages
+- Law search, plain English explanation, Hindi and Marathi translation
 - Light and dark theme toggle
-- Quick search chips for common men's rights queries
-- Mobile responsive layout
-- Switched from Claude API (paid) to Gemini (free) to Groq (free, better limits)
-- Switched from Cloudflare Worker to direct browser calls (later reversed for security)
-- Debugged multiple issues: wrong model name, invalid API keys, daily quota exhaustion, exposed key in console, old inline script in index.html, missing https:// in worker URL
+- Multiple API iterations: Claude API (paid) → Gemini (rate limited) → Groq (current)
+- Multiple architecture iterations: direct browser call (insecure) → Cloudflare Worker (secure)
+- Debugging sessions: missing https://, old inline script conflict, wrong model name,
+  invalid API keys, daily quota exhaustion, translate() browser conflict, Jina AI timeout
 
 ---
 
 ## Future Roadmap
 
+- Indian Kanoon API integration for verbatim statute text
 - Search history via localStorage
 - Bookmark and save laws for later
 - Share result as a link
 - PDF export of full result
 - Related laws section per result
+- Full result translation (not just simple explanation)
 - Tamil and Telugu translation
-- Community-verified judgment references
 - Lawyer directory or legal aid contact section
+- Community-verified judgment references
