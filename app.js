@@ -3,12 +3,11 @@
 // No API key here. Key is safe inside Cloudflare.
 const WORKER = 'https://law-made-simple-proxy.jkuku7866.workers.dev';
 // -----------------------------------------------
-// Law Made Simple — Cloudflare Worker v4
-// Indian Kanoon (Verbatim) + Tavily Search (Fallback) + Groq (Explanation)
+// Law Made Simple — Cloudflare Worker v3
+// Tavily Search (real-time Indian law fetch) + Groq (explanation)
 // Cloudflare Secrets needed:
-//   GROQ_KEY     → console.groq.com (free)
-//   TAVILY_KEY   → app.tavily.com   (free, 1000 searches/month)
-//   KANOON_TOKEN → api.indiankanoon.org
+//   GROQ_KEY   → console.groq.com (free)
+//   TAVILY_KEY → app.tavily.com   (free, 1000 searches/month)
 
 export default {
   async fetch(request, env) {
@@ -33,102 +32,63 @@ export default {
           ? `Section ${section} Indian law statute text`
           : `Section ${section} ${act} statute text`
 
-        let liveContext = ''
-        let sourceLabel = 'Based on AI training knowledge.'
+        // ── Step 1: Tavily real-time search ──────────────────
+        let tavilyContext = ''
+        let sourceLabel   = 'Based on AI training knowledge.'
 
-        // ── Step 1: Try Indian Kanoon Verbatim Fetch ──────────
         try {
-          if (env.KANOON_TOKEN) {
-            const kanoonSearchUrl = `https://api.indiankanoon.org/search/?formInput=${encodeURIComponent(searchQuery)}&pagenum=0`
-            const kanoonSearchRes = await fetch(kanoonSearchUrl, {
-              headers: { 
-                'Authorization': `Token ${env.KANOON_TOKEN}`,
-                'Accept': 'application/json'
-              }
+          const tavilyRes = await fetch('https://api.tavily.com/search', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${env.TAVILY_KEY}`
+            },
+            body: JSON.stringify({
+              query: searchQuery,
+              search_depth: 'advanced',
+              include_domains: [
+                'indiankanoon.org',
+                'indiacode.nic.in',
+                'legislative.gov.in',
+                'mha.gov.in',
+                'lawmin.gov.in',
+                'sci.gov.in'
+              ],
+              max_results: 4,
+              include_raw_content: false,
+              include_answer: true
             })
-            
-            if (kanoonSearchRes.ok) {
-              const kData = await kanoonSearchRes.json()
-              if (kData.docs && kData.docs.length > 0) {
-                const docId = kData.docs.tid || kData.docs.docid
-                const kDocUrl = `https://api.indiankanoon.org/doc/${docId}/`
-                const kDocRes = await fetch(kDocUrl, {
-                  headers: { 
-                    'Authorization': `Token ${env.KANOON_TOKEN}`,
-                    'Accept': 'application/json'
-                  }
-                })
-                
-                if (kDocRes.ok) {
-                  const docData = await kDocRes.json()
-                  const verbatimText = docData.doc || docData.body || ''
-                  if (verbatimText) {
-                    liveContext = `VERBATIM STATUTE TEXT FROM INDIAN KANOON:\n"""\n${verbatimText}\n"""`
-                    sourceLabel = `Verbatim text fetched directly from Indian Kanoon (Doc ID: ${docId}).`
-                  }
-                }
-              }
-            }
-          }
-        } catch (kErr) {
-          // Fail silently, fall through to Tavily
-        }
+          })
 
-        // ── Step 2: Fallback to Tavily if Kanoon Empty ────────
-        if (!liveContext) {
-          try {
-            const tavilyRes = await fetch('https://api.tavily.com/search', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${env.TAVILY_KEY}`
-              },
-              body: JSON.stringify({
-                query: searchQuery,
-                search_depth: 'advanced',
-                include_domains: [
-                  'indiankanoon.org',
-                  'indiacode.nic.in',
-                  'legislative.gov.in',
-                  'mha.gov.in',
-                  'lawmin.gov.in',
-                  'sci.gov.in'
-                ],
-                max_results: 4,
-                include_raw_content: false,
-                include_answer: true
+          if (tavilyRes.ok) {
+            const td = await tavilyRes.json()
+
+            // Combine Tavily answer + top result snippets
+            const parts = []
+            if (td.answer) parts.push(td.answer)
+            if (td.results && td.results.length > 0) {
+              td.results.slice(0, 3).forEach(r => {
+                if (r.content) parts.push(`[${r.url}]\n${r.content}`)
               })
-            })
-
-            if (tavilyRes.ok) {
-              const td = await tavilyRes.json()
-              const parts = []
-              if (td.answer) parts.push(td.answer)
-              if (td.results && td.results.length > 0) {
-                td.results.slice(0, 3).forEach(r => {
-                  if (r.content) parts.push(`[${r.url}]\n${r.content}`)
-                })
-              }
-              if (parts.length > 0) {
-                liveContext = parts.join('\n\n').substring(0, 5000)
-                sourceLabel = 'Content fetched live from Indian legal databases (Indian Kanoon, India Code, Legislative.gov.in).'
-              }
             }
-          } catch (tavilyErr) {
-            tavilyContext = ''
-            sourceLabel = 'Live fetch unavailable. Based on AI training knowledge. Verify on Indian Kanoon.'
+            tavilyContext = parts.join('\n\n').substring(0, 5000)
+            sourceLabel   = 'Content fetched live from Indian legal databases (Indian Kanoon, India Code, Legislative.gov.in).'
           }
+        } catch (tavilyErr) {
+          // Tavily failed — continue with Groq knowledge only
+          tavilyContext = ''
+          sourceLabel   = 'Live fetch unavailable. Based on AI training knowledge. Verify on Indian Kanoon.'
         }
 
-        const contextBlock = liveContext
-          ? `LIVE CONTENT FROM INDIAN LEGAL DATABASES:\n"""\n${liveContext}\n"""\n\nUse the above as primary source of truth.`
+        const contextBlock = tavilyContext
+          ? `LIVE CONTENT FROM INDIAN LEGAL DATABASES:\n"""\n${tavilyContext}\n"""\n\nUse the above as primary source of truth.`
           : `No live content available. Use your training knowledge carefully and accurately.`
 
         const fullQuery = isAllActs
           ? `Section ${section} (identify the correct Indian Act)`
           : `Section ${section} of ${act}`
 
-        // ── Step 3: Groq explanation ─────────────────────────
+        // ── Step 2: Groq explanation ─────────────────────────
         const prompt = `You are a senior Indian legal expert.
 
 ${contextBlock}
@@ -186,7 +146,7 @@ Reply ONLY with raw JSON. No markdown. No backticks. Nothing outside JSON.
         }
 
         const gData = await groqRes.json()
-        const text  = gData.choices?.?.message?.content || ''
+        const text  = gData.choices?.[0]?.message?.content || ''
 
         return new Response(JSON.stringify({ text }), {
           headers: { 'Content-Type': 'application/json', ...CORS }
@@ -224,7 +184,7 @@ Rules:
         })
 
         const gData = await groqRes.json()
-        const text  = gData.choices?.?.message?.content || ''
+        const text  = gData.choices?.[0]?.message?.content || ''
 
         return new Response(JSON.stringify({ text }), {
           headers: { 'Content-Type': 'application/json', ...CORS }
