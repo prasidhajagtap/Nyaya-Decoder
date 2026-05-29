@@ -3,6 +3,7 @@
 // No API key here. Key is safe inside Cloudflare.
 const WORKER = 'https://law-made-simple-proxy.jkuku7866.workers.dev';
 // -----------------------------------------------
+// -----------------------------------------------
 let curExp = '';
 let curFullText = '';
 let curLang = '';
@@ -54,6 +55,20 @@ function makeList(el, items) {
   });
 }
 
+function normalizeQuery(q) {
+  // Fix common shorthand: BNSS144 -> BNSS Section 144, BNS85 -> BNS Section 85
+  q = q.replace(/(BNS|BNSS|BSA|IPC|CrPC)\s*(\d+)/gi, (_, act, num) => act.toUpperCase() + ' Section ' + num);
+  // Fix sec/s. shorthand: sec144 -> Section 144
+  q = q.replace(/(sec|s\.)\s*(\d+)/gi, 'Section $2');
+  // Normalize known act names
+  q = q.replace(/bnss/gi, 'BNSS');
+  q = q.replace(/bns/gi, 'BNS');
+  q = q.replace(/bsa/gi, 'BSA');
+  q = q.replace(/ipc/gi, 'IPC');
+  q = q.replace(/cr\.?pc/gi, 'CrPC');
+  return q.trim();
+}
+
 async function doSearch() {
   const q = document.getElementById('q').value.trim();
   if (!q) return;
@@ -64,7 +79,8 @@ async function doSearch() {
   curExp = ''; curFullText = '';
 
   try {
-    const raw = await callWorker({ type: 'search', query: q });
+    const nq = normalizeQuery(q);
+  const raw = await callWorker({ type: 'search', query: nq });
     const m = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('Could not read response. Try again.');
     const r = JSON.parse(m[0]);
