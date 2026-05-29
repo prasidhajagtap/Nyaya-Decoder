@@ -3,7 +3,6 @@
 // No API key here. Key is safe inside Cloudflare.
 const WORKER = 'https://law-made-simple-proxy.jkuku7866.workers.dev';
 // -----------------------------------------------
-// -----------------------------------------------
 let curExp = '';
 let curFullText = '';
 let curLang = '';
