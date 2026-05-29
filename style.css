@@ -109,6 +109,7 @@ h1 em{font-style:italic;color:var(--accent)}
 [data-theme="dark"] .men-head{color:#fbbf24}
 
 .lblock{background:var(--ac2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.25rem}
+.source-note{font-size:.7rem;color:var(--atxt);opacity:.7;margin-top:.3rem;font-style:italic}
 .law-disclaimer{font-size:.7rem;color:var(--atxt);margin-bottom:.5rem;font-style:italic;opacity:.8}
 .ltext{font-family:'Open Sans',sans-serif;font-size:.9rem;line-height:2;color:var(--t2);white-space:pre-line;letter-spacing:.01em}
 
